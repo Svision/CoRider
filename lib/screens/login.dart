@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import '../widgets/googlemap.dart';
 
 const users = const {
   'user': 'user',
+  '': '',
 };
 
 class LoginScreen extends StatelessWidget {
@@ -46,7 +48,7 @@ class LoginScreen extends StatelessWidget {
       onSignup: _signupUser,
       onSubmitAnimationCompleted: () {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const SizedBox.shrink(),
+          builder: (context) => const MapWidget(),
         ));
       },
       userValidator: (value) => null,
