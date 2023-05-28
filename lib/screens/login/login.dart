@@ -1,6 +1,7 @@
+import 'package:corider/screens/onboardingScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
-import '../widgets/googlemap.dart';
+import '../dashboard.dart';
 
 const users = const {
   'user': 'user',
@@ -8,6 +9,7 @@ const users = const {
 };
 
 class LoginScreen extends StatelessWidget {
+  static bool isFirstTimeLoad = true;
   Duration get loginTime => Duration(milliseconds: 1000);
 
   Future<String?> _authUser(LoginData data) {
@@ -43,17 +45,29 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlutterLogin(
-      logo: const AssetImage('assets/images/logo.png'),
+      title: "CoRider",
+      // logo: const AssetImage('assets/images/logo.png'),
       onLogin: _authUser,
       onSignup: _signupUser,
       onSubmitAnimationCompleted: () {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const MapWidget(),
-        ));
+        if (isFirstTimeLoad) {
+          isFirstTimeLoad = false;
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => OnboardingScreen(),
+          ));
+        }
+        else {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const NavigationView(),
+          ));
+        }
       },
       userValidator: (value) => null,
       passwordValidator: (value) => null,
       onRecoverPassword: _recoverPassword,
+      messages: LoginMessages(
+        userHint: 'Company Email',
+      ),
     );
   }
 }
