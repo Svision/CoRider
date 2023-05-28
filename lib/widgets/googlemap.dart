@@ -26,7 +26,9 @@ class MapWidgetState extends State<MapWidget> {
         initialCameraPosition: CameraPosition(
           target: _center,
           zoom: 16.0,
-        )
+        ),
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
       ),
     );
   }
