@@ -16,6 +16,7 @@ dependencies:
   flutter_login: ^4.1.1
   image: ^4.0.17
   google_maps_flutter: ^2.2.8
+  location: ^4.4.0
 
 dev_dependencies:
   flutter_test:

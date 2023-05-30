@@ -1,5 +1,6 @@
+import 'package:corider/screens/findRide/find_ride.dart';
 import 'package:flutter/material.dart';
-import '../widgets/googlemap.dart';
+import 'package:corider/widgets/googleMap.dart';
 import 'profile/profile.dart';
 
 class NavigationView extends StatefulWidget {
@@ -64,7 +65,7 @@ class _NavigationViewState extends State<NavigationView> {
         ),
         Container(
           alignment: Alignment.center,
-          child: const Text('Find Ride'),
+          child: RideOfferList(),
         ),
         Container(
           alignment: Alignment.center,

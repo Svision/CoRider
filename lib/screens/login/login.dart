@@ -1,4 +1,4 @@
-import 'package:corider/screens/onboardingScreen.dart';
+import 'package:corider/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../dashboard.dart';
@@ -9,7 +9,7 @@ const users = const {
 };
 
 class LoginScreen extends StatelessWidget {
-  static bool isFirstTimeLoad = true;
+  static bool isFirstTimeLoad = false;
   Duration get loginTime => Duration(milliseconds: 1000);
 
   Future<String?> _authUser(LoginData data) {
