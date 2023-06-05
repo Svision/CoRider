@@ -28,7 +28,6 @@ class _RideOfferListState extends State<RideOfferList> {
   final LatLng _center = const LatLng(43.7720940, -79.3453741);
   final Set<Marker> _markers = {};
 
-  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -62,7 +61,6 @@ List<LatLng> mockLocations = [
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
   }
 
   @override
