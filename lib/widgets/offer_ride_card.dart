@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class RideOfferCard extends StatelessWidget {
   final String rideOffer;
 
-  RideOfferCard({required this.rideOffer});
+  const RideOfferCard({super.key, required this.rideOffer});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class RideOfferCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: CircleAvatar(
+            leading: const CircleAvatar(
               // Replace with offer person's avatar
               backgroundColor: Colors.grey,
               child: Icon(
@@ -23,9 +23,9 @@ class RideOfferCard extends StatelessWidget {
             ),
             title: Text(
               rideOffer,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(
+            subtitle: const Text(
               'Proposed Time: 9:00 AM', // Replace with proposed time
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
@@ -36,7 +36,7 @@ class RideOfferCard extends StatelessWidget {
             // Replace with map view for pickup location
             // Map view implementation goes here
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

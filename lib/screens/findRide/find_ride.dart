@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:corider/widgets/offer_ride_card.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:corider/widgets/googleMap.dart';
-import 'package:location/location.dart';
 
 class RideOfferList extends StatefulWidget {
+  const RideOfferList({super.key});
+
   @override
   _RideOfferListState createState() => _RideOfferListState();
 }
@@ -69,7 +69,7 @@ List<LatLng> mockLocations = [
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ride Offers'),
+        title: const Text('Ride Offers'),
       ),
       body: IndexedStack(
         index: _selectedIndex,
@@ -94,7 +94,7 @@ List<LatLng> mockLocations = [
             _selectedIndex = index;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
             label: 'List View',

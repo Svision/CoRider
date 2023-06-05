@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dashboard.dart';
 
 class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
   @override
   _OnboardingScreenState createState() => _OnboardingScreenState();
 }
@@ -57,11 +59,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ? TextButton(
                         onPressed: () {
                           _pageController.nextPage(
-                            duration: Duration(milliseconds: 500),
+                            duration: const Duration(milliseconds: 500),
                             curve: Curves.ease,
                           );
                         },
-                        child: Text(
+                        child: const Text(
                           'Next',
                           style: TextStyle(
                             fontSize: 18.0,
@@ -76,20 +78,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             builder: (context) => const NavigationView(),
                           ));
                         },
-                        child: Text(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                        ),
+                        child: const Text(
                           'Get Started',
                           style: TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
                         ),
                       ),
               ],
@@ -123,7 +125,7 @@ class OnboardingPage extends StatelessWidget {
   final String title;
   final String description;
 
-  const OnboardingPage({
+  const OnboardingPage({super.key, 
     required this.backgroundColor,
     required this.title,
     required this.description,
@@ -133,23 +135,23 @@ class OnboardingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: backgroundColor,
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24.0,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           Text(
             description,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16.0,
               color: Colors.white,
             ),

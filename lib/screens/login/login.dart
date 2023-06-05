@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../dashboard.dart';
 
-const users = const {
+const users = {
   'user': 'user',
   '': '',
 };
 
 class LoginScreen extends StatelessWidget {
   static bool isFirstTimeLoad = false;
-  Duration get loginTime => Duration(milliseconds: 1000);
+
+  const LoginScreen({super.key});
+  Duration get loginTime => const Duration(milliseconds: 1000);
 
   Future<String?> _authUser(LoginData data) {
     debugPrint('Name: ${data.name}, Password: ${data.password}');
@@ -53,7 +55,7 @@ class LoginScreen extends StatelessWidget {
         if (isFirstTimeLoad) {
           isFirstTimeLoad = false;
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => OnboardingScreen(),
+            builder: (context) => const OnboardingScreen(),
           ));
         }
         else {

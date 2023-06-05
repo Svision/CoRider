@@ -65,7 +65,7 @@ class _NavigationViewState extends State<NavigationView> {
         ),
         Container(
           alignment: Alignment.center,
-          child: RideOfferList(),
+          child: const RideOfferList(),
         ),
         Container(
           alignment: Alignment.center,
