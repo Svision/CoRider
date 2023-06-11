@@ -18,7 +18,7 @@ class _RideOfferListState extends State<RideOfferList> {
 
   List<RideOfferModel> mockOffers = [
     RideOfferModel(
-      driver: UserModel(name: 'John Doe', age: 30),
+      driver: UserModel(email: 'abc@abc.com', name: 'John Doe', age: 30),
       vehicle: VehicleModel(make: 'Toyota', model: 'Camry'),
       proposedTime: const TimeOfDay(hour: 9, minute: 0),
       proposedWeekdays: [1, 3, 5],
@@ -29,7 +29,7 @@ class _RideOfferListState extends State<RideOfferList> {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     ),
     RideOfferModel(
-      driver: UserModel(name: 'Jane Smith', age: 28),
+      driver: UserModel(email: 'abc@abc.com', name: 'Jane Smith', age: 28),
       vehicle: VehicleModel(make: 'Honda', model: 'Civic'),
       proposedTime: const TimeOfDay(hour: 14, minute: 30),
       proposedWeekdays: [2, 4],
@@ -40,7 +40,7 @@ class _RideOfferListState extends State<RideOfferList> {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     ),
     RideOfferModel(
-      driver: UserModel(name: 'Alex Johnson', age: 35),
+      driver: UserModel(email: 'abc@abc.com', name: 'Alex Johnson', age: 35),
       vehicle: VehicleModel(make: 'Ford', model: 'Mustang'),
       proposedTime: const TimeOfDay(hour: 11, minute: 15),
       proposedWeekdays: [1, 3, 5],
@@ -51,7 +51,7 @@ class _RideOfferListState extends State<RideOfferList> {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     ),
     RideOfferModel(
-      driver: UserModel(name: 'Emily Wilson', age: 32),
+      driver: UserModel(email: 'abc@abc.com', name: 'Emily Wilson', age: 32),
       vehicle: VehicleModel(make: 'Chevrolet', model: 'Silverado'),
       proposedTime: const TimeOfDay(hour: 17, minute: 45),
       proposedWeekdays: [2, 4],
@@ -62,7 +62,7 @@ class _RideOfferListState extends State<RideOfferList> {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     ),
     RideOfferModel(
-      driver: UserModel(name: 'Michael Brown', age: 29),
+      driver: UserModel(email: 'abc@abc.com', name: 'Michael Brown', age: 29),
       vehicle: VehicleModel(make: 'Tesla', model: 'Model 3'),
       proposedTime: const TimeOfDay(hour: 13, minute: 20),
       proposedWeekdays: [1, 3, 5],
