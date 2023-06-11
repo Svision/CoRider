@@ -47,7 +47,7 @@ class LoginScreen extends StatelessWidget {
       return null;
     } catch (e) {
       // Error occurred while signing in
-      return('Error signing in: $e');
+      return ('Error signing in: $e');
     }
   }
 
@@ -55,18 +55,20 @@ class LoginScreen extends StatelessWidget {
     debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
     try {
       await Firebase.initializeApp(); // Initialize Firebase
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: data.name!,
         password: data.password!,
       );
-      
+
       // User added successfully
-      String successMessage = 'User ${userCredential.user} signed up successfully!';
+      String successMessage =
+          'User ${userCredential.user} signed up successfully!';
       debugPrint(successMessage);
       return null;
     } catch (e) {
       // Error occurred while adding user
-      return('Error adding user: $e');
+      return ('Error adding user: $e');
     }
   }
 
@@ -82,7 +84,7 @@ class LoginScreen extends StatelessWidget {
       return null;
     } catch (e) {
       // Error occurred while sending password reset email
-      return('Error sending password reset email: $e');
+      return ('Error sending password reset email: $e');
     }
   }
 
@@ -92,12 +94,22 @@ class LoginScreen extends StatelessWidget {
       title: "CoRider",
       // logo: const AssetImage('assets/images/logo.png'),
       onLogin: (data) async {
-        await _authUser(data);
-        _handleLogin(context, data);
+        final err = await _authUser(data);
+        if (err == null) {
+          _handleLogin(context, data);
+        } else {
+          // Handle the error returned from _authUser
+          return err;
+        }
       },
       onSignup: (data) async {
-        await _signupUser(data);
-        _handleSignup(context, data);
+        final err = await _signupUser(data);
+        if (err == null) {
+          _handleSignup(context, data);
+        } else {
+          // Handle the error returned from _authUser
+          return err;
+        }
       },
       onSubmitAnimationCompleted: () {
         if (isFirstTimeLoad) {
@@ -105,8 +117,7 @@ class LoginScreen extends StatelessWidget {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const OnboardingScreen(),
           ));
-        }
-        else {
+        } else {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const NavigationView(),
           ));

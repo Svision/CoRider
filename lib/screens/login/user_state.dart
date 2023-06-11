@@ -10,4 +10,9 @@ class UserState extends ChangeNotifier {
     _currentUser = user;
     notifyListeners();
   }
+
+  void signOff() {
+    _currentUser = null;
+    notifyListeners();
+  }
 }
