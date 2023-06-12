@@ -23,5 +23,15 @@ class UserModel {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
+      'profileImage': profileImage,
+      'createdAt': createdAt,
+    };
+  }
+
   String get fullName => '$firstName $lastName';
 }
