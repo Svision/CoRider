@@ -24,7 +24,7 @@ class _RideOfferCardState extends State<RideOfferCard> {
         ),
       ),
       title: Text(
-        widget.rideOffer.driver.name,
+        widget.rideOffer.driver.fullName,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(

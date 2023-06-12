@@ -1,11 +1,12 @@
 import 'package:corider/models/user_model.dart';
-import 'package:corider/screens/login/user_state.dart';
+import 'package:corider/models/user_state.dart';
 import 'package:corider/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../dashboard.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -14,24 +15,40 @@ class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
   Duration get loginTime => const Duration(milliseconds: 1000);
 
-  void _handleLogin(BuildContext context, LoginData data) {
-    // TODO: Get user data from Firebase
-    UserModel user = UserModel(
-      email: data.name,
-      name: 'User',
-      age: 24,
-    );
-    Provider.of<UserState>(context, listen: false).setUser(user);
+  Future<UserModel> _fetchUserFromFirebase(String email) async {
+    final usersCollection = FirebaseFirestore.instance.collection("users");
+    
+    final querySnapshot = await usersCollection.where("email", isEqualTo: email).get();
+    
+    if (querySnapshot.size > 0) {
+      final userData = querySnapshot.docs.first.data();
+      final userModel = UserModel.fromJson(userData);
+      return userModel;
+    } else {
+      throw Exception("User not found");
+    }
+}
+
+  Future<String?> _handleLogin(BuildContext context, LoginData data) async {
+    try {
+      await _fetchUserFromFirebase(data.name).then((user) {
+        Provider.of<UserState>(context, listen: false).setUser(user);
+      });
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
   }
 
-  void _handleSignup(BuildContext context, SignupData data) {
-    // TODO: Get user data from Firebase
-    UserModel user = UserModel(
-      email: data.name!,
-      name: 'User',
-      age: 24,
-    );
-    Provider.of<UserState>(context, listen: false).setUser(user);
+  Future<String?> _handleSignup(BuildContext context, SignupData data) async {
+    try {
+      await _fetchUserFromFirebase(data.name!).then((user) {
+        Provider.of<UserState>(context, listen: false).setUser(user);
+      });
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   Future<String?> _authUser(LoginData data) async {
@@ -60,6 +77,17 @@ class LoginScreen extends StatelessWidget {
         email: data.name!,
         password: data.password!,
       );
+
+      final db = FirebaseFirestore.instance;
+      final user = <String, dynamic>{
+        'email': data.name,
+        'firstName': data.additionalSignupData!['firstName'],
+        'lastName': data.additionalSignupData!['lastName'],
+        'createdAt': DateTime.now(),
+      };
+
+      await db.collection("users").add(user).then((DocumentReference doc) =>
+          debugPrint('DocumentSnapshot added with ID: ${doc.id}'));
 
       // User added successfully
       String successMessage =
@@ -92,11 +120,14 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlutterLogin(
       title: "CoRider",
+      userType: LoginUserType.email,
+      savedEmail: "user@user.com", // TODO: Remove this line
+      savedPassword: "123456", // TODO: Remove this line
       // logo: const AssetImage('assets/images/logo.png'),
       onLogin: (data) async {
         final err = await _authUser(data);
         if (err == null) {
-          _handleLogin(context, data);
+          return await _handleLogin(context, data);
         } else {
           // Handle the error returned from _authUser
           return err;
@@ -105,7 +136,7 @@ class LoginScreen extends StatelessWidget {
       onSignup: (data) async {
         final err = await _signupUser(data);
         if (err == null) {
-          _handleSignup(context, data);
+          return await _handleSignup(context, data);
         } else {
           // Handle the error returned from _authUser
           return err;
@@ -129,6 +160,52 @@ class LoginScreen extends StatelessWidget {
       messages: LoginMessages(
         userHint: 'Company Email',
       ),
+      // onConfirmSignup: (String key, LoginData loginData) async {
+      //   bool isEmailVerified = false;
+      //   try {
+      //     await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      //       email: loginData.name,
+      //       password: loginData.password,
+      //     );
+
+      //     // Send verification email
+      //     await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+
+      //     // Wait for user to verify email
+      //     await FirebaseAuth.instance.currentUser?.reload();
+      //     isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
+      //     if (isEmailVerified) {
+      //       // User signed up successfully
+      //       String successMessage =
+      //           'User ${loginData.name} signed up successfully!';
+      //       debugPrint(successMessage);
+      //     } else {
+      //       // Error occurred while signing up
+      //       return 'Error signing up: Email not verified';
+      //     }
+      //     // Return null to indicate successful signup
+      //     return null;
+      //   } catch (e) {
+      //     // Return the error message to display in the UI
+      //     return 'Error signing up: $e';
+      //   }
+      // },
+      // confirmSignupKeyboardType: TextInputType.number,
+      loginAfterSignUp: true,
+      additionalSignupFields: [
+        UserFormField(
+            keyName: "firstName",
+            displayName: "First Name",
+            icon: Icon(Icons.person),
+            fieldValidator: (value) =>
+                value!.isEmpty ? 'First Name is required' : null),
+        UserFormField(
+            keyName: "lastName",
+            displayName: "Last Name",
+            icon: Icon(Icons.person),
+            fieldValidator: (value) =>
+                value!.isEmpty ? 'Last Name is required' : null),
+      ],
     );
   }
 }

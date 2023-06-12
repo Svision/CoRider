@@ -24,11 +24,7 @@ class RideOfferDetailPage extends StatelessWidget {
             ),
             SizedBox(height: 8.0),
             Text(
-              'Name: ${rideOffer.driver.name}',
-              style: TextStyle(fontSize: 16.0),
-            ),
-            Text(
-              'Age: ${rideOffer.driver.age}',
+              'Name: ${rideOffer.driver.fullName}',
               style: TextStyle(fontSize: 16.0),
             ),
             SizedBox(height: 16.0),

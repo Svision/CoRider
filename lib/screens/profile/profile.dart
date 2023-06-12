@@ -1,4 +1,4 @@
-import 'package:corider/screens/login/user_state.dart';
+import 'package:corider/models/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,8 +25,8 @@ class SignOffButton extends StatelessWidget {
           context: context,
           builder: (BuildContext dialogContext) {
             return AlertDialog(
-              title: Text('Confirm Delete'),
-              content: Text(
+              title: const Text('Confirm Delete'),
+              content: const Text(
                   'Are you sure you want to delete your account? This action cannot be undone.'),
               actions: [
                 TextButton(
@@ -35,22 +35,22 @@ class SignOffButton extends StatelessWidget {
                     try {
                       await user.delete();
                       // Account deleted successfully
-                      print('Account deleted successfully!');
+                      debugPrint('Account deleted successfully!');
                       // Perform any additional actions after account deletion
                       handleSignOff();
                     } catch (e) {
                       // Error occurred while deleting the account
-                      print('Error deleting account: $e');
+                      debugPrint('Error deleting account: $e');
                     }
                   },
-                  child: Text('Delete', style: TextStyle(color: Colors.red)),
+                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: () {
                     Navigator.of(dialogContext).pop(); // Close the dialog
                   },
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                 ),
               ],
             );
@@ -63,19 +63,28 @@ class SignOffButton extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "User: ${currentUser?.email ?? 'Unknown'}",
-          style: TextStyle(fontSize: 16),
+          currentUser?.email ?? 'Unknown',
+          style: const TextStyle(fontSize: 16),
         ),
+        Text(
+          currentUser?.fullName ?? 'Unknown Name',
+          style: const TextStyle(fontSize: 16),
+        ),
+        Text(
+          currentUser?.createdAt.toString() ?? 'Unknown Created At',
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        SizedBox(height: 16),
         ElevatedButton(
           onPressed: handleSignOff,
-          child: Text('Sign Off'),
+          child: const Text('Sign Off'),
         ),
         ElevatedButton(
           onPressed: () => handleDeleteAccount(context),
-          child: Text('DELETE ACCOUNT'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red, // Set the background color to red
           ),
+          child: const Text('DELETE ACCOUNT'),
         ),
       ],
     );
