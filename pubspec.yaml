@@ -25,6 +25,7 @@ dependencies:
   provider: ^6.0.5
   cloud_firestore: ^4.8.0
   image_picker: ^0.8.8
+  image_cropper: ^4.0.1
 
 dev_dependencies:
   flutter_test:

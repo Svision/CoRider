@@ -2,7 +2,7 @@ class UserModel {
   final String email;
   final String firstName;
   final String lastName;
-  final String? profileImage;
+  String? profileImage;
   final DateTime createdAt;
 
   UserModel({
@@ -31,6 +31,10 @@ class UserModel {
       'profileImage': profileImage,
       'createdAt': createdAt,
     };
+  }
+
+  setProfileImage(String? imageUrl) {
+    profileImage = imageUrl;
   }
 
   String get fullName => '$firstName $lastName';

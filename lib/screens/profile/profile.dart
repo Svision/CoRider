@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/models/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'dart:io';
 
 class SignOffButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -13,6 +17,8 @@ class SignOffButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     final currentUser = userState.currentUser;
+    ValueNotifier<String?> profileImageNotifier =
+        ValueNotifier<String?>(currentUser?.profileImage);
 
     void handleSignOff() {
       userState.signOff();
@@ -22,17 +28,52 @@ class SignOffButton extends StatelessWidget {
     void handleUploadPhoto() async {
       final imagePicker = ImagePicker();
       final pickedImage = await imagePicker.pickImage(
-        source: ImageSource
-            .gallery, // Use ImageSource.camera to capture a new photo
+        source: ImageSource.gallery,
       );
 
       if (pickedImage != null) {
-        // Image selected or captured successfully
-        // You can save the image to Firebase Storage or perform any other actions
+        final croppedImage = await ImageCropper().cropImage(
+          sourcePath: pickedImage.path,
+          aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+          cropStyle: CropStyle.circle,
+          compressQuality: 100, // Adjust the compression quality as needed
+        );
+        if (croppedImage != null) {
+          try {
+            final storage = firebase_storage.FirebaseStorage.instance;
+            final storageRef =
+                storage.ref().child('profile_images/${currentUser!.email}.jpg');
 
-        // Example: Display the selected image in the CircleAvatar
-        debugPrint('Image path: ${pickedImage.path}');
-        // currentUser?.profileImage = pickedImage.path;
+            // Upload the image file to Firebase Storage
+            await storageRef.putFile(File(croppedImage.path));
+
+            // Get the download URL for the uploaded image
+            final imageUrl = await storageRef.getDownloadURL();
+
+            // Update the user's profile image URL in Firestore or perform any other actions
+            debugPrint('Image uploaded successfully. URL: $imageUrl');
+            profileImageNotifier.value = imageUrl;
+            // Update the user's profile image URL in Firestore
+            final usersCollection =
+                FirebaseFirestore.instance.collection('users');
+            final userQuerySnapshot = await usersCollection
+                .where('email', isEqualTo: currentUser.email)
+                .get();
+
+            if (userQuerySnapshot.docs.isNotEmpty) {
+              final userDocumentSnapshot = userQuerySnapshot.docs.first;
+              await userDocumentSnapshot.reference.update({
+                'profileImage': imageUrl,
+              });
+            }
+          } catch (e) {
+            debugPrint('Error uploading image: $e');
+          }
+        } else {
+          debugPrint('Image cropping was canceled.');
+        }
+      } else {
+        debugPrint('No image was selected.');
       }
     }
 
@@ -81,18 +122,25 @@ class SignOffButton extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        GestureDetector(
-          onTap:
-              handleUploadPhoto, // Add the function to handle the upload photo action
-          child: CircleAvatar(
-            radius: 50,
-            backgroundImage: NetworkImage(currentUser?.profileImage ?? ''),
-            child: Icon(
-              Icons.camera_alt,
-              size: 40,
-              color: Colors.white,
-            ),
-          ),
+        ValueListenableBuilder<String?>(
+          valueListenable: profileImageNotifier,
+          builder: (context, profileImage, _) {
+            return GestureDetector(
+              onTap: handleUploadPhoto,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage:
+                    profileImage != null ? NetworkImage(profileImage) : null,
+                child: profileImage == null
+                    ? const Icon(
+                        Icons.camera_alt,
+                        size: 40,
+                        color: Colors.white,
+                      )
+                    : null,
+              ),
+            );
+          },
         ),
         SizedBox(height: 16),
         Text(
