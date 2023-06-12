@@ -2,6 +2,7 @@ import 'package:corider/models/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SignOffButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -16,6 +17,23 @@ class SignOffButton extends StatelessWidget {
     void handleSignOff() {
       userState.signOff();
       onPressed();
+    }
+
+    void handleUploadPhoto() async {
+      final imagePicker = ImagePicker();
+      final pickedImage = await imagePicker.pickImage(
+        source: ImageSource
+            .gallery, // Use ImageSource.camera to capture a new photo
+      );
+
+      if (pickedImage != null) {
+        // Image selected or captured successfully
+        // You can save the image to Firebase Storage or perform any other actions
+
+        // Example: Display the selected image in the CircleAvatar
+        debugPrint('Image path: ${pickedImage.path}');
+        // currentUser?.profileImage = pickedImage.path;
+      }
     }
 
     void handleDeleteAccount(BuildContext context) async {
@@ -43,7 +61,8 @@ class SignOffButton extends StatelessWidget {
                       debugPrint('Error deleting account: $e');
                     }
                   },
-                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                  child:
+                      const Text('Delete', style: TextStyle(color: Colors.red)),
                 ),
                 const SizedBox(width: 8),
                 TextButton(
@@ -62,6 +81,20 @@ class SignOffButton extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        GestureDetector(
+          onTap:
+              handleUploadPhoto, // Add the function to handle the upload photo action
+          child: CircleAvatar(
+            radius: 50,
+            backgroundImage: NetworkImage(currentUser?.profileImage ?? ''),
+            child: Icon(
+              Icons.camera_alt,
+              size: 40,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        SizedBox(height: 16),
         Text(
           currentUser?.email ?? 'Unknown',
           style: const TextStyle(fontSize: 16),
