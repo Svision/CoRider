@@ -1,9 +1,14 @@
+import 'package:corider/models/ride_offer_model.dart';
+import 'package:corider/models/vehicle_model.dart';
+
 class UserModel {
   final String email;
-  final String firstName;
-  final String lastName;
+  String firstName;
+  String lastName;
   String? profileImage;
   final DateTime createdAt;
+  VehicleModel? vehicle;
+  List<RideOfferModel> rideOffers;
 
   UserModel({
     required this.email,
@@ -11,6 +16,8 @@ class UserModel {
     required this.lastName,
     this.profileImage,
     required this.createdAt,
+    this.vehicle,
+    this.rideOffers = const [],
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +27,9 @@ class UserModel {
       lastName: json['lastName'],
       profileImage: json['profileImage'],
       createdAt: json['createdAt'].toDate(),
+      vehicle: json['vehicle'] != null
+          ? VehicleModel.fromJson(json['vehicle'])
+          : null,
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/models/user_state.dart';
+import 'package:corider/screens/profile/add_vehicle_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -155,7 +156,26 @@ class SignOffButton extends StatelessWidget {
           currentUser?.createdAt.toString() ?? 'Unknown Created At',
           style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
-        SizedBox(height: 16),
+        currentUser!.vehicle == null ?
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddVehiclePage()),
+            );
+          },
+          child: const Text('Add Vehicle'),
+        ) 
+        : ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddVehiclePage()),
+            );
+          },
+          child: const Text('Modify Vehicle'),
+        ),
+        const SizedBox(height: 16),
         ElevatedButton(
           onPressed: handleSignOff,
           child: const Text('Sign Off'),
