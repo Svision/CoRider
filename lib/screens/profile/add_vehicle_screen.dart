@@ -1,7 +1,12 @@
+import 'package:corider/models/user_state.dart';
+import 'package:corider/models/vehicle_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 List<int> years = List.generate(
     DateTime.now().year - 1989, (index) => DateTime.now().year - index);
+
+List<int> availableSeats = [1, 2, 3, 4, 5, 6, 7, 8];
 
 Map<String, List<String>> makeModels = {
   'Audi': ['A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'TT', 'R8'],
@@ -40,11 +45,38 @@ Map<String, List<String>> makeModels = {
     'AMG GT'
   ],
   'Tesla': ['Model 3', 'Model S', 'Model X', 'Model Y', 'Roadster'],
-  'Toyota': ['Camry', 'Corolla', 'Prius', 'Rav4', 'Highlander', '4Runner', 'Tacoma', 'Tundra', 'Sienna'],
+  'Toyota': [
+    'Camry',
+    'Corolla',
+    'Prius',
+    'Rav4',
+    'Highlander',
+    '4Runner',
+    'Tacoma',
+    'Tundra',
+    'Sienna'
+  ],
   'Honda': ['Accord', 'Civic', 'CR-V', 'Pilot', 'Odyssey', 'Ridgeline'],
   'Ford': ['Mustang', 'F-150', 'Explorer', 'Escape', 'Focus', 'Fusion', 'Edge'],
-  'Chevrolet': ['Cruze', 'Malibu', 'Impala', 'Equinox', 'Traverse', 'Silverado', 'Camaro', 'Corvette'],
-  'Volkswagen': ['Golf', 'Passat', 'Jetta', 'Tiguan', 'Atlas', 'Arteon', 'Touareg'],
+  'Chevrolet': [
+    'Cruze',
+    'Malibu',
+    'Impala',
+    'Equinox',
+    'Traverse',
+    'Silverado',
+    'Camaro',
+    'Corvette'
+  ],
+  'Volkswagen': [
+    'Golf',
+    'Passat',
+    'Jetta',
+    'Tiguan',
+    'Atlas',
+    'Arteon',
+    'Touareg'
+  ],
   'Volvo': ['S60', 'S90', 'XC40', 'XC60', 'XC90'],
   'Subaru': ['Impreza', 'Legacy', 'Forester', 'Outback', 'Crosstrek', 'Ascent'],
 };
@@ -52,7 +84,6 @@ Map<String, List<String>> makeModels = {
 List<String> colors = [
   'Black',
   'White',
-  'Silver',
   'Gray',
   'Red',
   'Blue',
@@ -66,7 +97,8 @@ List<String> colors = [
 ];
 
 class AddVehiclePage extends StatefulWidget {
-  const AddVehiclePage({Key? key}) : super(key: key);
+  final VehicleModel? vehicle;
+  const AddVehiclePage({Key? key, required this.vehicle}) : super(key: key);
 
   @override
   State<AddVehiclePage> createState() => _AddVehiclePageState();
@@ -75,10 +107,13 @@ class AddVehiclePage extends StatefulWidget {
 class _AddVehiclePageState extends State<AddVehiclePage> {
   int yearSelected = years.first;
   late List<String> makes;
+  late VehicleModel? vehicle;
   late ValueNotifier<String> makeSelectedNotifier;
+  late TextEditingController _licensePlateController;
   late String modelSelected;
+  late int availableSeatsSelected;
   String colorSelected = colors.first;
-  String licensePlate = '';
+  String? licensePlate = '';
   late List<String> makeAlphabet;
   late ValueNotifier<String> makeAlphabetSelectedNotifier;
   bool isLoadingMakes = true;
@@ -88,17 +123,35 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   @override
   void initState() {
     super.initState();
+    vehicle = widget.vehicle;
+    debugPrint(vehicle?.toJson().toString());
     makes = makeModels.keys.toList();
     makes.sort();
     makeAlphabet = makes.map((e) => e.substring(0, 1)).toSet().toList();
     makeAlphabet.sort();
-    makeAlphabetSelectedNotifier = ValueNotifier<String>(makeAlphabet.first);
-    makeSelectedNotifier = ValueNotifier<String>(makes.first);
-    modelSelected = makeModels[makeSelectedNotifier.value]!.first;
+
+    if (vehicle != null) {
+      yearSelected = vehicle!.year!;
+      makeAlphabetSelectedNotifier =
+          ValueNotifier<String>(vehicle!.make!.substring(0, 1));
+      makeSelectedNotifier = ValueNotifier<String>(vehicle!.make!);
+      modelSelected = vehicle!.model!;
+      colorSelected = vehicle!.color!;
+      licensePlate = vehicle!.licensePlate;
+      availableSeatsSelected = vehicle!.availableSeats ?? 4;
+    } else {
+      makeAlphabetSelectedNotifier = ValueNotifier<String>(makeAlphabet.first);
+      makeSelectedNotifier = ValueNotifier<String>(makes.first);
+      modelSelected = makeModels[makeSelectedNotifier.value]!.first;
+      availableSeatsSelected = 4;
+    }
+    _licensePlateController = TextEditingController(text: licensePlate);
   }
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
+    final currentUser = userState.currentUser;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Vehicle Info'),
@@ -109,21 +162,57 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Column(children: [
-              DropdownButtonFormField<int>(
-                value: yearSelected,
-                items: years.map((int value) {
-                  return DropdownMenuItem<int>(
-                    value: value,
-                    child: Text(value.toString()),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    yearSelected = value!;
-                  });
-                },
-                decoration: const InputDecoration(labelText: 'Year'),
-                menuMaxHeight: 300.0,
+              Row(
+                children: [
+                  SizedBox(
+                      width: 80,
+                      child: DropdownButtonFormField<int>(
+                        value: yearSelected,
+                        items: years.map((int value) {
+                          return DropdownMenuItem<int>(
+                            value: value,
+                            child: Text(value.toString()),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            yearSelected = value!;
+                          });
+                        },
+                        decoration: const InputDecoration(labelText: 'Year'),
+                        menuMaxHeight: 300.0,
+                      )),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: colorSelected,
+                      items: colors.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 16,
+                                height: 16,
+                                color: _getColorFromValue(
+                                    value), // Replace this with your own logic to get color based on value
+                                margin: const EdgeInsets.only(right: 8),
+                              ),
+                              Text(value),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          colorSelected = value!;
+                        });
+                      },
+                      decoration: const InputDecoration(labelText: 'Color'),
+                      menuMaxHeight: 300.0,
+                    ),
+                  )
+                ],
               ),
               Row(
                 children: [
@@ -183,47 +272,60 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                           })),
                 ],
               ),
-              ValueListenableBuilder<String?>(
-                valueListenable: makeSelectedNotifier,
-                builder: (context, makeSelected, _) {
-                  debugPrint('makeSelected: ${makeSelected!}');
-                  debugPrint('modelSelected: $modelSelected');
-                  return DropdownButtonFormField<String>(
-                    value: modelSelected,
-                    items: makeModels[makeSelected]!.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        modelSelected = value!;
-                      });
-                    },
-                    decoration: const InputDecoration(labelText: 'Model'),
-                    menuMaxHeight: 300.0,
-                  );
-                },
-              ),
-              DropdownButtonFormField<String>(
-                value: colorSelected,
-                items: colors.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    colorSelected = value!;
-                  });
-                },
-                decoration: const InputDecoration(labelText: 'Color'),
-                menuMaxHeight: 300.0,
+              Row(
+                children: [
+                  Expanded(
+                    child: ValueListenableBuilder<String?>(
+                      valueListenable: makeSelectedNotifier,
+                      builder: (context, makeSelected, _) {
+                        debugPrint('makeSelected: ${makeSelected!}');
+                        debugPrint('modelSelected: $modelSelected');
+                        return DropdownButtonFormField<String>(
+                          value: modelSelected,
+                          items: makeModels[makeSelected]!.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              modelSelected = value!;
+                            });
+                          },
+                          decoration: const InputDecoration(labelText: 'Model'),
+                          menuMaxHeight: 300.0,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 18),
+                  SizedBox(
+                    width: 120,
+                    child: DropdownButtonFormField<int>(
+                      value: availableSeatsSelected,
+                      items: availableSeats.map((int value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text(value.toString()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          availableSeatsSelected = value!;
+                        });
+                      },
+                      decoration:
+                          const InputDecoration(labelText: 'Availabile Seats'),
+                      menuMaxHeight: 300.0,
+                    ),
+                  )
+                ],
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'License Plate'),
+                textCapitalization: TextCapitalization.characters,
+                controller: _licensePlateController,
                 onChanged: (value) {
                   setState(() {
                     licensePlate = value;
@@ -232,16 +334,72 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Save the vehicle information
-                  // You can access the entered values using the state variables (make, model, year, etc.)
+                onPressed: () async {
+                  VehicleModel savedVehicle = VehicleModel(
+                      year: yearSelected,
+                      make: makeSelectedNotifier.value,
+                      model: modelSelected,
+                      color: colorSelected,
+                      licensePlate: licensePlate ?? 'Default',
+                      availableSeats: availableSeatsSelected);
+                  debugPrint(savedVehicle.toJson().toString());
+                  final err =
+                      await savedVehicle.saveToFirestore(currentUser!.email);
+                  if (err == null) {
+                    currentUser.setVehicle(savedVehicle);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Vehicle information saved!'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    Navigator.of(context).pop(savedVehicle);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: $err'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
                 },
-                child: const Text('Save'),
+                child:
+                    vehicle == null ? const Text('Save') : const Text('Update'),
               ),
             ])
           ],
         ),
       ),
     );
+  }
+}
+
+Color _getColorFromValue(String value) {
+  switch (value) {
+    case 'Black':
+      return Colors.black;
+    case 'White':
+      return Colors.white;
+    case 'Gray':
+      return Colors.grey;
+    case 'Red':
+      return Colors.red;
+    case 'Blue':
+      return Colors.blue;
+    case 'Green':
+      return Colors.green;
+    case 'Brown':
+      return Colors.brown;
+    case 'Yellow':
+      return Colors.yellow;
+    case 'Orange':
+      return Colors.orange;
+    case 'Purple':
+      return Colors.purple;
+    case 'Pink':
+      return Colors.pink;
+    default:
+      return Colors
+          .transparent; // Return a default color if the value doesn't match any case
   }
 }

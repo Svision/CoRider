@@ -17,17 +17,17 @@ class LoginScreen extends StatelessWidget {
 
   Future<UserModel> _fetchUserFromFirebase(String email) async {
     final usersCollection = FirebaseFirestore.instance.collection("users");
-    
-    final querySnapshot = await usersCollection.where("email", isEqualTo: email).get();
-    
-    if (querySnapshot.size > 0) {
-      final userData = querySnapshot.docs.first.data();
-      final userModel = UserModel.fromJson(userData);
+
+    final docSnapshot = await usersCollection.doc(email).get();
+
+    if (docSnapshot.exists) {
+      final userData = docSnapshot.data();
+      final userModel = UserModel.fromJson(userData!);
       return userModel;
     } else {
       throw Exception("User not found");
     }
-}
+  }
 
   Future<String?> _handleLogin(BuildContext context, LoginData data) async {
     try {
@@ -86,8 +86,8 @@ class LoginScreen extends StatelessWidget {
         'createdAt': DateTime.now(),
       };
 
-      await db.collection("users").add(user).then((DocumentReference doc) =>
-          debugPrint('DocumentSnapshot added with ID: ${doc.id}'));
+      await db.collection("users").doc(user['email']).set(user).then((_) =>
+          debugPrint('DocumentSnapshot added with ID: ${user['email']}'));
 
       // User added successfully
       String successMessage =

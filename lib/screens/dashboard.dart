@@ -1,6 +1,8 @@
+import 'package:corider/models/user_state.dart';
 import 'package:corider/screens/findRide/find_ride.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/widgets/googleMap.dart';
+import 'package:provider/provider.dart';
 import 'profile/profile.dart';
 
 class NavigationView extends StatefulWidget {
@@ -16,6 +18,7 @@ class _NavigationViewState extends State<NavigationView> {
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -55,13 +58,15 @@ class _NavigationViewState extends State<NavigationView> {
         ),
         Container(
           alignment: Alignment.center,
-          child: showMap ? const MapWidget() : ShowMapButton(
-            onPressed: () {
-              setState(() {
-                showMap = true;
-              });
-            },
-          ),
+          child: showMap
+              ? const MapWidget()
+              : ShowMapButton(
+                  onPressed: () {
+                    setState(() {
+                      showMap = true;
+                    });
+                  },
+                ),
         ),
         Container(
           alignment: Alignment.center,
@@ -72,6 +77,7 @@ class _NavigationViewState extends State<NavigationView> {
           child: SignOffButton(
             onPressed: () {
               Navigator.popAndPushNamed(context, '/login');
+              userState.signOff();
             },
           ),
         ),

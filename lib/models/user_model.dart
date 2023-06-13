@@ -48,4 +48,8 @@ class UserModel {
   }
 
   String get fullName => '$firstName $lastName';
+
+  setVehicle(VehicleModel vehicle) {
+    this.vehicle = vehicle;
+  }
 }

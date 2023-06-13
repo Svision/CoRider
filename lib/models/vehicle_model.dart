@@ -1,18 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class VehicleModel {
-  int year;
-  String make;
-  String model;
-  String color;
-  String licensePlate;
-  int seats;
+  int? year;
+  String? make;
+  String? model;
+  String? color;
+  String? licensePlate;
+  int? availableSeats;
 
   VehicleModel({
-    this.year = 2018,
-    this.make = 'Audi',
-    this.model = 'A4',
-    this.color = 'grey',
-    this.licensePlate = 'ABC123',
-    this.seats = 5,
+    this.year = 1990,
+    this.make = 'Unknown',
+    this.model = 'Unknown',
+    this.color = 'Unknown',
+    this.licensePlate = 'Unknown',
+    this.availableSeats = 4,
   });
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
@@ -22,7 +24,7 @@ class VehicleModel {
       year: json['year'],
       color: json['color'],
       licensePlate: json['licensePlate'],
-      seats: json['seats'],
+      availableSeats: json['availableSeats'],
     );
   }
 
@@ -33,7 +35,21 @@ class VehicleModel {
       'year': year,
       'color': color,
       'licensePlate': licensePlate,
-      'seats': seats,
+      'availableSeats': availableSeats,
     };
+  }
+
+  Future<String?> saveToFirestore(String email) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(email)
+          .update({
+            'vehicle': toJson(),
+          });
+      return null;
+    } on FirebaseException catch (e) {
+      return e.message;
+    }
   }
 }

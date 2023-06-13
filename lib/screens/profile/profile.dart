@@ -21,11 +21,6 @@ class SignOffButton extends StatelessWidget {
     ValueNotifier<String?> profileImageNotifier =
         ValueNotifier<String?>(currentUser?.profileImage);
 
-    void handleSignOff() {
-      userState.signOff();
-      onPressed();
-    }
-
     void handleUploadPhoto() async {
       final imagePicker = ImagePicker();
       final pickedImage = await imagePicker.pickImage(
@@ -53,6 +48,7 @@ class SignOffButton extends StatelessWidget {
 
             // Update the user's profile image URL in Firestore or perform any other actions
             debugPrint('Image uploaded successfully. URL: $imageUrl');
+            currentUser.setProfileImage(imageUrl);
             profileImageNotifier.value = imageUrl;
             // Update the user's profile image URL in Firestore
             final usersCollection =
@@ -97,7 +93,7 @@ class SignOffButton extends StatelessWidget {
                       // Account deleted successfully
                       debugPrint('Account deleted successfully!');
                       // Perform any additional actions after account deletion
-                      handleSignOff();
+                      userState.signOff();
                     } catch (e) {
                       // Error occurred while deleting the account
                       debugPrint('Error deleting account: $e');
@@ -143,7 +139,7 @@ class SignOffButton extends StatelessWidget {
             );
           },
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Text(
           currentUser?.email ?? 'Unknown',
           style: const TextStyle(fontSize: 16),
@@ -156,12 +152,12 @@ class SignOffButton extends StatelessWidget {
           currentUser?.createdAt.toString() ?? 'Unknown Created At',
           style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
-        currentUser!.vehicle == null ?
+        currentUser?.vehicle == null ?
         ElevatedButton(
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AddVehiclePage()),
+              MaterialPageRoute(builder: (context) => AddVehiclePage(vehicle: currentUser!.vehicle,)),
             );
           },
           child: const Text('Add Vehicle'),
@@ -170,14 +166,14 @@ class SignOffButton extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AddVehiclePage()),
+              MaterialPageRoute(builder: (context) => AddVehiclePage(vehicle: currentUser!.vehicle,)),
             );
           },
-          child: const Text('Modify Vehicle'),
+          child: const Text('My Vehicle'),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: handleSignOff,
+          onPressed: onPressed,
           child: const Text('Sign Off'),
         ),
         ElevatedButton(
