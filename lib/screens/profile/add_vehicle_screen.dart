@@ -366,6 +366,35 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 child:
                     vehicle == null ? const Text('Save') : const Text('Update'),
               ),
+              const SizedBox(height: 32),
+              if (vehicle != null)
+                ElevatedButton(
+                  onPressed: () async {
+                    final err = await currentUser!.deleteVehicle();
+                    if (err == null) {
+                      currentUser.setVehicle(null);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Vehicle information deleted!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      Navigator.of(context).pop();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: $err'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.red, // Set the background color to red
+                  ),
+                  child: const Text('Delete'),
+                ),
             ])
           ],
         ),

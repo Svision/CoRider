@@ -9,10 +9,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 
-class SignOffButton extends StatelessWidget {
+class ProfileScreen extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const SignOffButton({super.key, required this.onPressed});
+  const ProfileScreen({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -152,17 +152,7 @@ class SignOffButton extends StatelessWidget {
           currentUser?.createdAt.toString() ?? 'Unknown Created At',
           style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
-        currentUser?.vehicle == null ?
         ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddVehiclePage(vehicle: currentUser!.vehicle,)),
-            );
-          },
-          child: const Text('Add Vehicle'),
-        ) 
-        : ElevatedButton(
           onPressed: () {
             Navigator.push(
               context,

@@ -74,7 +74,7 @@ class _NavigationViewState extends State<NavigationView> {
         ),
         Container(
           alignment: Alignment.center,
-          child: SignOffButton(
+          child: ProfileScreen(
             onPressed: () {
               Navigator.popAndPushNamed(context, '/login');
               userState.signOff();

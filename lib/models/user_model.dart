@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/vehicle_model.dart';
 
@@ -49,7 +50,20 @@ class UserModel {
 
   String get fullName => '$firstName $lastName';
 
-  setVehicle(VehicleModel vehicle) {
+  setVehicle(VehicleModel? vehicle) {
     this.vehicle = vehicle;
+  }
+
+  Future<String?> deleteVehicle() async {
+    try {
+      vehicle = null;
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(email)
+          .update({'vehicle': FieldValue.delete()});
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
   }
 }
