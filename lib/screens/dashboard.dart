@@ -1,9 +1,8 @@
 import 'package:corider/models/user_state.dart';
-import 'package:corider/screens/findRide/find_ride.dart';
+import 'package:corider/screens/Ride/find_ride.dart';
 import 'package:flutter/material.dart';
-import 'package:corider/widgets/googleMap.dart';
 import 'package:provider/provider.dart';
-import 'profile/profile.dart';
+import 'profile/profile_screen.dart';
 
 class NavigationView extends StatefulWidget {
   const NavigationView({super.key});
@@ -37,12 +36,7 @@ class _NavigationViewState extends State<NavigationView> {
           NavigationDestination(
             selectedIcon: Icon(Icons.commute),
             icon: Icon(Icons.commute_outlined),
-            label: 'Offer Ride',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.search),
-            icon: Icon(Icons.search_outlined),
-            label: 'Find Ride',
+            label: 'Ride',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.person),
@@ -55,18 +49,6 @@ class _NavigationViewState extends State<NavigationView> {
         Container(
           alignment: Alignment.center,
           child: const Text('Home'),
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: showMap
-              ? const MapWidget()
-              : ShowMapButton(
-                  onPressed: () {
-                    setState(() {
-                      showMap = true;
-                    });
-                  },
-                ),
         ),
         Container(
           alignment: Alignment.center,

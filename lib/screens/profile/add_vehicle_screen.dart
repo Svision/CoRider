@@ -156,19 +156,156 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
       appBar: AppBar(
         title: const Text('Add Vehicle Info'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(children: [
-              Row(
-                children: [
-                  SizedBox(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(children: [
+                Row(
+                  children: [
+                    SizedBox(
+                        width: 80,
+                        child: DropdownButtonFormField<int>(
+                          value: yearSelected,
+                          items: years.map((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text(value.toString()),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              yearSelected = value!;
+                            });
+                          },
+                          decoration: const InputDecoration(labelText: 'Year'),
+                          menuMaxHeight: 300.0,
+                        )),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: colorSelected,
+                        items: colors.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 16,
+                                  height: 16,
+                                  color: _getColorFromValue(
+                                      value), // Replace this with your own logic to get color based on value
+                                  margin: const EdgeInsets.only(right: 8),
+                                ),
+                                Text(value),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            colorSelected = value!;
+                          });
+                        },
+                        decoration: const InputDecoration(labelText: 'Color'),
+                        menuMaxHeight: 300.0,
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    SizedBox(
                       width: 80,
+                      child: DropdownButtonFormField<String>(
+                        value: makeAlphabetSelectedNotifier.value,
+                        items: makeAlphabet.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            makeSelectedNotifier.value = makeModels.keys
+                                .where((e) => e.startsWith(value!))
+                                .first;
+                            modelSelected =
+                                makeModels[makeSelectedNotifier.value]!.first;
+                            makeAlphabetSelectedNotifier.value = value!;
+                          });
+                        },
+                        decoration:
+                            const InputDecoration(labelText: 'Make Initial'),
+                        menuMaxHeight: 300.0,
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                        child: ValueListenableBuilder<String?>(
+                            valueListenable: makeAlphabetSelectedNotifier,
+                            builder: (context, makeAlphabetSelected, _) {
+                              debugPrint(
+                                  'makeAlphabetSelected: ${makeAlphabetSelected!}');
+                              return DropdownButtonFormField<String>(
+                                value: makeSelectedNotifier.value,
+                                items: makeModels.keys
+                                    .where(
+                                        (e) => e.startsWith(makeAlphabetSelected))
+                                    .map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    modelSelected = makeModels[value!]!.first;
+                                    makeSelectedNotifier.value = value;
+                                  });
+                                },
+                                decoration:
+                                    const InputDecoration(labelText: 'Make'),
+                                menuMaxHeight: 300.0,
+                              );
+                            })),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ValueListenableBuilder<String?>(
+                        valueListenable: makeSelectedNotifier,
+                        builder: (context, makeSelected, _) {
+                          debugPrint('makeSelected: ${makeSelected!}');
+                          debugPrint('modelSelected: $modelSelected');
+                          return DropdownButtonFormField<String>(
+                            value: modelSelected,
+                            items: makeModels[makeSelected]!.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                modelSelected = value!;
+                              });
+                            },
+                            decoration: const InputDecoration(labelText: 'Model'),
+                            menuMaxHeight: 300.0,
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    SizedBox(
+                      width: 120,
                       child: DropdownButtonFormField<int>(
-                        value: yearSelected,
-                        items: years.map((int value) {
+                        value: availableSeatsSelected,
+                        items: availableSeats.map((int value) {
                           return DropdownMenuItem<int>(
                             value: value,
                             child: Text(value.toString()),
@@ -176,210 +313,48 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                         }).toList(),
                         onChanged: (value) {
                           setState(() {
-                            yearSelected = value!;
+                            availableSeatsSelected = value!;
                           });
                         },
-                        decoration: const InputDecoration(labelText: 'Year'),
+                        decoration:
+                            const InputDecoration(labelText: 'Availabile Seats'),
                         menuMaxHeight: 300.0,
-                      )),
-                  const SizedBox(width: 18),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: colorSelected,
-                      items: colors.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 16,
-                                height: 16,
-                                color: _getColorFromValue(
-                                    value), // Replace this with your own logic to get color based on value
-                                margin: const EdgeInsets.only(right: 8),
-                              ),
-                              Text(value),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          colorSelected = value!;
-                        });
-                      },
-                      decoration: const InputDecoration(labelText: 'Color'),
-                      menuMaxHeight: 300.0,
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 80,
-                    child: DropdownButtonFormField<String>(
-                      value: makeAlphabetSelectedNotifier.value,
-                      items: makeAlphabet.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          makeSelectedNotifier.value = makeModels.keys
-                              .where((e) => e.startsWith(value!))
-                              .first;
-                          modelSelected =
-                              makeModels[makeSelectedNotifier.value]!.first;
-                          makeAlphabetSelectedNotifier.value = value!;
-                        });
-                      },
-                      decoration:
-                          const InputDecoration(labelText: 'Make Initial'),
-                      menuMaxHeight: 300.0,
-                    ),
-                  ),
-                  const SizedBox(width: 18),
-                  Expanded(
-                      child: ValueListenableBuilder<String?>(
-                          valueListenable: makeAlphabetSelectedNotifier,
-                          builder: (context, makeAlphabetSelected, _) {
-                            debugPrint(
-                                'makeAlphabetSelected: ${makeAlphabetSelected!}');
-                            return DropdownButtonFormField<String>(
-                              value: makeSelectedNotifier.value,
-                              items: makeModels.keys
-                                  .where(
-                                      (e) => e.startsWith(makeAlphabetSelected))
-                                  .map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  modelSelected = makeModels[value!]!.first;
-                                  makeSelectedNotifier.value = value;
-                                });
-                              },
-                              decoration:
-                                  const InputDecoration(labelText: 'Make'),
-                              menuMaxHeight: 300.0,
-                            );
-                          })),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: ValueListenableBuilder<String?>(
-                      valueListenable: makeSelectedNotifier,
-                      builder: (context, makeSelected, _) {
-                        debugPrint('makeSelected: ${makeSelected!}');
-                        debugPrint('modelSelected: $modelSelected');
-                        return DropdownButtonFormField<String>(
-                          value: modelSelected,
-                          items: makeModels[makeSelected]!.map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              modelSelected = value!;
-                            });
-                          },
-                          decoration: const InputDecoration(labelText: 'Model'),
-                          menuMaxHeight: 300.0,
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 18),
-                  SizedBox(
-                    width: 120,
-                    child: DropdownButtonFormField<int>(
-                      value: availableSeatsSelected,
-                      items: availableSeats.map((int value) {
-                        return DropdownMenuItem<int>(
-                          value: value,
-                          child: Text(value.toString()),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          availableSeatsSelected = value!;
-                        });
-                      },
-                      decoration:
-                          const InputDecoration(labelText: 'Availabile Seats'),
-                      menuMaxHeight: 300.0,
-                    ),
-                  )
-                ],
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'License Plate'),
-                textCapitalization: TextCapitalization.characters,
-                controller: _licensePlateController,
-                onChanged: (value) {
-                  setState(() {
-                    licensePlate = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  VehicleModel savedVehicle = VehicleModel(
-                      year: yearSelected,
-                      make: makeSelectedNotifier.value,
-                      model: modelSelected,
-                      color: colorSelected,
-                      licensePlate: licensePlate ?? 'Default',
-                      availableSeats: availableSeatsSelected);
-                  debugPrint(savedVehicle.toJson().toString());
-                  final err =
-                      await savedVehicle.saveToFirestore(currentUser!.email);
-                  if (err == null) {
-                    currentUser.setVehicle(savedVehicle);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vehicle information saved!'),
-                        duration: Duration(seconds: 2),
                       ),
-                    );
-                    Navigator.of(context).pop(savedVehicle);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error: $err'),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
-                child:
-                    vehicle == null ? const Text('Save') : const Text('Update'),
-              ),
-              const SizedBox(height: 32),
-              if (vehicle != null)
+                    )
+                  ],
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'License Plate'),
+                  textCapitalization: TextCapitalization.characters,
+                  controller: _licensePlateController,
+                  onChanged: (value) {
+                    setState(() {
+                      licensePlate = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
-                    final err = await currentUser!.deleteVehicle();
+                    VehicleModel savedVehicle = VehicleModel(
+                        year: yearSelected,
+                        make: makeSelectedNotifier.value,
+                        model: modelSelected,
+                        color: colorSelected,
+                        licensePlate: licensePlate ?? 'Default',
+                        availableSeats: availableSeatsSelected);
+                    debugPrint(savedVehicle.toJson().toString());
+                    final err =
+                        await savedVehicle.saveToFirestore(currentUser!.email);
                     if (err == null) {
-                      currentUser.setVehicle(null);
+                      currentUser.setVehicle(savedVehicle);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Vehicle information deleted!'),
+                          content: Text('Vehicle information saved!'),
                           duration: Duration(seconds: 2),
                         ),
                       );
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(savedVehicle);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -389,14 +364,41 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                       );
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.red, // Set the background color to red
-                  ),
-                  child: const Text('Delete'),
+                  child:
+                      vehicle == null ? const Text('Save') : const Text('Update'),
                 ),
-            ])
-          ],
+                const SizedBox(height: 32),
+                if (vehicle != null)
+                  ElevatedButton(
+                    onPressed: () async {
+                      final err = await currentUser!.deleteVehicle();
+                      if (err == null) {
+                        currentUser.setVehicle(null);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Vehicle information deleted!'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error: $err'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Colors.red, // Set the background color to red
+                    ),
+                    child: const Text('Delete'),
+                  ),
+              ])
+            ],
+          ),
         ),
       ),
     );

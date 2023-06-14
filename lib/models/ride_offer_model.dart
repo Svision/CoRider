@@ -4,19 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RideOfferModel {
-  final UserModel driver;
-  final VehicleModel vehicle;
-  final TimeOfDay proposedTime;
-  final List<int> proposedWeekdays;
-  final String driverLocationName;
-  final LatLng driverLocation;
-  final double price;
-  final String additionalDetails;
+  UserModel driver;
+  VehicleModel vehicle;
+  TimeOfDay? proposedStartTime;
+  TimeOfDay? proposedBackTime;
+  List<int> proposedWeekdays;
+  String driverLocationName;
+  LatLng driverLocation;
+  double price;
+  String additionalDetails;
 
   RideOfferModel({
     required this.driver,
     required this.vehicle,
-    required this.proposedTime,
+    this.proposedStartTime,
+    this.proposedBackTime,
     required this.proposedWeekdays,
     required this.driverLocationName,
     required this.driverLocation,

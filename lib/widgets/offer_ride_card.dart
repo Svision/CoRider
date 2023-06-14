@@ -1,5 +1,5 @@
 import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/screens/findRide/ride_offer_detail_page.dart';
+import 'package:corider/screens/Ride/ride_offer_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -31,7 +31,7 @@ class _RideOfferCardState extends State<RideOfferCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Proposed Time: ${widget.rideOffer.proposedTime.format(context)}',
+            'Proposed Time: ${widget.rideOffer.proposedStartTime!.format(context)}',
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8.0),
