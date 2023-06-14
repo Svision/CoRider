@@ -1,5 +1,5 @@
 import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/screens/Ride/ride_offer_detail_page.dart';
+import 'package:corider/screens/Ride/ride_offer_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

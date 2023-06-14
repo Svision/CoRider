@@ -1,7 +1,7 @@
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/models/vehicle_model.dart';
-import 'package:corider/screens/Ride/offerRide/offer_ride_page.dart';
+import 'package:corider/screens/Ride/offerRide/offer_ride_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/widgets/offer_ride_card.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -98,24 +98,23 @@ class _RideOfferListState extends State<RideOfferList> {
         title: const Text('Ride Offers'),
         leading: IconButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => CreateRideOfferPage()),
-            );
+            setState(() {
+              _selectedIndex = _selectedIndex == 0 ? 1 : 0;
+            });
           },
-          icon: const Icon(Icons.add_circle_outline),
+          icon: Icon(
+            _selectedIndex == 0 ? Icons.map : Icons.list,
+          ),
         ),
         actions: [
           IconButton(
             onPressed: () {
-              setState(() {
-                _selectedIndex = _selectedIndex == 0 ? 1 : 0;
-              });
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CreateRideOfferPage()),
+              );
             },
-            icon: Icon(
-              _selectedIndex == 0 ? Icons.map : Icons.list,
-            ),
+            icon: const Icon(Icons.add_circle_outline),
           ),
         ],
       ),
