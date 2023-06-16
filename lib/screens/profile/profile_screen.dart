@@ -48,17 +48,15 @@ class ProfileScreen extends StatelessWidget {
             // Update the user's profile image URL in Firestore or perform any other actions
             debugPrint('Image uploaded successfully. URL: $imageUrl');
             currentUser.setProfileImage(imageUrl);
+            userState.setUser(currentUser);
             profileImageNotifier.value = imageUrl;
             // Update the user's profile image URL in Firestore
             final usersCollection =
                 FirebaseFirestore.instance.collection('users');
-            final userQuerySnapshot = await usersCollection
-                .where('email', isEqualTo: currentUser.email)
-                .get();
+            final userSnapshot = await usersCollection.doc(currentUser.email).get();
 
-            if (userQuerySnapshot.docs.isNotEmpty) {
-              final userDocumentSnapshot = userQuerySnapshot.docs.first;
-              await userDocumentSnapshot.reference.update({
+            if (userSnapshot.exists) {
+              await userSnapshot.reference.update({
                 'profileImage': imageUrl,
               });
             }

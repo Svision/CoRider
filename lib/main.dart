@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/screens/dashboard.dart';
 import 'package:corider/screens/login/login.dart';
@@ -21,6 +22,16 @@ Future<void> main() async {
   if (currentUserString != null) {
     try {
       currentUser = UserModel.fromJson(jsonDecode(currentUserString));
+      // fetch user from firebase
+      FirebaseFunctions.fetchUserFromFirebase(currentUser.email).then((user) {
+        // compare currentUser with user
+        if (jsonEncode(currentUser!.toJson()) != jsonEncode(user.toJson())) {
+          // print different
+          debugPrint('difference: ${jsonEncode(currentUser.toJson())} != ${jsonEncode(user.toJson())}');
+          // if different, update currentUser
+          UserState(currentUser).setUser(user);
+        }
+      });
       debugPrint('currentUser: ${currentUser.toJson().toString()}');
     } catch (e) {
       debugPrint('Error parsing currentUserString: $e');
