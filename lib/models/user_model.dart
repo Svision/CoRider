@@ -31,7 +31,7 @@ class UserModel {
         vehicle: json['vehicle'] != null
             ? VehicleModel.fromJson(json['vehicle'])
             : null,
-        rideOffers: json['vehicle'] != null
+        rideOffers: json['rideOffers'] != null
             ? List<RideOfferModel>.from(
                 json['rideOffers'].map((e) => RideOfferModel.fromJson(e)))
             : []);
