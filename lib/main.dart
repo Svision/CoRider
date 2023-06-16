@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:corider/models/user_model.dart';
 import 'package:corider/screens/dashboard.dart';
 import 'package:corider/screens/login/login.dart';
 import 'package:corider/models/user_state.dart';
@@ -5,15 +7,30 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  SharedPreferences sharedUser = await SharedPreferences.getInstance();
+  final currentUserString = sharedUser.getString('currentUser');
+  UserModel? currentUser;
+  if (currentUserString != null) {
+    try {
+      currentUser = UserModel.fromJson(jsonDecode(currentUserString));
+      debugPrint('currentUser: ${currentUser.toJson().toString()}');
+    } catch (e) {
+      debugPrint('Error parsing currentUserString: $e');
+    }
+  } else {
+    debugPrint('currentUserString is null');
+  }
   runApp(
     ChangeNotifierProvider(
-      create: (_) => UserState(), 
+      create: (_) => UserState(currentUser),
       child: const MyApp(),
     ),
   );
@@ -25,12 +42,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
     return MaterialApp(
       title: 'CoRider',
       theme: ThemeData(
         primarySwatch: Colors.lightBlue,
       ),
-      home: const LoginScreen(),
+      home: userState.currentUser == null ? const LoginScreen() : const NavigationView(),
       routes: {
         "/login": (context) => const LoginScreen(),
         "/dashboard": (context) => const NavigationView(),

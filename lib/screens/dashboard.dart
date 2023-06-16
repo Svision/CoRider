@@ -1,7 +1,5 @@
-import 'package:corider/models/user_state.dart';
 import 'package:corider/screens/Ride/find_ride.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'profile/profile_screen.dart';
 
 class NavigationView extends StatefulWidget {
@@ -17,7 +15,6 @@ class _NavigationViewState extends State<NavigationView> {
 
   @override
   Widget build(BuildContext context) {
-    final userState = Provider.of<UserState>(context);
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -56,12 +53,7 @@ class _NavigationViewState extends State<NavigationView> {
         ),
         Container(
           alignment: Alignment.center,
-          child: ProfileScreen(
-            onPressed: () {
-              Navigator.popAndPushNamed(context, '/login');
-              userState.signOff();
-            },
-          ),
+          child: const ProfileScreen(),
         ),
       ][currentPageIndex],
     );

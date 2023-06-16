@@ -23,26 +23,29 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      email: json['email'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
-      profileImage: json['profileImage'],
-      createdAt: json['createdAt'].toDate(),
-      vehicle: json['vehicle'] != null
-          ? VehicleModel.fromJson(json['vehicle'])
-          : null,
-    );
+        email: json['email'],
+        firstName: json['firstName'],
+        lastName: json['lastName'],
+        profileImage: json['profileImage'],
+        createdAt: DateTime.parse(json['createdAt']),
+        vehicle: json['vehicle'] != null
+            ? VehicleModel.fromJson(json['vehicle'])
+            : null,
+        rideOffers: json['vehicle'] != null
+            ? List<RideOfferModel>.from(
+                json['rideOffers'].map((e) => RideOfferModel.fromJson(e)))
+            : []);
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'email': email,
-      'firstName': firstName,
-      'lastName': lastName,
-      'profileImage': profileImage,
-      'createdAt': createdAt,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        "email": email,
+        "firstName": firstName,
+        "lastName": lastName,
+        "profileImage": profileImage,
+        "createdAt": createdAt.toIso8601String(),
+        "vehicle": vehicle?.toJson(),
+        "rideOffers": rideOffers.map((e) => e.toJson()).toList(),
+      };
 
   setProfileImage(String? imageUrl) {
     profileImage = imageUrl;

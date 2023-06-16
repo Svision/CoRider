@@ -29,20 +29,9 @@ class LoginScreen extends StatelessWidget {
     }
   }
 
-  Future<String?> _handleLogin(BuildContext context, LoginData data) async {
+  Future<String?> _handleLogin(BuildContext context, String email) async {
     try {
-      await _fetchUserFromFirebase(data.name).then((user) {
-        Provider.of<UserState>(context, listen: false).setUser(user);
-      });
-      return null;
-    } catch (e) {
-      return e.toString();
-    }
-  }
-
-  Future<String?> _handleSignup(BuildContext context, SignupData data) async {
-    try {
-      await _fetchUserFromFirebase(data.name!).then((user) {
+      await _fetchUserFromFirebase(email).then((user) async {
         Provider.of<UserState>(context, listen: false).setUser(user);
       });
       return null;
@@ -83,7 +72,7 @@ class LoginScreen extends StatelessWidget {
         'email': data.name,
         'firstName': data.additionalSignupData!['firstName'],
         'lastName': data.additionalSignupData!['lastName'],
-        'createdAt': DateTime.now(),
+        'createdAt': DateTime.now().toIso8601String(),
       };
 
       await db.collection("users").doc(user['email']).set(user).then((_) =>
@@ -127,7 +116,7 @@ class LoginScreen extends StatelessWidget {
       onLogin: (data) async {
         final err = await _authUser(data);
         if (err == null) {
-          return await _handleLogin(context, data);
+          return await _handleLogin(context, data.name);
         } else {
           // Handle the error returned from _authUser
           return err;
@@ -136,7 +125,7 @@ class LoginScreen extends StatelessWidget {
       onSignup: (data) async {
         final err = await _signupUser(data);
         if (err == null) {
-          return await _handleSignup(context, data);
+          return await _handleLogin(context, data.name!);
         } else {
           // Handle the error returned from _authUser
           return err;
@@ -196,13 +185,11 @@ class LoginScreen extends StatelessWidget {
         UserFormField(
             keyName: "firstName",
             displayName: "First Name",
-            icon: Icon(Icons.person),
             fieldValidator: (value) =>
                 value!.isEmpty ? 'First Name is required' : null),
         UserFormField(
             keyName: "lastName",
             displayName: "Last Name",
-            icon: Icon(Icons.person),
             fieldValidator: (value) =>
                 value!.isEmpty ? 'Last Name is required' : null),
       ],

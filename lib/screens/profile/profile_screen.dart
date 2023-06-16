@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/models/user_state.dart';
+import 'package:corider/screens/login/login.dart';
 import 'package:corider/screens/profile/add_vehicle_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,9 +11,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 
 class ProfileScreen extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const ProfileScreen({super.key, required this.onPressed});
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -87,13 +86,24 @@ class ProfileScreen extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(dialogContext).pop(); // Close the dialog
                     try {
+                      await FirebaseFirestore.instance.collection('users').doc(user.email).delete();
                       await user.delete();
+                      
                       // Account deleted successfully
                       debugPrint('Account deleted successfully!');
-                      // Perform any additional actions after account deletion
-                      userState.signOff();
+                      userState.unsetUser();
+                      // Show snackbar
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Account deleted successfully!'),
+                        ),
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()),
+                      );
                     } catch (e) {
                       // Error occurred while deleting the account
                       debugPrint('Error deleting account: $e');
@@ -156,14 +166,23 @@ class ProfileScreen extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AddVehiclePage(vehicle: currentUser!.vehicle,)),
+              MaterialPageRoute(
+                  builder: (context) => AddVehiclePage(
+                        vehicle: currentUser!.vehicle,
+                      )),
             );
           },
           child: const Text('My Vehicle'),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: onPressed,
+          onPressed: () => {
+            userState.unsetUser(),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+            ),
+          },
           child: const Text('Sign Off'),
         ),
         ElevatedButton(

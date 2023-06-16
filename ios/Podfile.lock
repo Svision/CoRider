@@ -96,6 +96,9 @@ PODS:
   - nanopb/decode (2.30909.0)
   - nanopb/encode (2.30909.0)
   - PromisesObjC (2.2.0)
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - TOCropViewController (2.6.1)
   - url_launcher_ios (0.0.1):
     - Flutter
@@ -112,6 +115,7 @@ DEPENDENCIES:
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - location (from `.symlinks/plugins/location/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -155,6 +159,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
@@ -188,6 +194,7 @@ SPEC CHECKSUMS:
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
+  shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
 
