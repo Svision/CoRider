@@ -11,12 +11,12 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  firebase_core: ^2.13.1
-  firebase_auth: ^4.6.2
+  firebase_core: ^2.14.0
+  firebase_auth: ^4.6.3
   flutter_login: ^4.1.1
-  firebase_storage: ^11.2.2
+  firebase_storage: ^11.2.3
   image: ^4.0.17
-  google_maps_flutter: ^2.2.8
+  google_maps_flutter: ^2.3.0
   location:  # temporary fix for android compile error
     git:
       url: https://github.com/781flyingdutchman/flutterlocation.git
