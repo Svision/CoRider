@@ -1,5 +1,6 @@
 import 'package:corider/models/user_state.dart';
 import 'package:corider/models/vehicle_model.dart';
+import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -195,8 +196,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                                 Container(
                                   width: 16,
                                   height: 16,
-                                  color: _getColorFromValue(
-                                      value), // Replace this with your own logic to get color based on value
+                                  color: Utils.getColorFromValue(value),
                                   margin: const EdgeInsets.only(right: 8),
                                 ),
                                 Text(value),
@@ -252,8 +252,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                               return DropdownButtonFormField<String>(
                                 value: makeSelectedNotifier.value,
                                 items: makeModels.keys
-                                    .where(
-                                        (e) => e.startsWith(makeAlphabetSelected))
+                                    .where((e) =>
+                                        e.startsWith(makeAlphabetSelected))
                                     .map((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
@@ -283,7 +283,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                           debugPrint('modelSelected: $modelSelected');
                           return DropdownButtonFormField<String>(
                             value: modelSelected,
-                            items: makeModels[makeSelected]!.map((String value) {
+                            items:
+                                makeModels[makeSelected]!.map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(value),
@@ -294,7 +295,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                                 modelSelected = value!;
                               });
                             },
-                            decoration: const InputDecoration(labelText: 'Model'),
+                            decoration:
+                                const InputDecoration(labelText: 'Model'),
                             menuMaxHeight: 300.0,
                           );
                         },
@@ -316,8 +318,8 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                             availableSeatsSelected = value!;
                           });
                         },
-                        decoration:
-                            const InputDecoration(labelText: 'Availabile Seats'),
+                        decoration: const InputDecoration(
+                            labelText: 'Availabile Seats'),
                         menuMaxHeight: 300.0,
                       ),
                     )
@@ -364,8 +366,9 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                       );
                     }
                   },
-                  child:
-                      vehicle == null ? const Text('Save') : const Text('Update'),
+                  child: vehicle == null
+                      ? const Text('Save')
+                      : const Text('Update'),
                 ),
                 const SizedBox(height: 32),
                 if (vehicle != null)
@@ -402,35 +405,5 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
         ),
       ),
     );
-  }
-}
-
-Color _getColorFromValue(String value) {
-  switch (value) {
-    case 'Black':
-      return Colors.black;
-    case 'White':
-      return Colors.white;
-    case 'Gray':
-      return Colors.grey;
-    case 'Red':
-      return Colors.red;
-    case 'Blue':
-      return Colors.blue;
-    case 'Green':
-      return Colors.green;
-    case 'Brown':
-      return Colors.brown;
-    case 'Yellow':
-      return Colors.yellow;
-    case 'Orange':
-      return Colors.orange;
-    case 'Purple':
-      return Colors.purple;
-    case 'Pink':
-      return Colors.pink;
-    default:
-      return Colors
-          .transparent; // Return a default color if the value doesn't match any case
   }
 }

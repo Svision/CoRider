@@ -4,11 +4,20 @@ import 'package:corider/models/ride_offer_model.dart';
 class RideOfferDetailPage extends StatelessWidget {
   final RideOfferModel rideOffer;
 
-  const RideOfferDetailPage({Key? key, required this.rideOffer}) : super(key: key);
-  
+  const RideOfferDetailPage({Key? key, required this.rideOffer})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekdays = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+    ];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ride Offer Details'),
@@ -24,7 +33,7 @@ class RideOfferDetailPage extends StatelessWidget {
             ),
             SizedBox(height: 8.0),
             Text(
-              'Name: ${rideOffer.driver.fullName}',
+              'Driver Id: ${rideOffer.driverId}',
               style: TextStyle(fontSize: 16.0),
             ),
             SizedBox(height: 16.0),

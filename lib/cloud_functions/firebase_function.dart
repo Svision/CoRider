@@ -1,11 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/models/user_model.dart';
+import 'package:corider/models/vehicle_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 
 class FirebaseFunctions {
+  static Future<VehicleModel> fetchVehicleFromFirebase(String email) async {
+    final usersCollection = FirebaseFirestore.instance.collection("users");
+
+    final userSnapshot = await usersCollection.doc(email).get();
+
+    if (userSnapshot.exists) {
+      final userData = userSnapshot.data();
+      final vehicleData = userData!['vehicle'];
+      if (vehicleData == null) {
+        throw Exception("Vehicle not found");
+      }
+      final vehicleModel = VehicleModel.fromJson(vehicleData);
+      return vehicleModel;
+    } else {
+      throw Exception("User not found");
+    }
+  }
+
   static Future<UserModel> fetchUserFromFirebase(String email) async {
     final usersCollection = FirebaseFirestore.instance.collection("users");
 

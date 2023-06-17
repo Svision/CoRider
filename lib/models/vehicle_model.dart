@@ -17,6 +17,8 @@ class VehicleModel {
     this.availableSeats = 4,
   });
 
+  String get fullName => '$make $model';
+
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
     return VehicleModel(
       make: json['make'],
@@ -41,12 +43,9 @@ class VehicleModel {
 
   Future<String?> saveToFirestore(String email) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(email)
-          .update({
-            'vehicle': toJson(),
-          });
+      await FirebaseFirestore.instance.collection('users').doc(email).update({
+        'vehicle': toJson(),
+      });
       return null;
     } on FirebaseException catch (e) {
       return e.message;

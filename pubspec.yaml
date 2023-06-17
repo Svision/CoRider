@@ -28,6 +28,9 @@ dependencies:
   image_cropper: ^4.0.1
   geocoding: ^2.1.0
   shared_preferences: ^2.1.2
+  uuid: ^3.0.7
+  tuple: ^2.0.2
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:

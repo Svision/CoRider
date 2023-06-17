@@ -1,8 +1,17 @@
-import 'package:corider/screens/Ride/offerRide/location_picker_map_screen.dart';
+import 'package:corider/cloud_functions/firebase_function.dart';
+import 'package:corider/models/ride_offer_model.dart';
+import 'package:corider/models/user_model.dart';
+import 'package:corider/models/user_state.dart';
+import 'package:corider/models/vehicle_model.dart';
+import 'package:corider/screens/Ride/offerRide/address_search_screen.dart';
+import 'package:corider/screens/profile/add_vehicle_screen.dart';
+import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 final List<String> weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -17,10 +26,12 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
   TimeOfDay proposedStartTime = const TimeOfDay(hour: 8, minute: 30);
   TimeOfDay proposedBackTime = const TimeOfDay(hour: 17, minute: 00);
   List<int> proposedWeekdays = [1, 2, 3, 4, 5];
-  String driverLocationName = '';
+  String? driverLocationName;
   LatLng? driverLocation;
   double price = 0.0;
+  VehicleModel? vehicle;
   String additionalDetails = '';
+  bool isSubmitting = false;
 
   void _showTimePicker(bool forStart) async {
     final selectedTime = await showTimePicker(
@@ -39,53 +50,37 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
     }
   }
 
+  Future<Tuple2<String, LatLng>?> selectDriverLocation() async {
+    // Launch the map screen to select a location
+    Tuple2<String, LatLng>? text2location = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddressSearchScreen()),
+    );
+
+    // Handle the selected location
+    if (text2location != null) {
+      // Update the driver location based on the selected location
+      return text2location;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    void selectDriverLocation() async {
-      LocationData? currentLocation;
-      var location = Location();
-
-      // Check if location services are enabled
-      bool serviceEnabled = await location.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await location.requestService();
-        if (!serviceEnabled) {
-          // Location services are not enabled, handle accordingly
-          return;
-        }
-      }
-
-      // Check if the app has permission to access location
-      PermissionStatus permissionGranted = await location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
-          // Location permission not granted, handle accordingly
-          return;
-        }
-      }
-
-      // Get the current location
-      currentLocation = await location.getLocation();
-
-      // Launch the map screen to select a location
-      LatLng? selectedLocation = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => LocationPickerMapScreen(
-            initialLocation:
-                LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
-          ),
-        ),
-      );
-
-      // Handle the selected location
-      if (selectedLocation != null) {
-        // Update the driver location based on the selected location
+    final userState = Provider.of<UserState>(context);
+    final currentUser = userState.currentUser;
+    try {
+      FirebaseFunctions.fetchVehicleFromFirebase(currentUser!.email)
+          .then((vehicle) {
         setState(() {
-          driverLocation = selectedLocation;
+          this.vehicle = vehicle;
         });
-      }
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() {
+        vehicle = VehicleModel();
+      });
     }
 
     return Scaffold(
@@ -156,12 +151,73 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                 ],
               ),
               const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  selectDriverLocation();
-                },
-                child: const Text('Select your Location'),
-              ),
+              driverLocationName == null
+                  ? ElevatedButton(
+                      onPressed: () {
+                        selectDriverLocation().then((selectedLocation) {
+                          setState(() {
+                            driverLocationName =
+                                selectedLocation?.item1 ?? driverLocationName;
+                            driverLocation =
+                                selectedLocation?.item2 ?? driverLocation;
+                            debugPrint(
+                                'Selected location: $driverLocationName, $driverLocation');
+                          });
+                        });
+                      },
+                      child: const Text('Select your Location'),
+                    )
+                  : Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: Text(driverLocationName!),
+                        ),
+                        Expanded(
+                            child: ElevatedButton(
+                          onPressed: () {
+                            selectDriverLocation().then((selectedLocation) {
+                              setState(() {
+                                driverLocationName = selectedLocation?.item1 ??
+                                    driverLocationName;
+                                driverLocation =
+                                    selectedLocation?.item2 ?? driverLocation;
+                                debugPrint(
+                                    'Selected location: $driverLocationName, $driverLocation');
+                              });
+                            });
+                          },
+                          child: const Text('Modify'),
+                        ))
+                      ],
+                    ),
+              const SizedBox(height: 16.0),
+              if (vehicle == null)
+                const CircularProgressIndicator()
+              else if (vehicle!.fullName == VehicleModel().fullName)
+                ElevatedButton(
+                  child: const Text('Add Vehicle'),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AddVehiclePage(
+                              vehicle: currentUser!.vehicle,
+                            )),
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    Text('Vehicle Used: ${vehicle!.fullName}'),
+                    const SizedBox(width: 8.0),
+                    Container(
+                      width: 16,
+                      height: 16,
+                      color: Utils.getColorFromValue(vehicle!.color!),
+                      margin: const EdgeInsets.only(right: 8),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 16.0),
               TextFormField(
                 decoration: const InputDecoration(
@@ -170,16 +226,19 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d+\.?\d{0,1}')),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    price = double.parse(value) ?? 0.0;
+                    price = double.tryParse(value) ?? 0.0;
                   });
                 },
+                // Display the formatted price in the text field
+                initialValue: price != null
+                    ? NumberFormat.currency().format(price)
+                    : null,
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 decoration: const InputDecoration(
                   labelText: 'Additional Details',
@@ -190,13 +249,64 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                   });
                 },
               ),
-              SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement saving the ride offer logic
-                },
-                child: const Text('Create Ride Offer'),
-              ),
+              const SizedBox(height: 16.0),
+              isSubmitting
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          isSubmitting = true;
+                        });
+                        if (driverLocationName == null ||
+                            driverLocation == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please select your location'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                          setState(() {
+                            isSubmitting = false;
+                          });
+                          return;
+                        }
+                        if (vehicle == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please select your vehicle'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                          setState(() {
+                            isSubmitting = false;
+                          });
+                          return;
+                        }
+                        final rideOffer = RideOfferModel(
+                          driverId: currentUser!.email,
+                          proposedStartTime: proposedStartTime,
+                          proposedBackTime: proposedBackTime,
+                          proposedWeekdays: proposedWeekdays,
+                          driverLocationName: driverLocationName!,
+                          driverLocation: driverLocation!,
+                          vehicle: vehicle!,
+                          price: price,
+                          additionalDetails: additionalDetails,
+                        );
+                        await rideOffer.saveToFirestore(currentUser.email);
+                        setState(() {
+                          isSubmitting = false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Ride offer created!'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Create Ride Offer'),
+                    ),
             ],
           ),
         ),

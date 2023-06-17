@@ -6,6 +6,7 @@ class UserModel {
   final String email;
   String firstName;
   String lastName;
+  late final companyName;
   String? profileImage;
   final DateTime createdAt;
   VehicleModel? vehicle;
@@ -19,7 +20,9 @@ class UserModel {
     required this.createdAt,
     this.vehicle,
     this.rideOffers = const [],
-  });
+  }) {
+    companyName = email.split("@")[1];
+  }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(

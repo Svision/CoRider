@@ -53,7 +53,8 @@ class ProfileScreen extends StatelessWidget {
             // Update the user's profile image URL in Firestore
             final usersCollection =
                 FirebaseFirestore.instance.collection('users');
-            final userSnapshot = await usersCollection.doc(currentUser.email).get();
+            final userSnapshot =
+                await usersCollection.doc(currentUser.email).get();
 
             if (userSnapshot.exists) {
               await userSnapshot.reference.update({
@@ -85,9 +86,12 @@ class ProfileScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () async {
                     try {
-                      await FirebaseFirestore.instance.collection('users').doc(user.email).delete();
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.email)
+                          .delete();
                       await user.delete();
-                      
+
                       // Account deleted successfully
                       debugPrint('Account deleted successfully!');
                       userState.unsetUser();
@@ -154,6 +158,10 @@ class ProfileScreen extends StatelessWidget {
         ),
         Text(
           currentUser?.fullName ?? 'Unknown Name',
+          style: const TextStyle(fontSize: 16),
+        ),
+        Text(
+          currentUser?.companyName ?? 'Unknown Company',
           style: const TextStyle(fontSize: 16),
         ),
         Text(

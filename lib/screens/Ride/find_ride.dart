@@ -19,13 +19,10 @@ class _RideOfferListState extends State<RideOfferList> {
 
   List<RideOfferModel> mockOffers = [
     RideOfferModel(
-      driver: UserModel(
-          email: 'abc@abc.com',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          createdAt: DateTime.now()),
+      driverId: 'abc@abc.com',
       vehicle: VehicleModel(make: 'Honda', model: 'Civic'),
       proposedStartTime: const TimeOfDay(hour: 14, minute: 30),
+      proposedBackTime: null,
       proposedWeekdays: [2, 4],
       driverLocationName: '3401 Dufferin St, Toronto, ON M6A 2T9',
       driverLocation: const LatLng(43.723821, -79.452058),
@@ -34,13 +31,10 @@ class _RideOfferListState extends State<RideOfferList> {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
     ),
     RideOfferModel(
-      driver: UserModel(
-          email: 'abc@abc.com',
-          firstName: 'Michael',
-          lastName: 'Brown',
-          createdAt: DateTime.now()),
+      driverId: 'abc@abc.com',
       vehicle: VehicleModel(make: 'Tesla', model: 'Model 3'),
       proposedStartTime: const TimeOfDay(hour: 13, minute: 20),
+      proposedBackTime: null,
       proposedWeekdays: [1, 3, 5],
       driverLocationName: '131 McMahon Dr, North York, ON M2K 1C2',
       driverLocation: const LatLng(43.767148, -79.373519),
@@ -66,7 +60,7 @@ class _RideOfferListState extends State<RideOfferList> {
       Marker marker = Marker(
         markerId: MarkerId(i.toString()),
         position: location,
-        infoWindow: InfoWindow(title: mockOffers[i].driver.fullName),
+        infoWindow: InfoWindow(title: mockOffers[i].driverId),
       );
       _markers.add(marker);
     }

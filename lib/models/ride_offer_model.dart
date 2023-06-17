@@ -1,10 +1,10 @@
-import 'package:corider/models/user_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RideOfferModel {
-  UserModel driver;
+  String driverId;
   VehicleModel vehicle;
   TimeOfDay? proposedStartTime;
   TimeOfDay? proposedBackTime;
@@ -15,10 +15,10 @@ class RideOfferModel {
   String additionalDetails;
 
   RideOfferModel({
-    required this.driver,
+    required this.driverId,
     required this.vehicle,
-    this.proposedStartTime,
-    this.proposedBackTime,
+    required this.proposedStartTime,
+    required this.proposedBackTime,
     required this.proposedWeekdays,
     required this.driverLocationName,
     required this.driverLocation,
@@ -27,7 +27,7 @@ class RideOfferModel {
   });
 
   Map<String, dynamic> toJson() => {
-        'driver': driver.toJson(),
+        'driver': driverId,
         'vehicle': vehicle.toJson(),
         'proposedStartTime': proposedStartTime?.toString(),
         'proposedBackTime': proposedBackTime?.toString(),
@@ -40,7 +40,7 @@ class RideOfferModel {
 
   factory RideOfferModel.fromJson(Map<String, dynamic> json) {
     return RideOfferModel(
-      driver: UserModel.fromJson(json['driver']),
+      driverId: json['driverId'],
       vehicle: VehicleModel.fromJson(json['vehicle']),
       proposedStartTime: json['proposedStartTime'] != null
           ? TimeOfDay(
@@ -63,5 +63,16 @@ class RideOfferModel {
       price: json['price'],
       additionalDetails: json['additionalDetails'],
     );
+  }
+
+  Future<String?> saveToFirestore(String email) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(email).update({
+        'rideOffers': FieldValue.arrayUnion([toJson()])
+      });
+      return null;
+    } on FirebaseException catch (e) {
+      return e.message;
+    }
   }
 }
