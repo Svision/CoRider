@@ -67,15 +67,14 @@ class FirebaseFunctions {
       );
 
       final db = FirebaseFirestore.instance;
-      final user = <String, dynamic>{
-        'email': data.name,
-        'firstName': data.additionalSignupData!['firstName'],
-        'lastName': data.additionalSignupData!['lastName'],
-        'createdAt': DateTime.now().toIso8601String(),
-      };
+      final user = UserModel(
+          email: data.name!,
+          firstName: data.additionalSignupData!['firstName']!,
+          lastName: data.additionalSignupData!['lastName']!);
+      final userJson = user.toJson();
 
-      await db.collection("users").doc(user['email']).set(user).then((_) =>
-          debugPrint('DocumentSnapshot added with ID: ${user['email']}'));
+      await db.collection("users").doc(user.email).set(userJson).then(
+          (_) => debugPrint('DocumentSnapshot added with ID: ${user.email}'));
 
       // User added successfully
       String successMessage =

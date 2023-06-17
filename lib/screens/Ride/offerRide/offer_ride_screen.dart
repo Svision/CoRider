@@ -68,20 +68,10 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
   @override
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
-    final currentUser = userState.currentUser;
-    try {
-      FirebaseFunctions.fetchVehicleFromFirebase(currentUser!.email)
-          .then((vehicle) {
-        setState(() {
-          this.vehicle = vehicle;
-        });
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-      setState(() {
-        vehicle = VehicleModel();
-      });
-    }
+    final UserModel currentUser = userState.currentUser!;
+    setState(() {
+      vehicle = currentUser.vehicle;
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -192,32 +182,33 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                       ],
                     ),
               const SizedBox(height: 16.0),
-              if (vehicle == null)
-                const CircularProgressIndicator()
-              else if (vehicle!.fullName == VehicleModel().fullName)
-                ElevatedButton(
-                  child: const Text('Add Vehicle'),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddVehiclePage(
-                              vehicle: currentUser!.vehicle,
-                            )),
-                  ),
-                )
-              else
-                Row(
-                  children: [
-                    Text('Vehicle Used: ${vehicle!.fullName}'),
-                    const SizedBox(width: 8.0),
-                    Container(
-                      width: 16,
-                      height: 16,
-                      color: Utils.getColorFromValue(vehicle!.color!),
-                      margin: const EdgeInsets.only(right: 8),
+              vehicle == null
+                  ? ElevatedButton(
+                      child: const Text('Add Vehicle'),
+                      onPressed: () => {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AddVehiclePage(
+                                        vehicle: currentUser.vehicle,
+                                      )),
+                            ),
+                            setState(() {
+                              vehicle = currentUser.vehicle;
+                            }),
+                          })
+                  : Row(
+                      children: [
+                        Text('Vehicle Used: ${vehicle!.fullName}'),
+                        const SizedBox(width: 8.0),
+                        Container(
+                          width: 16,
+                          height: 16,
+                          color: Utils.getColorFromValue(vehicle!.color!),
+                          margin: const EdgeInsets.only(right: 8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
               const SizedBox(height: 16.0),
               TextFormField(
                 decoration: const InputDecoration(
@@ -233,10 +224,6 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                     price = double.tryParse(value) ?? 0.0;
                   });
                 },
-                // Display the formatted price in the text field
-                initialValue: price != null
-                    ? NumberFormat.currency().format(price)
-                    : null,
               ),
               const SizedBox(height: 16.0),
               TextFormField(
@@ -283,13 +270,13 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                           return;
                         }
                         final rideOffer = RideOfferModel(
-                          driverId: currentUser!.email,
+                          driverId: currentUser.email,
                           proposedStartTime: proposedStartTime,
                           proposedBackTime: proposedBackTime,
                           proposedWeekdays: proposedWeekdays,
                           driverLocationName: driverLocationName!,
                           driverLocation: driverLocation!,
-                          vehicle: vehicle!,
+                          vehicleId: vehicle!.id,
                           price: price,
                           additionalDetails: additionalDetails,
                         );

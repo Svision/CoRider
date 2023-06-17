@@ -20,7 +20,7 @@ class _RideOfferListState extends State<RideOfferList> {
   List<RideOfferModel> mockOffers = [
     RideOfferModel(
       driverId: 'abc@abc.com',
-      vehicle: VehicleModel(make: 'Honda', model: 'Civic'),
+      vehicleId: '123456',
       proposedStartTime: const TimeOfDay(hour: 14, minute: 30),
       proposedBackTime: null,
       proposedWeekdays: [2, 4],
@@ -32,7 +32,7 @@ class _RideOfferListState extends State<RideOfferList> {
     ),
     RideOfferModel(
       driverId: 'abc@abc.com',
-      vehicle: VehicleModel(make: 'Tesla', model: 'Model 3'),
+      vehicleId: '1234567',
       proposedStartTime: const TimeOfDay(hour: 13, minute: 20),
       proposedBackTime: null,
       proposedWeekdays: [1, 3, 5],

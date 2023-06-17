@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/vehicle_model.dart';
 
 class UserModel {
@@ -8,21 +7,20 @@ class UserModel {
   String lastName;
   late final companyName;
   String? profileImage;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   VehicleModel? vehicle;
-  List<RideOfferModel> rideOffers;
+  List<String> rideOfferIds;
 
   UserModel({
+    DateTime? createdAt,
     required this.email,
     required this.firstName,
     required this.lastName,
     this.profileImage,
-    required this.createdAt,
     this.vehicle,
-    this.rideOffers = const [],
-  }) {
-    companyName = email.split("@")[1];
-  }
+    this.rideOfferIds = const [],
+  })  : companyName = email.split("@")[1],
+        createdAt = DateTime.now();
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -34,9 +32,8 @@ class UserModel {
         vehicle: json['vehicle'] != null
             ? VehicleModel.fromJson(json['vehicle'])
             : null,
-        rideOffers: json['rideOffers'] != null
-            ? List<RideOfferModel>.from(
-                json['rideOffers'].map((e) => RideOfferModel.fromJson(e)))
+        rideOfferIds: json['rideOfferIds'] != null
+            ? List<String>.from(json['rideOfferIds'])
             : []);
   }
 
@@ -45,9 +42,9 @@ class UserModel {
         "firstName": firstName,
         "lastName": lastName,
         "profileImage": profileImage,
-        "createdAt": createdAt.toIso8601String(),
+        "createdAt": createdAt!.toIso8601String(),
         "vehicle": vehicle?.toJson(),
-        "rideOffers": rideOffers.map((e) => e.toJson()).toList(),
+        "rideOffers": rideOfferIds,
       };
 
   setProfileImage(String? imageUrl) {
