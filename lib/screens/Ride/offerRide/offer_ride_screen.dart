@@ -280,7 +280,7 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                           price: price,
                           additionalDetails: additionalDetails,
                         );
-                        await rideOffer.saveToFirestore(currentUser.email);
+                        await rideOffer.saveToFirestore(currentUser);
                         setState(() {
                           isSubmitting = false;
                         });
