@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/vehicle_model.dart';
 
 class UserModel {

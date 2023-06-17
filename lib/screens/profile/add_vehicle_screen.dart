@@ -2,6 +2,7 @@ import 'package:corider/models/user_state.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 List<int> years = List.generate(
@@ -329,6 +330,11 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                   decoration: const InputDecoration(labelText: 'License Plate'),
                   textCapitalization: TextCapitalization.characters,
                   controller: _licensePlateController,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^[A-Z0-9]{1,7}$'),
+                    ),
+                  ],
                   onChanged: (value) {
                     setState(() {
                       licensePlate = value;
@@ -350,6 +356,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                         await savedVehicle.saveToFirestore(currentUser!.email);
                     if (err == null) {
                       currentUser.setVehicle(savedVehicle);
+                      userState.setUser(currentUser);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Vehicle information saved!'),
@@ -377,6 +384,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                       final err = await currentUser!.deleteVehicle();
                       if (err == null) {
                         currentUser.setVehicle(null);
+                        userState.setUser(currentUser);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Vehicle information deleted!'),
