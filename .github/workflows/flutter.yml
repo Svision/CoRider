@@ -7,20 +7,8 @@ on:
     branches: [ "master" ]
 
 jobs:
-    basic-analysis:
-      # Basic analysis
-      runs-on: ubuntu-latest
-
-      steps:
-        - uses: actions/checkout@v3
-        - uses: subosito/flutter-action@v2
-        - run: flutter --version
-        - run: flutter pub get
-        - run: flutter test
-        - run: flutter analyze --no-fatal-infos --no-fatal-warnings
-
     build-android:
-      # Build Android APK and app bundle
+      # # Basic analysis & Build Android APK and app bundle
       runs-on: ubuntu-latest
 
       steps:
@@ -31,6 +19,10 @@ jobs:
             distribution: 'zulu'
             java-version: '11'
         - run: flutter pub get
+        - name: Run test
+          run: flutter test
+        - name: flutter analyze
+          run: flutter analyze --no-fatal-infos --no-fatal-warnings
         - run: flutter build apk
         - run: flutter build appbundle
 
@@ -46,15 +38,3 @@ jobs:
             architecture: x64
         - run: flutter pub get
         - run: flutter build ios --release --no-codesign
-
-    build-web:
-      # Build for web
-      runs-on: ubuntu-latest
-
-      steps:
-        - uses: actions/checkout@v3
-        - uses: subosito/flutter-action@v2
-          with:
-            channel: 'stable'
-        - run: flutter pub get
-        - run: flutter build web
