@@ -8,7 +8,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 
 class FirebaseFunctions {
-  static Future<String?> deleteRideOfferFromFirebase(
+  static Future<String?> fetchUserProfileImageByEmail(String email) async {
+    try {
+      final usersCollection = FirebaseFirestore.instance.collection("users");
+
+      final userSnapshot = await usersCollection.doc(email).get();
+
+      if (userSnapshot.exists) {
+        final userData = userSnapshot.data();
+        final profileImage = userData!['profileImage'];
+        return profileImage;
+      } else {
+        throw Exception("User not found");
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return null;
+    }
+  }
+
+  static Future<String?> deleteUserRideOfferByOfferId(
       UserModel user, String offerId) async {
     try {
       final offersCollection = FirebaseFirestore.instance
@@ -30,8 +49,7 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<List<RideOfferModel>> fetchOffersFromFirebase(
-      UserModel user) async {
+  static Future<List<RideOfferModel>> fetchOffersbyUser(UserModel user) async {
     try {
       final offersCollection = FirebaseFirestore.instance
           .collection("companies")
@@ -52,7 +70,7 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<VehicleModel> fetchVehicleFromFirebase(String email) async {
+  static Future<VehicleModel> fetchUserVehicleByEmail(String email) async {
     final usersCollection = FirebaseFirestore.instance.collection("users");
 
     final userSnapshot = await usersCollection.doc(email).get();
@@ -70,7 +88,7 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<UserModel> fetchUserFromFirebase(String email) async {
+  static Future<UserModel> fetchUserByEmail(String email) async {
     final usersCollection = FirebaseFirestore.instance.collection("users");
 
     final userSnapshot = await usersCollection.doc(email).get();

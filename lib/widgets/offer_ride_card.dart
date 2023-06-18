@@ -1,7 +1,9 @@
+import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/screens/Ride/ride_offer_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class RideOfferCard extends StatefulWidget {
   final RideOfferModel rideOffer;
@@ -18,15 +20,38 @@ class RideOfferCard extends StatefulWidget {
 }
 
 class _RideOfferCardState extends State<RideOfferCard> {
+  String? driverProfileImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseFunctions.fetchUserProfileImageByEmail(widget.rideOffer.driverId)
+        .then((profileImageUrl) {
+      setState(() {
+        driverProfileImageUrl = profileImageUrl;
+      });
+    });
+  }
+
   Widget _buildListView() {
     return ListTile(
-      leading: const CircleAvatar(
-        // Replace with offer person's avatar
-        backgroundColor: Colors.grey,
-        child: Icon(
-          Icons.person,
-          color: Colors.white,
-        ),
+      leading: CircleAvatar(
+        maxRadius: 25,
+        backgroundColor: driverProfileImageUrl == null ? Colors.grey : null,
+        child: driverProfileImageUrl == null
+            ? const Icon(
+                Icons.person,
+                color: Colors.white,
+              )
+            : ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: driverProfileImageUrl!,
+                  fit: BoxFit.cover,
+                  progressIndicatorBuilder: (context, url, download) =>
+                      CircularProgressIndicator(value: download.progress),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+              ),
       ),
       title: Text(
         widget.rideOffer.driverId,
@@ -35,9 +60,18 @@ class _RideOfferCardState extends State<RideOfferCard> {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Proposed Time: ${widget.rideOffer.proposedStartTime!.format(context)}',
-            style: const TextStyle(fontWeight: FontWeight.w500),
+          Row(
+            children: [
+              Text(
+                'Start: ${widget.rideOffer.proposedStartTime!.format(context)}',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(width: 8.0),
+              Text(
+                'Back: ${widget.rideOffer.proposedBackTime!.format(context)}',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
           const SizedBox(height: 8.0),
           Row(
@@ -49,19 +83,19 @@ class _RideOfferCardState extends State<RideOfferCard> {
   }
 
   Widget _buildMapView(LatLng driverLocation) {
-    return Container(
+    return SizedBox(
       height: 200.0,
       child: GoogleMap(
         initialCameraPosition: CameraPosition(
           target: driverLocation,
           zoom: 15.0,
         ),
-        markers: Set<Marker>.from([
+        markers: <Marker>{
           Marker(
-            markerId: MarkerId('driverLocationMarker'),
+            markerId: const MarkerId('driverLocationMarker'),
             position: driverLocation,
           ),
-        ]),
+        },
         myLocationButtonEnabled: false, // Disable the "Locate Me" button
         mapToolbarEnabled: false, // Disable the map toolbar
         zoomControlsEnabled: false, // Disable the zoom controls

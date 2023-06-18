@@ -26,7 +26,7 @@ Future<void> main() async {
     try {
       currentUser = UserModel.fromJson(jsonDecode(currentUserString));
       // fetch user from firebase
-      FirebaseFunctions.fetchUserFromFirebase(currentUser.email).then((user) {
+      FirebaseFunctions.fetchUserByEmail(currentUser.email).then((user) {
         // compare currentUser with user
         if (jsonEncode(currentUser!.toJson()) != jsonEncode(user.toJson())) {
           // print different
@@ -43,8 +43,7 @@ Future<void> main() async {
               .map((e) => RideOfferModel.fromJson(e))
               .toList();
           if (currentOffers.isEmpty) {
-            FirebaseFunctions.fetchOffersFromFirebase(currentUser)
-                .then((offers) {
+            FirebaseFunctions.fetchOffersbyUser(currentUser).then((offers) {
               UserState(currentUser, currentOffers).setOffers(offers);
             });
           }
@@ -54,7 +53,7 @@ Future<void> main() async {
         }
       } else {
         // fetch offers from firebase
-        FirebaseFunctions.fetchOffersFromFirebase(currentUser).then((offers) {
+        FirebaseFunctions.fetchOffersbyUser(currentUser).then((offers) {
           UserState(currentUser, currentOffers).setOffers(offers);
         });
       }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
@@ -27,7 +29,6 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
   @override
   void initState() {
     super.initState();
-    _addMarkers();
   }
 
   void _addMarkers() {
@@ -47,7 +48,7 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
   Future<void> _handleRefresh(UserModel user) async {
     final userState = Provider.of<UserState>(context, listen: false);
 
-    offers = await FirebaseFunctions.fetchOffersFromFirebase(user);
+    offers = await FirebaseFunctions.fetchOffersbyUser(user);
     userState.setOffers(offers);
     _addMarkers();
   }
@@ -57,6 +58,7 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
     final userState = Provider.of<UserState>(context);
     final UserModel currentUser = userState.currentUser!;
     offers = userState.offers;
+    _addMarkers();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ride Offers'),
@@ -97,7 +99,7 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
               )),
           CustomCustomMapWidget(
             markers: _markers,
-            initialCameraPosition: CameraPosition(target: _center),
+            initialCameraPosition: CameraPosition(target: _center, zoom: 12.0),
             onMapCreated: _onMapCreated,
           ),
         ],
@@ -119,26 +121,46 @@ class RideOfferList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return offers.isEmpty
-        ? ListView.builder(
-            itemCount: 1,
-            itemBuilder: (context, index) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('No offers found'),
-                    Text('Pull down to refresh')
-                  ],
+        ? // If there are no offers, show refresh button
+        Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'No offers found',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-              );
-            },
+                ElevatedButton(
+                  onPressed: () {
+                    refreshOffersIndicatorKey.currentState!.show();
+                  },
+                  child: const Text('Refresh'),
+                ),
+              ],
+            ),
           )
         : ListView.builder(
-            itemCount: offers.length,
+            itemCount: offers.length + 1,
             itemBuilder: (context, index) {
-              return RideOfferCard(
-                  rideOffer: offers[index],
-                  refreshOffersIndicatorKey: refreshOffersIndicatorKey);
+              if (index < offers.length) {
+                return RideOfferCard(
+                    rideOffer: offers[index],
+                    refreshOffersIndicatorKey: refreshOffersIndicatorKey);
+              } else {
+                return Container(
+                  padding: const EdgeInsets.all(16.0),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'END\nPull down to refresh',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                );
+              }
             },
           );
   }

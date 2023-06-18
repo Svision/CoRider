@@ -77,7 +77,7 @@ class RideOfferDetailPage extends StatelessWidget {
                   )
                 : ElevatedButton(
                     onPressed: () async {
-                      await FirebaseFunctions.deleteRideOfferFromFirebase(
+                      await FirebaseFunctions.deleteUserRideOfferByOfferId(
                           currentUser, rideOffer.id);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
