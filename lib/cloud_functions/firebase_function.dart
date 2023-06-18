@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 
 class FirebaseFunctions {
+  static Future<List<RideOfferModel>> fetchOffersFromFireBase(
+      UserModel user) async {
+    try {
+      final offersCollection = FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("rideOffers");
+
+      final offersSnapshot = await offersCollection.get();
+      debugPrint(offersSnapshot.docs.first.data().toString());
+
+      final offers = offersSnapshot.docs
+          .map((e) => RideOfferModel.fromJson(e.data()))
+          .toList();
+
+      return offers;
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
+  }
+
   static Future<VehicleModel> fetchVehicleFromFirebase(String email) async {
     final usersCollection = FirebaseFirestore.instance.collection("users");
 

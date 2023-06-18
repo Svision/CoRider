@@ -36,11 +36,13 @@ class RideOfferModel {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'driver': driverId,
-        'vehicle': vehicleId,
-        'proposedStartTime': proposedStartTime?.toString(),
+        'driverId': driverId,
+        'vehicleId': vehicleId,
+        'proposedStartTime':
+            '${proposedStartTime?.hour.toString()}:${proposedStartTime?.minute.toString()}',
         'passengerId': passengerId,
-        'proposedBackTime': proposedBackTime?.toString(),
+        'proposedBackTime':
+            '${proposedBackTime?.hour.toString()} : ${proposedBackTime?.minute.toString()}',
         'proposedWeekdays': proposedWeekdays,
         'driverLocationName': driverLocationName,
         'driverLocation': driverLocation.toJson(),
@@ -69,8 +71,8 @@ class RideOfferModel {
       proposedWeekdays: List<int>.from(json['proposedWeekdays']),
       driverLocationName: json['driverLocationName'],
       driverLocation: LatLng(
-        json['driverLocation']['latitude'],
-        json['driverLocation']['longitude'],
+        List<double>.from(json['driverLocation'])[0],
+        List<double>.from(json['driverLocation'])[1],
       ),
       price: json['price'],
       additionalDetails: json['additionalDetails'],

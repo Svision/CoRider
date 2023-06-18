@@ -1,10 +1,13 @@
+import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
+import 'package:corider/models/user_state.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:corider/screens/Ride/offerRide/offer_ride_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/widgets/offer_ride_card.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 class RideOfferList extends StatefulWidget {
   const RideOfferList({Key? key}) : super(key: key);
@@ -16,33 +19,7 @@ class RideOfferList extends StatefulWidget {
 class _RideOfferListState extends State<RideOfferList> {
   int _selectedIndex = 0;
   bool _isLoading = false;
-
-  List<RideOfferModel> mockOffers = [
-    RideOfferModel(
-      driverId: 'abc@abc.com',
-      vehicleId: '123456',
-      proposedStartTime: const TimeOfDay(hour: 14, minute: 30),
-      proposedBackTime: null,
-      proposedWeekdays: [2, 4],
-      driverLocationName: '3401 Dufferin St, Toronto, ON M6A 2T9',
-      driverLocation: const LatLng(43.723821, -79.452058),
-      price: 20.0,
-      additionalDetails:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    ),
-    RideOfferModel(
-      driverId: 'abc@abc.com',
-      vehicleId: '1234567',
-      proposedStartTime: const TimeOfDay(hour: 13, minute: 20),
-      proposedBackTime: null,
-      proposedWeekdays: [1, 3, 5],
-      driverLocationName: '131 McMahon Dr, North York, ON M2K 1C2',
-      driverLocation: const LatLng(43.767148, -79.373519),
-      price: 35.0,
-      additionalDetails:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    ),
-  ];
+  List<RideOfferModel> offers = [];
 
   final LatLng _center = const LatLng(43.7720940, -79.3453741);
   final Set<Marker> _markers = {};
@@ -54,13 +31,12 @@ class _RideOfferListState extends State<RideOfferList> {
   }
 
   void _addMarkers() {
-    for (int i = 0; i < mockOffers.length; i++) {
-      LatLng location =
-          mockOffers[i].driverLocation; // Replace with real location
+    for (int i = 0; i < offers.length; i++) {
+      LatLng location = offers[i].driverLocation; // Replace with real location
       Marker marker = Marker(
         markerId: MarkerId(i.toString()),
         position: location,
-        infoWindow: InfoWindow(title: mockOffers[i].driverId),
+        infoWindow: InfoWindow(title: offers[i].driverId),
       );
       _markers.add(marker);
     }
@@ -68,17 +44,12 @@ class _RideOfferListState extends State<RideOfferList> {
 
   void _onMapCreated(GoogleMapController controller) {}
 
-  Future<void> _handleRefresh() async {
+  Future<void> _handleRefresh(UserModel user) async {
     setState(() {
       _isLoading = true;
     });
 
-    // TODO: Add refresh logic here
-    // This method will be called when the user performs the "drag down to refresh" action
-    // You can fetch new data or update the existing data in this method
-
-    // Simulating a delay for demonstration purposes
-    await Future.delayed(Duration(seconds: 2));
+    offers = await FirebaseFunctions.fetchOffersFromFireBase(user);
 
     setState(() {
       _isLoading = false;
@@ -87,6 +58,8 @@ class _RideOfferListState extends State<RideOfferList> {
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
+    final UserModel currentUser = userState.currentUser!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ride Offers'),
@@ -116,13 +89,22 @@ class _RideOfferListState extends State<RideOfferList> {
         index: _selectedIndex,
         children: [
           RefreshIndicator(
-              onRefresh: _handleRefresh,
-              child: ListView.builder(
-                itemCount: mockOffers.length,
-                itemBuilder: (context, index) {
-                  return RideOfferCard(rideOffer: mockOffers[index]);
-                },
-              )),
+              onRefresh: () => _handleRefresh(currentUser),
+              child: offers.isEmpty
+                  ? ListView.builder(
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        return const Center(
+                          child: Text('No offers found'),
+                        );
+                      },
+                    )
+                  : ListView.builder(
+                      itemCount: offers.length,
+                      itemBuilder: (context, index) {
+                        return RideOfferCard(rideOffer: offers[index]);
+                      },
+                    )),
           CustomCustomMapWidget(
             markers: _markers,
             initialCameraPosition: CameraPosition(target: _center, zoom: 12.0),
