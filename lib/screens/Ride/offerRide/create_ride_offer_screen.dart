@@ -14,17 +14,17 @@ import 'package:tuple/tuple.dart';
 
 final List<String> weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-class CreateRideOfferPage extends StatefulWidget {
-  final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
+class CreateRideOfferScreen extends StatefulWidget {
+  final GlobalKey<RefreshIndicatorState>? refreshOffersIndicatorKey;
 
-  const CreateRideOfferPage({Key? key, required this.refreshOffersIndicatorKey})
+  const CreateRideOfferScreen({Key? key, this.refreshOffersIndicatorKey})
       : super(key: key);
 
   @override
-  _CreateRideOfferPageState createState() => _CreateRideOfferPageState();
+  _CreateRideOfferScreenState createState() => _CreateRideOfferScreenState();
 }
 
-class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
+class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
   TimeOfDay proposedStartTime = const TimeOfDay(hour: 8, minute: 30);
   TimeOfDay proposedBackTime = const TimeOfDay(hour: 17, minute: 00);
   List<int> proposedWeekdays = [1, 2, 3, 4, 5];
@@ -293,7 +293,7 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                           ),
                         );
                         Navigator.pop(context);
-                        widget.refreshOffersIndicatorKey.currentState?.show();
+                        widget.refreshOffersIndicatorKey!.currentState?.show();
                       },
                       child: const Text('Create Ride Offer'),
                     ),

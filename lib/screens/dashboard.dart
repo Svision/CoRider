@@ -1,4 +1,5 @@
 import 'package:corider/screens/Ride/find_ride.dart';
+import 'package:corider/screens/home/home.dart';
 import 'package:flutter/material.dart';
 import 'profile/profile_screen.dart';
 
@@ -11,7 +12,12 @@ class NavigationView extends StatefulWidget {
 
 class _NavigationViewState extends State<NavigationView> {
   int currentPageIndex = 0;
-  bool showMap = false;
+
+  void changePageIndex(int index) {
+    setState(() {
+      currentPageIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +26,6 @@ class _NavigationViewState extends State<NavigationView> {
         onDestinationSelected: (int index) {
           setState(() {
             currentPageIndex = index;
-            showMap = false;
           });
         },
         selectedIndex: currentPageIndex,
@@ -45,7 +50,9 @@ class _NavigationViewState extends State<NavigationView> {
       body: <Widget>[
         Container(
           alignment: Alignment.center,
-          child: const Text('Home'),
+          child: HomeScreen(
+            changePageIndex: changePageIndex,
+          ),
         ),
         Container(
           alignment: Alignment.center,
@@ -56,20 +63,6 @@ class _NavigationViewState extends State<NavigationView> {
           child: const ProfileScreen(),
         ),
       ][currentPageIndex],
-    );
-  }
-}
-
-class ShowMapButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const ShowMapButton({super.key, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: const Text('Show Map'),
     );
   }
 }

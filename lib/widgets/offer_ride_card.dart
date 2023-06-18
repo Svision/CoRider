@@ -47,8 +47,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
                 child: CachedNetworkImage(
                   imageUrl: driverProfileImageUrl!,
                   fit: BoxFit.cover,
-                  progressIndicatorBuilder: (context, url, download) =>
-                      CircularProgressIndicator(value: download.progress),
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
