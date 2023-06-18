@@ -93,8 +93,8 @@ class _AddressSearchScreenState extends State<AddressSearchScreen> {
                               await locationFromAddress(_controller.text);
                           final Tuple2<String, LatLng> text2location = Tuple2(
                               _controller.text,
-                              LatLng(locations[0].latitude,
-                                  locations[0].longitude));
+                              LatLng(locations.first.latitude,
+                                  locations.first.longitude));
                           setState(() {
                             _isSaveLoading = false;
                           });

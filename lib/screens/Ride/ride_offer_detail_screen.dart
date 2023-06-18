@@ -9,15 +9,7 @@ class RideOfferDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const weekdays = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday'
-    ];
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ride Offer Details'),
@@ -43,7 +35,12 @@ class RideOfferDetailPage extends StatelessWidget {
             ),
             SizedBox(height: 8.0),
             Text(
-              'Proposed Time: \n${rideOffer.proposedStartTime!.format(context)}',
+              'Proposed Start Time: \n${rideOffer.proposedStartTime!.format(context)}',
+              style: TextStyle(fontSize: 16.0),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              'Proposed Back Time: \n${rideOffer.proposedBackTime!.format(context)}',
               style: TextStyle(fontSize: 16.0),
             ),
             SizedBox(height: 8.0),

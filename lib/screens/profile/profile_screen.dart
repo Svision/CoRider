@@ -94,7 +94,7 @@ class ProfileScreen extends StatelessWidget {
 
                       // Account deleted successfully
                       debugPrint('Account deleted successfully!');
-                      userState.unsetUser();
+                      userState.signOff();
                       // Show snackbar
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -183,7 +183,7 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: () => {
-            userState.unsetUser(),
+            userState.signOff(),
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),

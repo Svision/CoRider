@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:corider/cloud_functions/firebase_function.dart';
+import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/screens/dashboard.dart';
 import 'package:corider/screens/login/login.dart';
@@ -18,6 +19,8 @@ Future<void> main() async {
 
   SharedPreferences sharedUser = await SharedPreferences.getInstance();
   final currentUserString = sharedUser.getString('currentUser');
+  final currentOffersString = sharedUser.getString('offers');
+  List<RideOfferModel> currentOffers = [];
   UserModel? currentUser;
   if (currentUserString != null) {
     try {
@@ -27,12 +30,34 @@ Future<void> main() async {
         // compare currentUser with user
         if (jsonEncode(currentUser!.toJson()) != jsonEncode(user.toJson())) {
           // print different
-          debugPrint('difference: ${jsonEncode(currentUser.toJson())} != ${jsonEncode(user.toJson())}');
+          debugPrint(
+              'difference: ${jsonEncode(currentUser.toJson())} != ${jsonEncode(user.toJson())}');
           // if different, update currentUser
-          UserState(currentUser).setUser(user);
+          UserState(currentUser, currentOffers).setUser(user);
         }
+        debugPrint('currentUser: ${currentUser.toJson().toString()}');
       });
-      debugPrint('currentUser: ${currentUser.toJson().toString()}');
+      if (currentOffersString != null) {
+        try {
+          currentOffers = (jsonDecode(currentOffersString) as List<dynamic>)
+              .map((e) => RideOfferModel.fromJson(e))
+              .toList();
+          if (currentOffers.isEmpty) {
+            FirebaseFunctions.fetchOffersFromFireBase(currentUser)
+                .then((offers) {
+              UserState(currentUser, currentOffers).setOffers(offers);
+            });
+          }
+          debugPrint('currentOffer: ${currentOffers.toString()}');
+        } catch (e) {
+          debugPrint('Error parsing currentOfferString: $e');
+        }
+      } else {
+        // fetch offers from firebase
+        FirebaseFunctions.fetchOffersFromFireBase(currentUser).then((offers) {
+          UserState(currentUser, currentOffers).setOffers(offers);
+        });
+      }
     } catch (e) {
       debugPrint('Error parsing currentUserString: $e');
     }
@@ -41,7 +66,7 @@ Future<void> main() async {
   }
   runApp(
     ChangeNotifierProvider(
-      create: (_) => UserState(currentUser),
+      create: (_) => UserState(currentUser, currentOffers),
       child: const MyApp(),
     ),
   );
@@ -59,7 +84,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.lightBlue,
       ),
-      home: userState.currentUser == null ? const LoginScreen() : const NavigationView(),
+      home: userState.currentUser == null
+          ? const LoginScreen()
+          : const NavigationView(),
       routes: {
         "/login": (context) => const LoginScreen(),
         "/dashboard": (context) => const NavigationView(),

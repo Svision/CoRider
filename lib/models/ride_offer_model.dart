@@ -51,6 +51,7 @@ class RideOfferModel {
       };
 
   factory RideOfferModel.fromJson(Map<String, dynamic> json) {
+    final driverLocationList = List<double>.from(json['driverLocation']);
     return RideOfferModel(
       id: json['id'],
       driverId: json['driverId'],
@@ -71,8 +72,8 @@ class RideOfferModel {
       proposedWeekdays: List<int>.from(json['proposedWeekdays']),
       driverLocationName: json['driverLocationName'],
       driverLocation: LatLng(
-        List<double>.from(json['driverLocation'])[0],
-        List<double>.from(json['driverLocation'])[1],
+        driverLocationList[0],
+        driverLocationList[1],
       ),
       price: json['price'],
       additionalDetails: json['additionalDetails'],

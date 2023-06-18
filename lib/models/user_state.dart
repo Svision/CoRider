@@ -1,16 +1,20 @@
 import 'dart:convert';
 
+import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserState extends ChangeNotifier {
   UserModel? _currentUser;
+  List<RideOfferModel> _offers = [];
 
   UserModel? get currentUser => _currentUser;
+  List<RideOfferModel> get offers => _offers;
 
-  UserState(UserModel? currentUser) {
+  UserState(UserModel? currentUser, List<RideOfferModel> offers) {
     _currentUser = currentUser;
+    _offers = offers;
   }
 
   void setUser(UserModel user) async {
@@ -21,11 +25,20 @@ class UserState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void unsetUser() async {
+  void setOffers(List<RideOfferModel> offers) async {
+    _offers = offers;
+    SharedPreferences sharedOffers = await SharedPreferences.getInstance();
+    sharedOffers.setString('offers', jsonEncode(offers));
+    notifyListeners();
+  }
+
+  void signOff() async {
     _currentUser = null;
-    SharedPreferences sharedUser = await SharedPreferences.getInstance();
-    debugPrint('signOffUser: ${sharedUser.getString('currentUser')}');
-    sharedUser.remove('currentUser');
+    _offers = [];
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    debugPrint('signOffUser: ${sharedPreferences.getString('currentUser')}');
+    sharedPreferences.remove('currentUser');
+    sharedPreferences.remove('offers');
     notifyListeners();
   }
 }
