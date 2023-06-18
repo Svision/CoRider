@@ -5,8 +5,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RideOfferCard extends StatefulWidget {
   final RideOfferModel rideOffer;
+  final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
-  const RideOfferCard({Key? key, required this.rideOffer}) : super(key: key);
+  const RideOfferCard(
+      {Key? key,
+      required this.rideOffer,
+      required this.refreshOffersIndicatorKey})
+      : super(key: key);
 
   @override
   _RideOfferCardState createState() => _RideOfferCardState();
@@ -102,8 +107,11 @@ class _RideOfferCardState extends State<RideOfferCard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    RideOfferDetailPage(rideOffer: widget.rideOffer)),
+                builder: (context) => RideOfferDetailPage(
+                      rideOffer: widget.rideOffer,
+                      refreshOffersIndicatorKey:
+                          widget.refreshOffersIndicatorKey,
+                    )),
           );
         },
         child: Card(

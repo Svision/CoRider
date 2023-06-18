@@ -8,7 +8,29 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 
 class FirebaseFunctions {
-  static Future<List<RideOfferModel>> fetchOffersFromFireBase(
+  static Future<String?> deleteRideOfferFromFirebase(
+      UserModel user, String offerId) async {
+    try {
+      final offersCollection = FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("rideOffers");
+      offersCollection.doc(offerId).delete();
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email)
+          .update({
+        'rideOffers': FieldValue.arrayRemove([offerId]),
+      });
+      return null;
+    } catch (e) {
+      debugPrint(e.toString());
+      return e.toString();
+    }
+  }
+
+  static Future<List<RideOfferModel>> fetchOffersFromFirebase(
       UserModel user) async {
     try {
       final offersCollection = FirebaseFirestore.instance

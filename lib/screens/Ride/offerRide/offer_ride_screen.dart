@@ -9,14 +9,16 @@ import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 final List<String> weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 class CreateRideOfferPage extends StatefulWidget {
-  const CreateRideOfferPage({Key? key}) : super(key: key);
+  final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
+
+  const CreateRideOfferPage({Key? key, required this.refreshOffersIndicatorKey})
+      : super(key: key);
 
   @override
   _CreateRideOfferPageState createState() => _CreateRideOfferPageState();
@@ -291,6 +293,7 @@ class _CreateRideOfferPageState extends State<CreateRideOfferPage> {
                           ),
                         );
                         Navigator.pop(context);
+                        widget.refreshOffersIndicatorKey.currentState?.show();
                       },
                       child: const Text('Create Ride Offer'),
                     ),

@@ -1,14 +1,24 @@
+import 'package:corider/cloud_functions/firebase_function.dart';
+import 'package:corider/models/user_model.dart';
+import 'package:corider/models/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
+import 'package:provider/provider.dart';
 
 class RideOfferDetailPage extends StatelessWidget {
   final RideOfferModel rideOffer;
+  final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
-  const RideOfferDetailPage({Key? key, required this.rideOffer})
+  const RideOfferDetailPage(
+      {Key? key,
+      required this.rideOffer,
+      required this.refreshOffersIndicatorKey})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final userState = Provider.of<UserState>(context);
+    final UserModel currentUser = userState.currentUser!;
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return Scaffold(
       appBar: AppBar(
@@ -59,6 +69,30 @@ class RideOfferDetailPage extends StatelessWidget {
               style: TextStyle(fontSize: 16.0),
             ),
             // Add more details as needed
+            SizedBox(height: 32.0),
+            currentUser.email != rideOffer.driverId
+                ? ElevatedButton(
+                    onPressed: () {},
+                    child: const Text('Request Ride'),
+                  )
+                : ElevatedButton(
+                    onPressed: () async {
+                      await FirebaseFunctions.deleteRideOfferFromFirebase(
+                          currentUser, rideOffer.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Ride offer deleted!'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                      Navigator.of(context).pop();
+                      refreshOffersIndicatorKey.currentState?.show();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text('Delete Ride'),
+                  ),
           ],
         ),
       ),

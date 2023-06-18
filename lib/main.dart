@@ -43,7 +43,7 @@ Future<void> main() async {
               .map((e) => RideOfferModel.fromJson(e))
               .toList();
           if (currentOffers.isEmpty) {
-            FirebaseFunctions.fetchOffersFromFireBase(currentUser)
+            FirebaseFunctions.fetchOffersFromFirebase(currentUser)
                 .then((offers) {
               UserState(currentUser, currentOffers).setOffers(offers);
             });
@@ -54,7 +54,7 @@ Future<void> main() async {
         }
       } else {
         // fetch offers from firebase
-        FirebaseFunctions.fetchOffersFromFireBase(currentUser).then((offers) {
+        FirebaseFunctions.fetchOffersFromFirebase(currentUser).then((offers) {
           UserState(currentUser, currentOffers).setOffers(offers);
         });
       }

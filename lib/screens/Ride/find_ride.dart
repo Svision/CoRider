@@ -21,6 +21,8 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
 
   final LatLng _center = const LatLng(43.7720940, -79.3453741);
   final Set<Marker> _markers = {};
+  GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -45,7 +47,7 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
   Future<void> _handleRefresh(UserModel user) async {
     final userState = Provider.of<UserState>(context, listen: false);
 
-    offers = await FirebaseFunctions.fetchOffersFromFireBase(user);
+    offers = await FirebaseFunctions.fetchOffersFromFirebase(user);
     userState.setOffers(offers);
     _addMarkers();
   }
@@ -73,7 +75,10 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CreateRideOfferPage()),
+                MaterialPageRoute(
+                    builder: (context) => CreateRideOfferPage(
+                          refreshOffersIndicatorKey: refreshOffersIndicatorKey,
+                        )),
               );
             },
             icon: const Icon(Icons.add_circle_outline),
@@ -84,9 +89,11 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
         index: _selectedIndex,
         children: [
           RefreshIndicator(
+              key: refreshOffersIndicatorKey,
               onRefresh: () => _handleRefresh(currentUser),
               child: RideOfferList(
                 offers: offers,
+                refreshOffersIndicatorKey: refreshOffersIndicatorKey,
               )),
           CustomCustomMapWidget(
             markers: _markers,
@@ -101,9 +108,11 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
 
 class RideOfferList extends StatelessWidget {
   final List<RideOfferModel> offers;
+  final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
   const RideOfferList({
     required this.offers,
+    required this.refreshOffersIndicatorKey,
     Key? key,
   }) : super(key: key);
 
@@ -127,7 +136,9 @@ class RideOfferList extends StatelessWidget {
         : ListView.builder(
             itemCount: offers.length,
             itemBuilder: (context, index) {
-              return RideOfferCard(rideOffer: offers[index]);
+              return RideOfferCard(
+                  rideOffer: offers[index],
+                  refreshOffersIndicatorKey: refreshOffersIndicatorKey);
             },
           );
   }
