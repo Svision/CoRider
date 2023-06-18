@@ -41,8 +41,8 @@ class MyOffers extends StatelessWidget {
 
         return ListTile(
           title: Text(rideOffer.driverLocationName),
-          subtitle:
-              Text(rideOffer.proposedStartTime?.format(context) ?? 'Unknown'),
+          subtitle: Text(
+              '${rideOffer.proposedStartTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
           // Customize the tile as needed with other ride offer information
           // For example, add buttons or icons to edit or delete the ride offer
           onTap: () {

@@ -8,6 +8,31 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 
 class FirebaseFunctions {
+  static Future<List<RideOfferModel>> fetchUserOffersbyUser(
+      UserModel user) async {
+    try {
+      final offersCollection = FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("rideOffers")
+          .where("driverId", isEqualTo: user.email);
+
+      final offersSnapshot = await offersCollection.get();
+
+      if (offersSnapshot.docs.isNotEmpty) {
+        final offers = offersSnapshot.docs
+            .map((offer) => RideOfferModel.fromJson(offer.data()))
+            .toList();
+        return offers;
+      } else {
+        throw Exception("No offers found");
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
+  }
+
   static Future<String?> fetchUserProfileImageByEmail(String email) async {
     try {
       final usersCollection = FirebaseFirestore.instance.collection("users");

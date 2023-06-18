@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/models/user_state.dart';
 import 'package:corider/screens/login/login.dart';
@@ -138,15 +139,22 @@ class ProfileScreen extends StatelessWidget {
               onTap: handleUploadPhoto,
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage:
-                    profileImage != null ? NetworkImage(profileImage) : null,
+                backgroundColor: profileImage == null ? Colors.grey : null,
                 child: profileImage == null
                     ? const Icon(
                         Icons.camera_alt,
                         size: 40,
                         color: Colors.white,
                       )
-                    : null,
+                    : ClipOval(
+                        child: CachedNetworkImage(
+                        imageUrl: profileImage,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
+                      )),
               ),
             );
           },
