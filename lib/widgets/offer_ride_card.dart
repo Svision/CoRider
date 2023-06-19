@@ -63,7 +63,7 @@ class _RideOfferCardState extends State<RideOfferCard> {
           Row(
             children: [
               Text(
-                'Start: ${widget.rideOffer.proposedStartTime!.format(context)}',
+                'Start: ${widget.rideOffer.proposedDepartureTime!.format(context)}',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(width: 8.0),

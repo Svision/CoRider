@@ -48,8 +48,8 @@ class _UpcomingRidesState extends State<UpcomingRides> {
 
         return ListTile(
           title: Text(rideOffer.driverLocationName),
-          subtitle:
-              Text(rideOffer.proposedStartTime?.format(context) ?? 'Unknown'),
+          subtitle: Text(
+              rideOffer.proposedDepartureTime?.format(context) ?? 'Unknown'),
           // Customize the tile as needed with other ride offer information
           // For example, add buttons or icons to perform actions on the ride offer
           onTap: () {

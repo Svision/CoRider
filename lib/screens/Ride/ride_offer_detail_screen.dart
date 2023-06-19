@@ -45,7 +45,7 @@ class RideOfferDetailPage extends StatelessWidget {
             ),
             SizedBox(height: 8.0),
             Text(
-              'Proposed Start Time: \n${rideOffer.proposedStartTime!.format(context)}',
+              'Proposed Departure Time: \n${rideOffer.proposedDepartureTime!.format(context)}',
               style: TextStyle(fontSize: 16.0),
             ),
             SizedBox(height: 8.0),

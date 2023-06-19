@@ -93,6 +93,26 @@ class ProfileScreen extends StatelessWidget {
                           .delete();
                       await user.delete();
 
+                      // Delete the user's profile image from Firebase Storage
+                      final storage = firebase_storage.FirebaseStorage.instance;
+                      final storageRef = storage
+                          .ref()
+                          .child('profile_images/${user.email}.jpg');
+                      await storageRef.delete();
+
+                      // Delete all ride offers created by the user
+                      final rideOffersCollection = FirebaseFirestore.instance
+                          .collection('comapnies')
+                          .doc(currentUser!.companyName)
+                          .collection('ride_offers');
+                      final rideOffersQuerySnapshot = await rideOffersCollection
+                          .where('driverId', isEqualTo: currentUser.email)
+                          .get();
+                      for (final rideOfferSnapshot
+                          in rideOffersQuerySnapshot.docs) {
+                        await rideOfferSnapshot.reference.delete();
+                      }
+
                       // Account deleted successfully
                       debugPrint('Account deleted successfully!');
                       userState.signOff();

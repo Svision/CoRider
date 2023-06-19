@@ -8,7 +8,7 @@ class RideOfferModel {
   String id;
   String driverId;
   String vehicleId;
-  TimeOfDay? proposedStartTime;
+  TimeOfDay? proposedDepartureTime;
   TimeOfDay? proposedBackTime;
   String? passengerId;
   List<int> proposedWeekdays;
@@ -22,7 +22,7 @@ class RideOfferModel {
     String? id,
     required this.driverId,
     required this.vehicleId,
-    required this.proposedStartTime,
+    required this.proposedDepartureTime,
     required this.proposedBackTime,
     this.passengerId,
     required this.proposedWeekdays,
@@ -38,7 +38,7 @@ class RideOfferModel {
         'driverId': driverId,
         'vehicleId': vehicleId,
         'proposedStartTime':
-            '${proposedStartTime?.hour.toString()}:${proposedStartTime?.minute.toString()}',
+            '${proposedDepartureTime?.hour.toString()}:${proposedDepartureTime?.minute.toString()}',
         'passengerId': passengerId,
         'proposedBackTime':
             '${proposedBackTime?.hour.toString()} : ${proposedBackTime?.minute.toString()}',
@@ -55,7 +55,7 @@ class RideOfferModel {
       id: json['id'],
       driverId: json['driverId'],
       vehicleId: json['vehicleId'],
-      proposedStartTime: json['proposedStartTime'] != null
+      proposedDepartureTime: json['proposedStartTime'] != null
           ? TimeOfDay(
               hour: int.parse(json['proposedStartTime'].split(':')[0]),
               minute: int.parse(json['proposedStartTime'].split(':')[1]),
