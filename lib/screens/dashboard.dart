@@ -1,5 +1,5 @@
 import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/Ride/find_ride.dart';
+import 'package:corider/screens/Ride/exploreRides/explore_rides.dart';
 import 'package:corider/screens/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -60,7 +60,7 @@ class _NavigationViewState extends State<NavigationView> {
         ),
         Container(
           alignment: Alignment.center,
-          child: RideOfferScreen(
+          child: ExploreRidesScreen(
             userState: userState,
           ),
         ),

@@ -1,24 +1,23 @@
-import 'dart:ui';
-
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/Ride/offerRide/create_ride_offer_screen.dart';
+import 'package:corider/screens/Ride/createRideOffer/create_ride_offer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/widgets/offer_ride_card.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
-class RideOfferScreen extends StatefulWidget {
+class ExploreRidesScreen extends StatefulWidget {
   final UserState userState;
-  const RideOfferScreen({Key? key, required this.userState}) : super(key: key);
+  const ExploreRidesScreen({Key? key, required this.userState})
+      : super(key: key);
 
   @override
-  _RideOfferScreenState createState() => _RideOfferScreenState();
+  _ExploreRidesScreenState createState() => _ExploreRidesScreenState();
 }
 
-class _RideOfferScreenState extends State<RideOfferScreen> {
+class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   int _selectedIndex = 0;
   List<RideOfferModel> offers = [];
 
