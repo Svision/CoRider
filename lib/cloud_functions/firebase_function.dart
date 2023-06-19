@@ -95,36 +95,47 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<VehicleModel> fetchUserVehicleByEmail(String email) async {
-    final usersCollection = FirebaseFirestore.instance.collection("users");
+  static Future<VehicleModel?> fetchUserVehicleByEmail(String email) async {
+    VehicleModel? vehicleModel;
+    try {
+      final usersCollection = FirebaseFirestore.instance.collection("users");
 
-    final userSnapshot = await usersCollection.doc(email).get();
+      final userSnapshot = await usersCollection.doc(email).get();
 
-    if (userSnapshot.exists) {
-      final userData = userSnapshot.data();
-      final vehicleData = userData!['vehicle'];
-      if (vehicleData == null) {
-        throw Exception("Vehicle not found");
+      if (userSnapshot.exists) {
+        final userData = userSnapshot.data();
+        final vehicleData = userData!['vehicle'];
+        if (vehicleData == null) {
+          debugPrint("Vehicle not found");
+        } else {
+          vehicleModel = VehicleModel.fromJson(vehicleData);
+        }
+      } else {
+        debugPrint("User not found");
       }
-      final vehicleModel = VehicleModel.fromJson(vehicleData);
-      return vehicleModel;
-    } else {
-      throw Exception("User not found");
+    } catch (e) {
+      debugPrint(e.toString());
     }
+    return vehicleModel;
   }
 
-  static Future<UserModel> fetchUserByEmail(String email) async {
-    final usersCollection = FirebaseFirestore.instance.collection("users");
+  static Future<UserModel?> fetchUserByEmail(String email) async {
+    UserModel? userModel;
+    try {
+      final usersCollection = FirebaseFirestore.instance.collection("users");
 
-    final userSnapshot = await usersCollection.doc(email).get();
+      final userSnapshot = await usersCollection.doc(email).get();
 
-    if (userSnapshot.exists) {
-      final userData = userSnapshot.data();
-      final userModel = UserModel.fromJson(userData!);
-      return userModel;
-    } else {
-      throw Exception("User not found");
+      if (userSnapshot.exists) {
+        final userData = userSnapshot.data();
+        userModel = UserModel.fromJson(userData!);
+      } else {
+        debugPrint("User not found");
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
+    return userModel;
   }
 
   static Future<String?> authUser(LoginData data) async {

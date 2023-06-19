@@ -28,7 +28,7 @@ Future<void> main() async {
       // fetch user from firebase
       FirebaseFunctions.fetchUserByEmail(currentUser.email).then((user) {
         // compare currentUser with user
-        if (jsonEncode(currentUser!.toJson()) != jsonEncode(user.toJson())) {
+        if (jsonEncode(currentUser!.toJson()) != jsonEncode(user!.toJson())) {
           // print different
           debugPrint(
               'difference: ${jsonEncode(currentUser.toJson())} != ${jsonEncode(user.toJson())}');

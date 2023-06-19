@@ -24,49 +24,55 @@ class MapWidgetState extends State<MapWidget> {
   }
 
   Future<void> _checkLocationPermissions() async {
-    LocationData? currentLocation; // Changed LocationData to nullable type
-    var location = Location();
+    try {
+      LocationData? currentLocation; // Changed LocationData to nullable type
+      var location = Location();
 
-    final hasPermission = await location.hasPermission();
-    if (hasPermission == PermissionStatus.granted) {
-      final serviceEnabled = await location.serviceEnabled();
-      if (serviceEnabled) {
-        location.onLocationChanged.listen((LocationData newLocation) {
-          setState(() {
-            currentLocation = newLocation;
-            _currentLocation = LatLng(
-              currentLocation!.latitude!,
-              currentLocation!.longitude!,
-            );
+      final hasPermission = await location.hasPermission();
+      if (hasPermission == PermissionStatus.granted) {
+        final serviceEnabled = await location.serviceEnabled();
+        if (serviceEnabled) {
+          location.onLocationChanged.listen((LocationData newLocation) {
+            setState(() {
+              currentLocation = newLocation;
+              _currentLocation = LatLng(
+                currentLocation!.latitude!,
+                currentLocation!.longitude!,
+              );
+            });
           });
-        });
+        } else {
+          debugPrint('Location service is disabled.');
+        }
       } else {
-        print('Location service is disabled.');
+        debugPrint('Location permission is not granted.');
       }
-    } else {
-      print('Location permission is not granted.');
+    } catch (e) {
+      debugPrint('Error while checking location permissions: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _currentLocation == null ? const Center(
+      body: _currentLocation == null
+          ? const Center(
               child: CircularProgressIndicator(),
-            ) : Stack(
-        children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            mapType: MapType.normal,
-            initialCameraPosition: CameraPosition(
-              target: _currentLocation!,
-              zoom: 16.0,
+            )
+          : Stack(
+              children: [
+                GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  mapType: MapType.normal,
+                  initialCameraPosition: CameraPosition(
+                    target: _currentLocation!,
+                    zoom: 16.0,
+                  ),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                ),
+              ],
             ),
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-          ),
-        ],
-      ),
     );
   }
 }

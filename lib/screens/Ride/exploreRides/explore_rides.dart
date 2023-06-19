@@ -51,12 +51,16 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   void _onMapCreated(GoogleMapController controller) {}
 
   Future<void> _handleRefresh(UserModel user) async {
-    offers = await FirebaseFunctions.fetchOffersbyUser(user);
-    setState(() {
-      offers = offers;
-    });
-    widget.userState.setOffers(offers);
-    _addMarkers();
+    try {
+      offers = await FirebaseFunctions.fetchOffersbyUser(user);
+      setState(() {
+        offers = offers;
+      });
+      widget.userState.setOffers(offers);
+      _addMarkers();
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
