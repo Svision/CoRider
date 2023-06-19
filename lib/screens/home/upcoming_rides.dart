@@ -1,14 +1,21 @@
+import 'package:corider/models/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 
-class UpcomingRides extends StatelessWidget {
-  final List<RideOfferModel> rideOffers;
+class UpcomingRides extends StatefulWidget {
+  UserState userState;
   final Function(int) changePageIndex;
 
-  const UpcomingRides(
-      {Key? key, required this.rideOffers, required this.changePageIndex})
+  UpcomingRides(
+      {Key? key, required this.userState, required this.changePageIndex})
       : super(key: key);
 
+  @override
+  _UpcomingRidesState createState() => _UpcomingRidesState();
+}
+
+class _UpcomingRidesState extends State<UpcomingRides> {
+  List<RideOfferModel> rideOffers = [];
   @override
   Widget build(BuildContext context) {
     if (rideOffers.isEmpty) {
@@ -25,7 +32,9 @@ class UpcomingRides extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () => {changePageIndex(1)},
+              onPressed: () {
+                widget.changePageIndex(1);
+              },
               child: const Text('Explore Rides'),
             ),
           ],

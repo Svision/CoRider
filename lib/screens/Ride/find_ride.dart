@@ -11,7 +11,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class RideOfferScreen extends StatefulWidget {
-  const RideOfferScreen({Key? key}) : super(key: key);
+  UserState userState;
+  RideOfferScreen({Key? key, required this.userState}) : super(key: key);
 
   @override
   _RideOfferScreenState createState() => _RideOfferScreenState();
@@ -29,6 +30,11 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.userState.offers == null || widget.userState.offers!.isEmpty) {
+      _handleRefresh(widget.userState.currentUser!);
+    } else {
+      offers = [];
+    }
   }
 
   void _addMarkers() {
@@ -46,10 +52,11 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
   void _onMapCreated(GoogleMapController controller) {}
 
   Future<void> _handleRefresh(UserModel user) async {
-    final userState = Provider.of<UserState>(context, listen: false);
-
     offers = await FirebaseFunctions.fetchOffersbyUser(user);
-    userState.setOffers(offers);
+    setState(() {
+      offers = offers;
+    });
+    widget.userState.setOffers(offers);
     _addMarkers();
   }
 
@@ -57,7 +64,7 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     final UserModel currentUser = userState.currentUser!;
-    offers = userState.offers;
+    offers = userState.offers!;
     _addMarkers();
     return Scaffold(
       appBar: AppBar(
@@ -108,19 +115,28 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
   }
 }
 
-class RideOfferList extends StatelessWidget {
-  final List<RideOfferModel> offers;
+class RideOfferList extends StatefulWidget {
+  List<RideOfferModel> offers;
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
-
-  const RideOfferList({
+  RideOfferList({
+    Key? key,
     required this.offers,
     required this.refreshOffersIndicatorKey,
-    Key? key,
   }) : super(key: key);
 
   @override
+  _RideOfferListState createState() => _RideOfferListState();
+}
+
+class _RideOfferListState extends State<RideOfferList> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return offers.isEmpty
+    return widget.offers.isEmpty
         ? // If there are no offers, show refresh button
         Center(
             child: Column(
@@ -130,22 +146,27 @@ class RideOfferList extends StatelessWidget {
                   'No offers found',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                ElevatedButton(
+                IconButton(
                   onPressed: () {
-                    refreshOffersIndicatorKey.currentState!.show();
+                    widget.refreshOffersIndicatorKey.currentState!.show();
                   },
-                  child: const Text('Refresh'),
+                  icon: const Icon(
+                    Icons.refresh,
+                    color: Colors.blue,
+                  ),
+                  iconSize: 48,
                 ),
               ],
             ),
           )
         : ListView.builder(
-            itemCount: offers.length + 1,
+            itemCount: widget.offers.length + 1,
             itemBuilder: (context, index) {
-              if (index < offers.length) {
+              if (index < widget.offers.length) {
                 return RideOfferCard(
-                    rideOffer: offers[index],
-                    refreshOffersIndicatorKey: refreshOffersIndicatorKey);
+                    rideOffer: widget.offers[index],
+                    refreshOffersIndicatorKey:
+                        widget.refreshOffersIndicatorKey);
               } else {
                 return Container(
                   padding: const EdgeInsets.all(16.0),

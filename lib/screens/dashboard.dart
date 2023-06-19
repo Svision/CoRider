@@ -24,7 +24,7 @@ class _NavigationViewState extends State<NavigationView> {
 
   @override
   Widget build(BuildContext context) {
-    UserModel currentUser = Provider.of<UserState>(context).currentUser!;
+    UserState userState = Provider.of<UserState>(context);
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -55,17 +55,19 @@ class _NavigationViewState extends State<NavigationView> {
         Container(
           alignment: Alignment.center,
           child: HomeScreen(
-            currentUser: currentUser,
+            userState: userState,
             changePageIndex: changePageIndex,
           ),
         ),
         Container(
           alignment: Alignment.center,
-          child: const RideOfferScreen(),
+          child: RideOfferScreen(
+            userState: userState,
+          ),
         ),
         Container(
           alignment: Alignment.center,
-          child: const ProfileScreen(),
+          child: ProfileScreen(),
         ),
       ][currentPageIndex],
     );

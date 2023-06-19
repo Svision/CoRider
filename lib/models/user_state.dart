@@ -7,10 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserState extends ChangeNotifier {
   UserModel? _currentUser;
-  List<RideOfferModel> _offers = [];
+  List<RideOfferModel>? _offers;
 
   UserModel? get currentUser => _currentUser;
-  List<RideOfferModel> get offers => _offers;
+  List<RideOfferModel>? get offers => _offers;
 
   UserState(UserModel? currentUser, List<RideOfferModel> offers) {
     _currentUser = currentUser;

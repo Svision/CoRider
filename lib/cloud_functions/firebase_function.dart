@@ -25,7 +25,7 @@ class FirebaseFunctions {
             .toList();
         return offers;
       } else {
-        throw Exception("No offers found");
+        return [];
       }
     } catch (e) {
       debugPrint(e.toString());
