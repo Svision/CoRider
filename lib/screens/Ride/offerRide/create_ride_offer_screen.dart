@@ -1,7 +1,7 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
-import 'package:corider/models/user_state.dart';
+import 'package:corider/providers/user_state.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:corider/screens/Ride/offerRide/address_search_screen.dart';
 import 'package:corider/screens/profile/add_vehicle_screen.dart';

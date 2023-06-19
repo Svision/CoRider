@@ -1,5 +1,5 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
-import 'package:corider/models/user_state.dart';
+import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';

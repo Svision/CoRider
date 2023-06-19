@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:corider/models/user_state.dart';
+import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/login/login.dart';
 import 'package:corider/screens/profile/add_vehicle_screen.dart';
 import 'package:flutter/material.dart';

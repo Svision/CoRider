@@ -1,4 +1,4 @@
-import 'package:corider/models/user_state.dart';
+import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/home/upcoming_rides.dart';
 import 'package:corider/screens/home/my_offers.dart';
 import 'package:flutter/material.dart';

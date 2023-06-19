@@ -1,4 +1,4 @@
-import 'package:corider/models/user_state.dart';
+import 'package:corider/providers/user_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:corider/main.dart';
