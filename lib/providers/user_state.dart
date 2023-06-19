@@ -32,6 +32,25 @@ class UserState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setOfferDriverImageUrlWithEmail(
+      String email, String driverImageUrl) async {
+    SharedPreferences sharedOffers = await SharedPreferences.getInstance();
+    sharedOffers.setString('driverImageUrl-$email', driverImageUrl);
+    notifyListeners();
+  }
+
+  Future<String?> getDriverImageUrlByEmail(String email) async {
+    SharedPreferences sharedOffers;
+    String? driverImageUrl;
+    try {
+      sharedOffers = await SharedPreferences.getInstance();
+      driverImageUrl = sharedOffers.getString('driverImageUrl-$email');
+    } catch (e) {
+      debugPrint('OfferDriverImageUrl not set for: $email');
+    }
+    return driverImageUrl;
+  }
+
   void signOff() async {
     _currentUser = null;
     _offers = [];

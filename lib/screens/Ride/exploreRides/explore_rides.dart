@@ -100,6 +100,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
               key: refreshOffersIndicatorKey,
               onRefresh: () => _handleRefresh(currentUser),
               child: RideOfferList(
+                userState: userState,
                 offers: offers,
                 refreshOffersIndicatorKey: refreshOffersIndicatorKey,
               )),
@@ -115,10 +116,12 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
 }
 
 class RideOfferList extends StatefulWidget {
+  final UserState userState;
   final List<RideOfferModel> offers;
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
   const RideOfferList({
     Key? key,
+    required this.userState,
     required this.offers,
     required this.refreshOffersIndicatorKey,
   }) : super(key: key);
@@ -163,6 +166,7 @@ class _RideOfferListState extends State<RideOfferList> {
             itemBuilder: (context, index) {
               if (index < widget.offers.length) {
                 return RideOfferCard(
+                    userState: widget.userState,
                     rideOffer: widget.offers[index],
                     refreshOffersIndicatorKey:
                         widget.refreshOffersIndicatorKey);

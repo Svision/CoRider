@@ -1,16 +1,19 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
+import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/Ride/exploreRides/ride_offer_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class RideOfferCard extends StatefulWidget {
+  final UserState userState;
   final RideOfferModel rideOffer;
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
   const RideOfferCard(
       {Key? key,
+      required this.userState,
       required this.rideOffer,
       required this.refreshOffersIndicatorKey})
       : super(key: key);
@@ -22,15 +25,37 @@ class RideOfferCard extends StatefulWidget {
 class _RideOfferCardState extends State<RideOfferCard> {
   String? driverProfileImageUrl;
 
+  void getUserProfileImageUrl() {
+    widget.userState
+        .getDriverImageUrlByEmail(widget.rideOffer.driverId)
+        .then((profileImageUrl) => {
+              if (profileImageUrl != null)
+                {
+                  setState(() {
+                    driverProfileImageUrl = profileImageUrl;
+                  })
+                }
+              else
+                {
+                  FirebaseFunctions.fetchUserProfileImageByEmail(
+                          widget.rideOffer.driverId)
+                      .then((profileImageUrl) {
+                    setState(() {
+                      driverProfileImageUrl = profileImageUrl;
+                      if (driverProfileImageUrl != null) {
+                        widget.userState.setOfferDriverImageUrlWithEmail(
+                            widget.rideOffer.driverId, driverProfileImageUrl!);
+                      }
+                    });
+                  })
+                }
+            });
+  }
+
   @override
   void initState() {
     super.initState();
-    FirebaseFunctions.fetchUserProfileImageByEmail(widget.rideOffer.driverId)
-        .then((profileImageUrl) {
-      setState(() {
-        driverProfileImageUrl = profileImageUrl;
-      });
-    });
+    getUserProfileImageUrl();
   }
 
   Widget _buildListView() {
