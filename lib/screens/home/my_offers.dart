@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 
 class MyOffers extends StatefulWidget {
-  UserState userState;
-  MyOffers({Key? key, required this.userState}) : super(key: key);
+  final UserState userState;
+  const MyOffers({Key? key, required this.userState}) : super(key: key);
 
   @override
   _MyOffersState createState() => _MyOffersState();

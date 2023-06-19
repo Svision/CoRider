@@ -11,8 +11,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class RideOfferScreen extends StatefulWidget {
-  UserState userState;
-  RideOfferScreen({Key? key, required this.userState}) : super(key: key);
+  final UserState userState;
+  const RideOfferScreen({Key? key, required this.userState}) : super(key: key);
 
   @override
   _RideOfferScreenState createState() => _RideOfferScreenState();
@@ -116,9 +116,9 @@ class _RideOfferScreenState extends State<RideOfferScreen> {
 }
 
 class RideOfferList extends StatefulWidget {
-  List<RideOfferModel> offers;
+  final List<RideOfferModel> offers;
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
-  RideOfferList({
+  const RideOfferList({
     Key? key,
     required this.offers,
     required this.refreshOffersIndicatorKey,

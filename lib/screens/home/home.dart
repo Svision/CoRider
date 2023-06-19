@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) changePageIndex;
-  UserState userState;
-  HomeScreen({Key? key, required this.userState, required this.changePageIndex})
+  final UserState userState;
+  const HomeScreen(
+      {Key? key, required this.userState, required this.changePageIndex})
       : super(key: key);
 
   @override

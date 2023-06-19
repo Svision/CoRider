@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 
 class UpcomingRides extends StatefulWidget {
-  UserState userState;
+  final UserState userState;
   final Function(int) changePageIndex;
 
-  UpcomingRides(
+  const UpcomingRides(
       {Key? key, required this.userState, required this.changePageIndex})
       : super(key: key);
 
