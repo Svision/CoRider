@@ -23,6 +23,7 @@ class MyOffersState extends State<MyOffers> {
     FirebaseFunctions.fetchUserOffersbyUser(widget.userState.currentUser!)
         .then((offers) {
       setState(() {
+        widget.userState.setOffers(offers);
         myOffers = offers;
         isMyOffersFetched = true;
       });
@@ -40,6 +41,7 @@ class MyOffersState extends State<MyOffers> {
     final offers = await FirebaseFunctions.fetchUserOffersbyUser(
         widget.userState.currentUser!);
     setState(() {
+      widget.userState.setOffers(offers);
       myOffers = offers;
       isMyOffersFetched = true;
     });
@@ -99,7 +101,7 @@ class MyOffersState extends State<MyOffers> {
 
     return RefreshIndicator(
         key: refreshMyOffersIndicatorKey,
-        onRefresh: () => asyncRefresh(),
+        onRefresh: asyncRefresh,
         child: ListView.builder(
           itemCount: myOffers.length,
           itemBuilder: (context, index) {
