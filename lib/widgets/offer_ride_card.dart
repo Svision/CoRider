@@ -34,21 +34,20 @@ class _RideOfferCardState extends State<RideOfferCard> {
                   setState(() {
                     driverProfileImageUrl = profileImageUrl;
                   })
-                }
-              else
-                {
-                  FirebaseFunctions.fetchUserProfileImageByEmail(
-                          widget.rideOffer.driverId)
-                      .then((profileImageUrl) {
-                    setState(() {
-                      driverProfileImageUrl = profileImageUrl;
-                      if (driverProfileImageUrl != null) {
-                        widget.userState.setOfferDriverImageUrlWithEmail(
-                            widget.rideOffer.driverId, driverProfileImageUrl!);
-                      }
-                    });
-                  })
-                }
+                },
+              FirebaseFunctions.fetchUserProfileImageByEmail(
+                      widget.rideOffer.driverId)
+                  .then((profileImageUrl) {
+                setState(() {
+                  if (profileImageUrl != driverProfileImageUrl) {
+                    driverProfileImageUrl = profileImageUrl;
+                    if (driverProfileImageUrl != null) {
+                      widget.userState.setOfferDriverImageUrlWithEmail(
+                          widget.rideOffer.driverId, driverProfileImageUrl!);
+                    }
+                  }
+                });
+              })
             });
   }
 
