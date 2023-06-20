@@ -1,4 +1,4 @@
-# CoRider
+# CoRider [![Flutter](https://github.com/Svision/CoRider/actions/workflows/flutter.yml/badge.svg?branch=master)](https://github.com/Svision/CoRider/actions/workflows/flutter.yml)
 
 CoRider is a company-wide carpooling app built using Flutter. The app aims to promote sustainable transportation, reduce traffic congestion, and foster employee connectivity within the organization.
 
