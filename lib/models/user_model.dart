@@ -5,11 +5,12 @@ class UserModel {
   final String email;
   String firstName;
   String lastName;
-  late final companyName;
+  late final String companyName;
   String? profileImage;
   final DateTime? createdAt;
   VehicleModel? vehicle;
-  List<String> rideOfferIds;
+  List<String> myOfferIds;
+  List<String> requestedOfferIds;
 
   UserModel({
     DateTime? createdAt,
@@ -18,7 +19,8 @@ class UserModel {
     required this.lastName,
     this.profileImage,
     this.vehicle,
-    this.rideOfferIds = const [],
+    this.myOfferIds = const [],
+    this.requestedOfferIds = const [],
   })  : companyName = email.split("@")[1],
         createdAt = DateTime.now();
 
@@ -32,8 +34,11 @@ class UserModel {
         vehicle: json['vehicle'] != null
             ? VehicleModel.fromJson(json['vehicle'])
             : null,
-        rideOfferIds: json['rideOfferIds'] != null
-            ? List<String>.from(json['rideOfferIds'])
+        myOfferIds: json['myOfferIds'] != null
+            ? List<String>.from(json['myOfferIds'])
+            : [],
+        requestedOfferIds: json['requestedOfferIds'] != null
+            ? List<String>.from(json['requestedOfferIds'])
             : []);
   }
 
@@ -44,7 +49,8 @@ class UserModel {
         "profileImage": profileImage,
         "createdAt": createdAt!.toIso8601String(),
         "vehicle": vehicle?.toJson(),
-        "rideOffers": rideOfferIds,
+        "myOfferIds": myOfferIds,
+        "requestedOfferIds": requestedOfferIds,
       };
 
   setProfileImage(String? imageUrl) {
