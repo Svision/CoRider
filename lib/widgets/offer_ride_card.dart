@@ -79,7 +79,9 @@ class _RideOfferCardState extends State<RideOfferCard> {
               ),
       ),
       title: Text(
-        widget.rideOffer.driverId,
+        widget.rideOffer.driverId == widget.userState.currentUser!.email
+            ? 'Me'
+            : widget.rideOffer.driverId,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(

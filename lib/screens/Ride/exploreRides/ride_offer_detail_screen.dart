@@ -1,7 +1,6 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/home/my_offers.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:provider/provider.dart';
@@ -65,6 +64,21 @@ class RideOfferDetailScreen extends StatelessWidget {
             SizedBox(height: 8.0),
             Text(
               'Driver Location: \n(${rideOffer.driverLocation.latitude}, ${rideOffer.driverLocation.longitude})',
+              style: TextStyle(fontSize: 16.0),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              'Price: \n${rideOffer.price}',
+              style: TextStyle(fontSize: 16.0),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              'Additional Details: \n${rideOffer.additionalDetails}',
+              style: TextStyle(fontSize: 16.0),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              'PassengerIds: \n${rideOffer.passengerIds.join(', ')}',
               style: TextStyle(fontSize: 16.0),
             ),
             // Add more details as needed

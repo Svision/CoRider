@@ -10,7 +10,7 @@ class RideOfferModel {
   String vehicleId;
   TimeOfDay? proposedDepartureTime;
   TimeOfDay? proposedBackTime;
-  String? passengerId;
+  List<String> passengerIds;
   List<int> proposedWeekdays;
   String driverLocationName;
   LatLng driverLocation;
@@ -24,7 +24,7 @@ class RideOfferModel {
     required this.vehicleId,
     required this.proposedDepartureTime,
     required this.proposedBackTime,
-    this.passengerId,
+    this.passengerIds = const [],
     required this.proposedWeekdays,
     required this.driverLocationName,
     required this.driverLocation,
@@ -39,7 +39,7 @@ class RideOfferModel {
         'vehicleId': vehicleId,
         'proposedStartTime':
             '${proposedDepartureTime?.hour.toString()}:${proposedDepartureTime?.minute.toString()}',
-        'passengerId': passengerId,
+        'passengerIds': passengerIds,
         'proposedBackTime':
             '${proposedBackTime?.hour.toString()} : ${proposedBackTime?.minute.toString()}',
         'proposedWeekdays': proposedWeekdays,
@@ -67,7 +67,9 @@ class RideOfferModel {
               minute: int.parse(json['proposedBackTime'].split(':')[1]),
             )
           : null,
-      passengerId: json['passengerId'],
+      passengerIds: json['passengerIds'] != null
+          ? List<String>.from(json['passengerIds'])
+          : [],
       proposedWeekdays: List<int>.from(json['proposedWeekdays']),
       driverLocationName: json['driverLocationName'],
       driverLocation: LatLng(
