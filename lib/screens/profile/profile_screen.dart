@@ -125,7 +125,9 @@ class ProfileScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
+                            builder: (context) => LoginScreen(
+                                  userState: userState,
+                                )),
                       );
                     } catch (e) {
                       // Error occurred while deleting the account
@@ -214,7 +216,10 @@ class ProfileScreen extends StatelessWidget {
             userState.signOff(),
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              MaterialPageRoute(
+                  builder: (context) => LoginScreen(
+                        userState: userState,
+                      )),
             ),
           },
           child: const Text('Sign Off'),

@@ -29,7 +29,8 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.userState.offers == null || widget.userState.offers!.isEmpty) {
+    if (widget.userState.currentOffers == null ||
+        widget.userState.currentOffers!.isEmpty) {
       _handleRefresh(widget.userState.currentUser!);
     } else {
       offers = [];
@@ -67,7 +68,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     final UserModel currentUser = userState.currentUser!;
-    offers = userState.offers!;
+    offers = userState.currentOffers!;
     _addMarkers();
     return Scaffold(
       appBar: AppBar(

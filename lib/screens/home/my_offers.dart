@@ -39,15 +39,17 @@ class MyOffersState extends State<MyOffers> {
   @override
   void initState() {
     super.initState();
-    if (widget.userState.offers == null || widget.userState.offers!.isEmpty) {
-      myOffers = [];
+    if (widget.userState.currentOffers == null) {
+      asyncRefresh();
+    } else if (widget.userState.currentOffers!.isEmpty) {
+      isMyOffersFetched = true;
     } else {
-      myOffers = widget.userState.offers!
+      myOffers = widget.userState.currentOffers!
           .where(
               (offer) => offer.driverId == widget.userState.currentUser!.email)
           .toList();
+      isMyOffersFetched = true;
     }
-    isMyOffersFetched = true;
   }
 
   @override

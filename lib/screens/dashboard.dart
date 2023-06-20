@@ -5,14 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'profile/profile_screen.dart';
 
-class NavigationView extends StatefulWidget {
-  const NavigationView({super.key});
+class RootNavigationView extends StatefulWidget {
+  final UserState userState;
+  const RootNavigationView({super.key, required this.userState});
 
   @override
-  State<NavigationView> createState() => _NavigationViewState();
+  State<RootNavigationView> createState() => _RootNavigationViewState();
 }
 
-class _NavigationViewState extends State<NavigationView> {
+class _RootNavigationViewState extends State<RootNavigationView> {
   int currentPageIndex = 0;
 
   void changePageIndex(int index) {

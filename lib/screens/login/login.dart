@@ -4,18 +4,19 @@ import 'package:corider/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../dashboard.dart';
-import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
+  final UserState userState;
   static bool isFirstTimeLoad = false;
 
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, required this.userState});
   Duration get loginTime => const Duration(milliseconds: 1000);
 
   Future<String?> _handleLogin(BuildContext context, String email) async {
     try {
       await FirebaseFunctions.fetchUserByEmail(email).then((user) async {
-        Provider.of<UserState>(context).setUser(user!);
+        await userState.setUser(user!);
+        await userState.loadData();
       });
       return null;
     } catch (e) {
@@ -53,11 +54,15 @@ class LoginScreen extends StatelessWidget {
         if (isFirstTimeLoad) {
           isFirstTimeLoad = false;
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => const OnboardingScreen(),
+            builder: (context) => OnboardingScreen(
+              userState: userState,
+            ),
           ));
         } else {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => const NavigationView(),
+            builder: (context) => RootNavigationView(
+              userState: userState,
+            ),
           ));
         }
       },

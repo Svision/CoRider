@@ -11,7 +11,9 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider<UserState>.value(
         value: userState,
-        child: const MyApp(),
+        child: MyApp(
+          userState: userState,
+        ),
       ),
     );
     expect(find.text('LOGIN'), findsOneWidget);

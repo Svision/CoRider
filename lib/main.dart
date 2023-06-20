@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/screens/dashboard.dart';
@@ -9,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'cloud_functions/firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,63 +14,30 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  SharedPreferences sharedUser = await SharedPreferences.getInstance();
-  final currentUserString = sharedUser.getString('currentUser');
-  final currentOffersString = sharedUser.getString('offers');
-  List<RideOfferModel> currentOffers = [];
   UserModel? currentUser;
-  if (currentUserString != null) {
-    try {
-      currentUser = UserModel.fromJson(jsonDecode(currentUserString));
-      // fetch user from firebase
-      FirebaseFunctions.fetchUserByEmail(currentUser.email).then((user) {
-        // compare currentUser with user
-        if (jsonEncode(currentUser!.toJson()) != jsonEncode(user!.toJson())) {
-          // print different
-          debugPrint(
-              'difference: ${jsonEncode(currentUser.toJson())} != ${jsonEncode(user.toJson())}');
-          // if different, update currentUser
-          UserState(currentUser, currentOffers).setUser(user);
-        }
-        debugPrint('currentUser: ${currentUser.toJson().toString()}');
-      });
-      if (currentOffersString != null) {
-        try {
-          currentOffers = (jsonDecode(currentOffersString) as List<dynamic>)
-              .map((e) => RideOfferModel.fromJson(e))
-              .toList();
-          if (currentOffers.isEmpty) {
-            FirebaseFunctions.fetchOffersbyUser(currentUser).then((offers) {
-              UserState(currentUser, currentOffers).setOffers(offers);
-            });
-          }
-          debugPrint('currentOffer: ${currentOffers.toString()}');
-        } catch (e) {
-          debugPrint('Error parsing currentOfferString: $e');
-        }
-      } else {
-        // fetch offers from firebase
-        FirebaseFunctions.fetchOffersbyUser(currentUser).then((offers) {
-          UserState(currentUser, currentOffers).setOffers(offers);
-        });
-      }
-    } catch (e) {
-      debugPrint('Error parsing currentUserString: $e');
-    }
-  } else {
-    debugPrint('currentUserString is null');
-  }
+  List<RideOfferModel>? currentOffers;
+  UserState userState = UserState(currentUser, currentOffers);
+
+  await userState.loadData();
+
   runApp(
     ChangeNotifierProvider(
-      create: (_) => UserState(currentUser, currentOffers),
-      child: const MyApp(),
+      create: (_) => userState,
+      child: MyApp(userState: userState),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  final UserState userState;
 
+  const MyApp({Key? key, required this.userState}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -84,11 +48,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.lightBlue,
       ),
       home: userState.currentUser == null
-          ? const LoginScreen()
-          : const NavigationView(),
+          ? LoginScreen(userState: widget.userState)
+          : RootNavigationView(userState: widget.userState),
       routes: {
-        "/login": (context) => const LoginScreen(),
-        "/dashboard": (context) => const NavigationView(),
+        "/login": (context) => LoginScreen(userState: widget.userState),
+        "/dashboard": (context) =>
+            RootNavigationView(userState: widget.userState),
       },
     );
   }

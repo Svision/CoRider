@@ -1,8 +1,10 @@
+import 'package:corider/providers/user_state.dart';
 import 'package:flutter/material.dart';
 import 'dashboard.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  final UserState userState;
+  const OnboardingScreen({super.key, required this.userState});
 
   @override
   _OnboardingScreenState createState() => _OnboardingScreenState();
@@ -16,17 +18,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     const OnboardingPage(
       backgroundColor: Colors.lightBlue,
       title: 'Welcome to CoRider',
-      description: 'Welcome to CoRider, your company-wide carpooling solution. With CoRider carpooling, you can contribute to a greener environment while enjoying a more efficient and enjoyable commute. Join us in reducing traffic congestion and promoting sustainable transportation options for our workplace community.',
+      description:
+          'Welcome to CoRider, your company-wide carpooling solution. With CoRider carpooling, you can contribute to a greener environment while enjoying a more efficient and enjoyable commute. Join us in reducing traffic congestion and promoting sustainable transportation options for our workplace community.',
     ),
     const OnboardingPage(
       backgroundColor: Colors.lightBlue,
       title: 'Find a Ride',
-      description: "With CoRider, finding a ride is a breeze. Browse through available rides shared by your colleagues and select the one that fits your schedule and route. Say goodbye to the hassle of driving alone and join fellow employees for a comfortable and cost-effective commute. Let's make carpooling a part of our daily routine.",
+      description:
+          "With CoRider, finding a ride is a breeze. Browse through available rides shared by your colleagues and select the one that fits your schedule and route. Say goodbye to the hassle of driving alone and join fellow employees for a comfortable and cost-effective commute. Let's make carpooling a part of our daily routine.",
     ),
     const OnboardingPage(
       backgroundColor: Colors.lightBlue,
       title: 'Offer a Ride',
-      description: "Share the ride, share the benefits. By offering a ride on CoRider, you can help your colleagues reach their destinations conveniently while reducing their carbon footprint. Offer your available seats, set your preferred route, and connect with coworkers who are heading in the same direction. Together, let's make our commutes more efficient, social, and eco-friendly.",
+      description:
+          "Share the ride, share the benefits. By offering a ride on CoRider, you can help your colleagues reach their destinations conveniently while reducing their carbon footprint. Offer your available seats, set your preferred route, and connect with coworkers who are heading in the same direction. Together, let's make our commutes more efficient, social, and eco-friendly.",
     ),
   ];
 
@@ -74,8 +79,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       )
                     : ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) => const NavigationView(),
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                            builder: (context) => RootNavigationView(
+                              userState: widget.userState,
+                            ),
                           ));
                         },
                         style: ElevatedButton.styleFrom(
@@ -83,7 +91,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0, vertical: 12.0),
                         ),
                         child: const Text(
                           'Get Started',
@@ -125,7 +134,8 @@ class OnboardingPage extends StatelessWidget {
   final String title;
   final String description;
 
-  const OnboardingPage({super.key, 
+  const OnboardingPage({
+    super.key,
     required this.backgroundColor,
     required this.title,
     required this.description,
