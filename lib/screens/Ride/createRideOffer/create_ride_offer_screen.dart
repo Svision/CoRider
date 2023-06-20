@@ -218,7 +218,8 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d{0,4}(\.\d{0,2})?$')),
                 ],
                 onChanged: (value) {
                   setState(() {
