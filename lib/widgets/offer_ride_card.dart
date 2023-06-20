@@ -166,10 +166,9 @@ class _RideOfferCardState extends State<RideOfferCard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => RideOfferDetailPage(
+                builder: (context) => RideOfferDetailScreen(
                       rideOffer: widget.rideOffer,
-                      refreshOffersIndicatorKey:
-                          widget.refreshOffersIndicatorKey,
+                      refreshOffersKey: widget.refreshOffersIndicatorKey,
                     )),
           );
         },

@@ -292,7 +292,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                           ),
                         );
                         Navigator.pop(context);
-                        widget.refreshOffersIndicatorKey!.currentState?.show();
+                        widget.refreshOffersIndicatorKey?.currentState?.show();
                       },
                       child: const Text('Create Ride Offer'),
                     ),

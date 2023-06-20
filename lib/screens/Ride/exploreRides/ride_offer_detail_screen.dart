@@ -1,18 +1,17 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/screens/home/my_offers.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:provider/provider.dart';
 
-class RideOfferDetailPage extends StatelessWidget {
+class RideOfferDetailScreen extends StatelessWidget {
   final RideOfferModel rideOffer;
-  final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
+  final GlobalKey? refreshOffersKey;
 
-  const RideOfferDetailPage(
-      {Key? key,
-      required this.rideOffer,
-      required this.refreshOffersIndicatorKey})
+  const RideOfferDetailScreen(
+      {Key? key, required this.rideOffer, this.refreshOffersKey})
       : super(key: key);
 
   @override
@@ -86,7 +85,16 @@ class RideOfferDetailPage extends StatelessWidget {
                         ),
                       );
                       Navigator.of(context).pop();
-                      refreshOffersIndicatorKey.currentState?.show();
+                      if (refreshOffersKey
+                          is GlobalKey<RefreshIndicatorState>) {
+                        GlobalKey<RefreshIndicatorState>
+                            refreshOffersIndicatorKey = refreshOffersKey
+                                as GlobalKey<RefreshIndicatorState>;
+                        refreshOffersIndicatorKey.currentState?.show();
+                      } else {
+                        debugPrint(
+                            'refreshOffersKey is not of type GlobalKey<RefreshIndicatorState> or GlobalKey<MyOffersState>');
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,

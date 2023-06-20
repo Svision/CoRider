@@ -48,7 +48,7 @@ class PlaceApiProvider {
       String input, String lang, String country) async {
     try {
       final request = Uri.parse(
-          'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&types=address&language=$lang&components=country:$country&key=$apiKey&sessiontoken=$sessionToken');
+          'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&types=address&language=$lang&components=country:CA&key=$apiKey&sessiontoken=$sessionToken');
       final response = await client.get(request);
 
       if (response.statusCode == 200) {
