@@ -19,22 +19,11 @@ class MyOffersState extends State<MyOffers> {
   List<RideOfferModel> myOffers = [];
   bool isMyOffersFetched = false;
 
-  void _fetchOffers() {
-    FirebaseFunctions.fetchUserOffersbyUser(widget.userState.currentUser!)
-        .then((offers) {
-      setState(() {
-        widget.userState.setOffers(offers);
-        myOffers = offers;
-        isMyOffersFetched = true;
-      });
-    });
-  }
-
   void triggerRefresh() {
     setState(() {
       isMyOffersFetched = false;
     });
-    _fetchOffers();
+    asyncRefresh();
   }
 
   Future<void> asyncRefresh() async {
@@ -51,20 +40,20 @@ class MyOffersState extends State<MyOffers> {
   void initState() {
     super.initState();
     if (widget.userState.offers == null || widget.userState.offers!.isEmpty) {
-      _fetchOffers();
+      myOffers = [];
     } else {
       myOffers = widget.userState.offers!
           .where(
               (offer) => offer.driverId == widget.userState.currentUser!.email)
           .toList();
-      isMyOffersFetched = true;
     }
+    isMyOffersFetched = true;
   }
 
   @override
   Widget build(BuildContext context) {
     if (!isMyOffersFetched) {
-      _fetchOffers();
+      asyncRefresh();
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -90,7 +79,7 @@ class MyOffersState extends State<MyOffers> {
                 Navigator.of(context)
                     .push(MaterialPageRoute(
                         builder: (context) => const CreateRideOfferScreen()))
-                    .then((_) => _fetchOffers());
+                    .then((_) => triggerRefresh());
               },
               child: const Text('Create Ride Offer'),
             ),
