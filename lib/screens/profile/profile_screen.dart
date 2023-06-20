@@ -122,7 +122,7 @@ class ProfileScreen extends StatelessWidget {
                           content: Text('Account deleted successfully!'),
                         ),
                       );
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                             builder: (context) => LoginScreen(
@@ -214,7 +214,7 @@ class ProfileScreen extends StatelessWidget {
         ElevatedButton(
           onPressed: () => {
             userState.signOff(),
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (context) => LoginScreen(
