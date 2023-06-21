@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/login/login.dart';
 import 'package:corider/screens/profile/add_vehicle_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,32 +38,27 @@ class ProfileScreen extends StatelessWidget {
         );
         if (croppedImage != null) {
           try {
-            final storage = firebase_storage.FirebaseStorage.instance;
-            final storageRef =
-                storage.ref().child('profile_images/${currentUser!.email}.jpg');
-
-            // Upload the image file to Firebase Storage
-            await storageRef.putFile(File(croppedImage.path));
-
-            // Get the download URL for the uploaded image
-            final imageUrl = await storageRef.getDownloadURL();
-
-            // Update the user's profile image URL in Firestore or perform any other actions
-            debugPrint('Image uploaded successfully. URL: $imageUrl');
-            currentUser.setProfileImage(imageUrl);
-            userState.setUser(currentUser);
-            profileImageNotifier.value = imageUrl;
-            // Update the user's profile image URL in Firestore
-            final usersCollection =
-                FirebaseFirestore.instance.collection('users');
-            final userSnapshot =
-                await usersCollection.doc(currentUser.email).get();
-
-            if (userSnapshot.exists) {
-              await userSnapshot.reference.update({
-                'profileImage': imageUrl,
-              });
-            }
+            FirebaseFunctions.uploadProfileImageByUser(
+              currentUser!,
+              File(croppedImage.path),
+            ).then((err) => {
+                  if (err == null)
+                    {
+                      FirebaseFunctions.getProfileImageUrlByUser(currentUser)
+                          .then((imageUrl) => {
+                                if (imageUrl != null)
+                                  {
+                                    currentUser.saveProfileImage(
+                                        userState, imageUrl),
+                                    profileImageNotifier.value = imageUrl,
+                                  }
+                              })
+                    }
+                  else
+                    {
+                      debugPrint('Error uploading image: $err'),
+                    }
+                });
           } catch (e) {
             debugPrint('Error uploading image: $e');
           }
@@ -87,32 +84,7 @@ class ProfileScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () async {
                     try {
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(user.email)
-                          .delete();
-                      await user.delete();
-
-                      // Delete the user's profile image from Firebase Storage
-                      final storage = firebase_storage.FirebaseStorage.instance;
-                      final storageRef = storage
-                          .ref()
-                          .child('profile_images/${user.email}.jpg');
-                      await storageRef.delete();
-
-                      // Delete all ride offers created by the user
-                      final rideOffersCollection = FirebaseFirestore.instance
-                          .collection('comapnies')
-                          .doc(currentUser!.companyName)
-                          .collection('ride_offers');
-                      final rideOffersQuerySnapshot = await rideOffersCollection
-                          .where('driverId', isEqualTo: currentUser.email)
-                          .get();
-                      for (final rideOfferSnapshot
-                          in rideOffersQuerySnapshot.docs) {
-                        await rideOfferSnapshot.reference.delete();
-                      }
-
+                      FirebaseFunctions.deleteUserAccount(currentUser!);
                       // Account deleted successfully
                       debugPrint('Account deleted successfully!');
                       userState.signOff();

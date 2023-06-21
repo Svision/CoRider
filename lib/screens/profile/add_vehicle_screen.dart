@@ -153,7 +153,7 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
   @override
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
-    final currentUser = userState.currentUser;
+    final currentUser = userState.currentUser!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Vehicle Info'),
@@ -343,63 +343,70 @@ class _AddVehiclePageState extends State<AddVehiclePage> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     VehicleModel savedVehicle = VehicleModel(
                         year: yearSelected,
                         make: makeSelectedNotifier.value,
                         model: modelSelected,
                         color: colorSelected,
-                        licensePlate: licensePlate ?? 'Default',
+                        licensePlate: licensePlate,
                         availableSeats: availableSeatsSelected);
                     debugPrint(savedVehicle.toJson().toString());
-                    final err =
-                        await savedVehicle.saveToFirestore(currentUser!.email);
-                    if (err == null) {
-                      currentUser.setVehicle(savedVehicle);
-                      userState.setUser(currentUser);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Vehicle information saved!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      Navigator.of(context).pop(savedVehicle);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error: $err'),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    }
+                    currentUser
+                        .saveVehicle(userState, savedVehicle)
+                        .then((err) => {
+                              if (err == null)
+                                {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                          Text('Vehicle information saved!'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  ),
+                                  Navigator.of(context).pop(savedVehicle),
+                                }
+                              else
+                                {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $err'),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  ),
+                                }
+                            });
                   },
                   child: vehicle == null
-                      ? const Text('Save')
-                      : const Text('Update'),
+                      ? const Text('Add New Vehicle')
+                      : const Text('Update Vehicle'),
                 ),
                 const SizedBox(height: 32),
                 if (vehicle != null)
                   ElevatedButton(
-                    onPressed: () async {
-                      final err = await currentUser!.deleteVehicle();
-                      if (err == null) {
-                        currentUser.setVehicle(null);
-                        userState.setUser(currentUser);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Vehicle information deleted!'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                        Navigator.of(context).pop();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error: $err'),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
+                    onPressed: () {
+                      currentUser.deleteVehicle(userState).then((err) => {
+                            if (err == null)
+                              {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text('Vehicle information deleted!'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                ),
+                                Navigator.of(context).pop(),
+                              }
+                            else
+                              {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: $err'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                ),
+                              }
+                          });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor:

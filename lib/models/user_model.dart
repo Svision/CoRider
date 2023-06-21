@@ -1,5 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:corider/cloud_functions/firebase_function.dart';
+import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/vehicle_model.dart';
+import 'package:corider/providers/user_state.dart';
 
 class UserModel {
   final String email;
@@ -53,26 +55,64 @@ class UserModel {
         "requestedOfferIds": requestedOfferIds,
       };
 
-  setProfileImage(String? imageUrl) {
-    profileImage = imageUrl;
-  }
-
   String get fullName => '$firstName $lastName';
 
-  setVehicle(VehicleModel? vehicle) {
-    this.vehicle = vehicle;
-  }
-
-  Future<String?> deleteVehicle() async {
-    try {
-      vehicle = null;
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(email)
-          .update({'vehicle': FieldValue.delete()});
+  //#region User Intents
+  Future<String?> createRideOffer(
+      UserState userState, RideOfferModel offer) async {
+    final err = await FirebaseFunctions.saveRideOfferByUser(this, offer);
+    if (err == null) {
+      myOfferIds.add(offer.id);
+      userState.setUser(this);
       return null;
-    } catch (e) {
-      return e.toString();
+    } else {
+      return err;
     }
   }
+
+  Future<String?> saveProfileImage(UserState userState, String imageUrl) async {
+    final err = await FirebaseFunctions.saveProfileImageByUser(this, imageUrl);
+    if (err == null) {
+      profileImage = imageUrl;
+      userState.setUser(this);
+      return null;
+    } else {
+      return err;
+    }
+  }
+
+  Future<String?> saveVehicle(UserState userState, VehicleModel vehicle) async {
+    final err = await FirebaseFunctions.saveVehicleByUser(this, vehicle);
+    if (err == null) {
+      this.vehicle = vehicle;
+      userState.setUser(this);
+      return null;
+    } else {
+      return err;
+    }
+  }
+
+  Future<String?> deleteVehicle(UserState userState) async {
+    final err = await FirebaseFunctions.deleteVehicleByUser(this);
+    if (err == null) {
+      vehicle = null;
+      userState.setUser(this);
+      return null;
+    } else {
+      return err;
+    }
+  }
+
+  Future<String?> requestRide(UserState userState, String rideOfferId) async {
+    final err =
+        await FirebaseFunctions.requestRideByRideOfferId(this, rideOfferId);
+    if (err == null) {
+      requestedOfferIds.add(rideOfferId);
+      userState.setUser(this);
+      return null;
+    } else {
+      return err;
+    }
+  }
+  //#endregion
 }

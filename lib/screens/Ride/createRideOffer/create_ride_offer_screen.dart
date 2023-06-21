@@ -282,7 +282,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                           price: price,
                           additionalDetails: additionalDetails,
                         );
-                        await rideOffer.saveToFirestore(currentUser);
+                        await currentUser.createRideOffer(userState, rideOffer);
                         setState(() {
                           isSubmitting = false;
                         });

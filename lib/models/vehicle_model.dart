@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 class VehicleModel {
@@ -44,16 +43,5 @@ class VehicleModel {
       'licensePlate': licensePlate,
       'availableSeats': availableSeats,
     };
-  }
-
-  Future<String?> saveToFirestore(String email) async {
-    try {
-      await FirebaseFirestore.instance.collection('users').doc(email).update({
-        'vehicle': toJson(),
-      });
-      return null;
-    } on FirebaseException catch (e) {
-      return e.message;
-    }
   }
 }

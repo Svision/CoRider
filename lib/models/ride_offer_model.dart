@@ -10,6 +10,7 @@ class RideOfferModel {
   String vehicleId;
   TimeOfDay? proposedDepartureTime;
   TimeOfDay? proposedBackTime;
+  List<String> requestedUserIds;
   List<String> passengerIds;
   List<int> proposedWeekdays;
   String driverLocationName;
@@ -24,6 +25,7 @@ class RideOfferModel {
     required this.vehicleId,
     required this.proposedDepartureTime,
     required this.proposedBackTime,
+    this.requestedUserIds = const [],
     this.passengerIds = const [],
     required this.proposedWeekdays,
     required this.driverLocationName,
@@ -39,6 +41,7 @@ class RideOfferModel {
         'vehicleId': vehicleId,
         'proposedStartTime':
             '${proposedDepartureTime?.hour.toString()}:${proposedDepartureTime?.minute.toString()}',
+        'requestedUserIds': requestedUserIds,
         'passengerIds': passengerIds,
         'proposedBackTime':
             '${proposedBackTime?.hour.toString()} : ${proposedBackTime?.minute.toString()}',
@@ -67,6 +70,9 @@ class RideOfferModel {
               minute: int.parse(json['proposedBackTime'].split(':')[1]),
             )
           : null,
+      requestedUserIds: json['requestedUserIds'] != null
+          ? List<String>.from(json['requestedUserIds'])
+          : [],
       passengerIds: json['passengerIds'] != null
           ? List<String>.from(json['passengerIds'])
           : [],
@@ -79,25 +85,5 @@ class RideOfferModel {
       price: json['price'],
       additionalDetails: json['additionalDetails'],
     );
-  }
-
-  Future<String?> saveToFirestore(UserModel user) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(user.companyName)
-          .collection('rideOffers')
-          .doc(id)
-          .set(toJson());
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.email)
-          .update({
-        'rideOffers': FieldValue.arrayUnion([id]),
-      });
-      return null;
-    } on FirebaseException catch (e) {
-      return e.message;
-    }
   }
 }
