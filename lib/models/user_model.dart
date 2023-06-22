@@ -114,5 +114,18 @@ class UserModel {
       return err;
     }
   }
+
+  Future<String?> withdrawRequestRide(
+      UserState userState, String rideOfferId) async {
+    final err = await FirebaseFunctions.removeRideRequestByRideOfferId(
+        this, rideOfferId);
+    if (err == null) {
+      requestedOfferIds.remove(rideOfferId);
+      userState.setUser(this);
+      return null;
+    } else {
+      return err;
+    }
+  }
   //#endregion
 }

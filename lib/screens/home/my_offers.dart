@@ -1,7 +1,7 @@
-import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/Ride/createRideOffer/create_ride_offer_screen.dart';
 import 'package:corider/screens/Ride/exploreRides/ride_offer_detail_screen.dart';
+import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 
@@ -14,8 +14,7 @@ class MyOffers extends StatefulWidget {
 }
 
 class MyOffersState extends State<MyOffers> {
-  GlobalKey<RefreshIndicatorState> refreshMyOffersIndicatorKey =
-      GlobalKey<RefreshIndicatorState>();
+  GlobalKey<RefreshIndicatorState> refreshMyOffersIndicatorKey = GlobalKey<RefreshIndicatorState>();
   List<RideOfferModel> myOffers = [];
   bool isMyOffersFetched = false;
 
@@ -23,15 +22,13 @@ class MyOffersState extends State<MyOffers> {
     setState(() {
       isMyOffersFetched = false;
     });
-    asyncRefresh();
+    fetchMyOffers();
   }
 
-  Future<void> asyncRefresh() async {
-    final offers = await FirebaseFunctions.fetchUserOffersbyUser(
-        widget.userState.currentUser!);
+  Future<void> fetchMyOffers() async {
+    final allOffers = await widget.userState.fetchAllOffers();
     setState(() {
-      widget.userState.setOffers(offers);
-      myOffers = offers;
+      myOffers = allOffers.where((offer) => offer.driverId == widget.userState.currentUser!.email).toList();
       isMyOffersFetched = true;
     });
   }
@@ -40,13 +37,12 @@ class MyOffersState extends State<MyOffers> {
   void initState() {
     super.initState();
     if (widget.userState.currentOffers == null) {
-      asyncRefresh();
+      fetchMyOffers();
     } else if (widget.userState.currentOffers!.isEmpty) {
       isMyOffersFetched = true;
     } else {
       myOffers = widget.userState.currentOffers!
-          .where(
-              (offer) => offer.driverId == widget.userState.currentUser!.email)
+          .where((offer) => offer.driverId == widget.userState.currentUser!.email)
           .toList();
       isMyOffersFetched = true;
     }
@@ -55,7 +51,7 @@ class MyOffersState extends State<MyOffers> {
   @override
   Widget build(BuildContext context) {
     if (!isMyOffersFetched) {
-      asyncRefresh();
+      fetchMyOffers();
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -79,8 +75,7 @@ class MyOffersState extends State<MyOffers> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context)
-                    .push(MaterialPageRoute(
-                        builder: (context) => const CreateRideOfferScreen()))
+                    .push(MaterialPageRoute(builder: (context) => const CreateRideOfferScreen()))
                     .then((_) => triggerRefresh());
               },
               child: const Text('Create Ride Offer'),
@@ -92,14 +87,14 @@ class MyOffersState extends State<MyOffers> {
 
     return RefreshIndicator(
         key: refreshMyOffersIndicatorKey,
-        onRefresh: asyncRefresh,
+        onRefresh: fetchMyOffers,
         child: ListView.builder(
           itemCount: myOffers.length,
           itemBuilder: (context, index) {
             final rideOffer = myOffers[index];
 
             return ListTile(
-              title: Text(rideOffer.driverLocationName),
+              title: Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
               subtitle: Text(
                   '${rideOffer.proposedDepartureTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
               // Customize the tile as needed with other ride offer information

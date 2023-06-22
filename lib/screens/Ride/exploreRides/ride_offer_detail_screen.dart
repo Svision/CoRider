@@ -9,14 +9,12 @@ class RideOfferDetailScreen extends StatefulWidget {
   final RideOfferModel rideOffer;
   final GlobalKey? refreshOffersKey;
 
-  const RideOfferDetailScreen(
-      {Key? key, required this.rideOffer, this.refreshOffersKey})
-      : super(key: key);
+  const RideOfferDetailScreen({Key? key, required this.rideOffer, this.refreshOffersKey}) : super(key: key);
   @override
-  _RideOfferDetailScreenState createState() => _RideOfferDetailScreenState();
+  RideOfferDetailScreenState createState() => RideOfferDetailScreenState();
 }
 
-class _RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
+class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   bool isRequesting = false;
 
   @override
@@ -92,47 +90,91 @@ class _RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             Center(
               child: !isRequesting
                   ? currentUser.email != widget.rideOffer.driverId
-                      ? currentUser.requestedOfferIds
-                              .contains(widget.rideOffer.id)
-                          ? const Text('Requested')
+                      ? currentUser.requestedOfferIds.contains(widget.rideOffer.id)
+                          ? Column(
+                              children: [
+                                const Text(
+                                  'Ride requested!',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                                ),
+                                const SizedBox(height: 8.0),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isRequesting = true;
+                                      });
+                                      currentUser.withdrawRequestRide(userState, widget.rideOffer.id).then((err) => {
+                                            setState(() {
+                                              isRequesting = false;
+                                            }),
+                                            if (err == null)
+                                              {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text('Ride request withdrawn!'),
+                                                    duration: Duration(seconds: 1),
+                                                  ),
+                                                ),
+                                                Navigator.of(context).pop(),
+                                              }
+                                            else
+                                              {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text("Ride request withdraw failed! $err"),
+                                                    duration: const Duration(seconds: 2),
+                                                  ),
+                                                )
+                                              },
+                                          });
+                                      if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
+                                        GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
+                                            widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
+                                        refreshOffersIndicatorKey.currentState?.show();
+                                      } else {
+                                        debugPrint(
+                                            'widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
+                                      }
+                                    },
+                                    child: const Text('Withdraw Request')),
+                              ],
+                            )
                           : ElevatedButton(
                               onPressed: () {
                                 setState(() {
                                   isRequesting = true;
                                 });
-                                // mock a delay
-                                currentUser
-                                    .requestRide(userState, widget.rideOffer.id)
-                                    .then((err) => {
-                                          setState(() {
-                                            isRequesting = false;
-                                          }),
-                                          if (err == null)
-                                            {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                      'Ride request sent!'),
-                                                  duration:
-                                                      Duration(seconds: 1),
-                                                ),
-                                              ),
-                                              Navigator.of(context).pop()
-                                            }
-                                          else
-                                            {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                      "Ride request failed! $err"),
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                ),
-                                              )
-                                            }
-                                        });
+                                currentUser.requestRide(userState, widget.rideOffer.id).then((err) => {
+                                      setState(() {
+                                        isRequesting = false;
+                                      }),
+                                      if (err == null)
+                                        {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Ride request sent!'),
+                                              duration: Duration(seconds: 1),
+                                            ),
+                                          ),
+                                          Navigator.of(context).pop(),
+                                        }
+                                      else
+                                        {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("Ride request failed! $err"),
+                                              duration: const Duration(seconds: 2),
+                                            ),
+                                          )
+                                        }
+                                    });
+                                if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
+                                  GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
+                                      widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
+                                  refreshOffersIndicatorKey.currentState?.show();
+                                } else {
+                                  debugPrint('widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
+                                }
                               },
                               child: const Text('Request Ride'),
                             )
@@ -141,14 +183,12 @@ class _RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                             setState(() {
                               isRequesting = true;
                             });
-                            FirebaseFunctions.deleteUserRideOfferByOfferId(
-                                    currentUser, widget.rideOffer.id)
+                            FirebaseFunctions.deleteUserRideOfferByOfferId(currentUser, widget.rideOffer.id)
                                 .then((value) => {
                                       setState(() {
                                         isRequesting = false;
                                       }),
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
                                           content: Text('Ride offer deleted!'),
                                           duration: Duration(seconds: 1),
@@ -156,16 +196,12 @@ class _RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                       )
                                     });
                             Navigator.of(context).pop();
-                            if (widget.refreshOffersKey
-                                is GlobalKey<RefreshIndicatorState>) {
-                              GlobalKey<RefreshIndicatorState>
-                                  refreshOffersIndicatorKey =
-                                  widget.refreshOffersKey
-                                      as GlobalKey<RefreshIndicatorState>;
+                            if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
+                              GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
+                                  widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
                               refreshOffersIndicatorKey.currentState?.show();
                             } else {
-                              debugPrint(
-                                  'widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
+                              debugPrint('widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
                             }
                           },
                           style: ElevatedButton.styleFrom(

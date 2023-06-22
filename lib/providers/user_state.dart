@@ -18,6 +18,17 @@ class UserState extends ChangeNotifier {
     _currentOffers = offers;
   }
 
+  Future<List<RideOfferModel>> fetchAllOffers() async {
+    List<RideOfferModel> allOffers = [];
+    try {
+      allOffers = await FirebaseFunctions.fetchAllOffersbyUser(currentUser!);
+    } catch (e) {
+      debugPrint('fetchAllOffers: $e');
+    }
+    setOffers(allOffers);
+    return allOffers;
+  }
+
   Future<void> setUser(UserModel user) async {
     _currentUser = user;
     SharedPreferences sharedUser = await SharedPreferences.getInstance();
@@ -33,8 +44,7 @@ class UserState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setOfferDriverImageUrlWithEmail(
-      String email, String driverImageUrl) async {
+  Future<void> setOfferDriverImageUrlWithEmail(String email, String driverImageUrl) async {
     SharedPreferences sharedOffers = await SharedPreferences.getInstance();
     sharedOffers.setString('driverImageUrl-$email', driverImageUrl);
     notifyListeners();
@@ -74,8 +84,7 @@ class UserState extends ChangeNotifier {
           // compare currentUser with user
           if (jsonEncode(currentUser!.toJson()) != jsonEncode(user!.toJson())) {
             // print different
-            debugPrint(
-                'difference: ${jsonEncode(currentUser!.toJson())} != ${jsonEncode(user.toJson())}');
+            debugPrint('difference: ${jsonEncode(currentUser!.toJson())} != ${jsonEncode(user.toJson())}');
             // if different, update currentUser
             setUser(user);
           }
@@ -83,11 +92,10 @@ class UserState extends ChangeNotifier {
         });
         if (currentOffersString != null) {
           try {
-            setOffers((jsonDecode(currentOffersString) as List<dynamic>)
-                .map((e) => RideOfferModel.fromJson(e))
-                .toList());
+            setOffers(
+                (jsonDecode(currentOffersString) as List<dynamic>).map((e) => RideOfferModel.fromJson(e)).toList());
             if (currentOffers!.isEmpty) {
-              FirebaseFunctions.fetchOffersbyUser(currentUser!).then((offers) {
+              FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
                 setOffers(offers);
               });
             }
@@ -97,7 +105,7 @@ class UserState extends ChangeNotifier {
           }
         } else {
           // fetch offers from firebase
-          FirebaseFunctions.fetchOffersbyUser(currentUser!).then((offers) {
+          FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
             setOffers(offers);
           });
         }

@@ -26,8 +26,12 @@ class Utils {
       case 'Pink':
         return Colors.pink;
       default:
-        return Colors
-            .transparent; // Return a default color if the value doesn't match any case
+        return Colors.transparent; // Return a default color if the value doesn't match any case
     }
+  }
+
+  static String getShortLocationName(String locationName) {
+    final splitName = locationName.split(',');
+    return splitName[0];
   }
 }

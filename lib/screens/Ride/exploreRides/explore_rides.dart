@@ -10,8 +10,7 @@ import 'package:provider/provider.dart';
 
 class ExploreRidesScreen extends StatefulWidget {
   final UserState userState;
-  const ExploreRidesScreen({Key? key, required this.userState})
-      : super(key: key);
+  const ExploreRidesScreen({Key? key, required this.userState}) : super(key: key);
 
   @override
   _ExploreRidesScreenState createState() => _ExploreRidesScreenState();
@@ -23,14 +22,12 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
 
   final LatLng _center = const LatLng(43.7720940, -79.3453741);
   final Set<Marker> _markers = {};
-  GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
-      GlobalKey<RefreshIndicatorState>();
+  GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
     super.initState();
-    if (widget.userState.currentOffers == null ||
-        widget.userState.currentOffers!.isEmpty) {
+    if (widget.userState.currentOffers == null || widget.userState.currentOffers!.isEmpty) {
       _handleRefresh(widget.userState.currentUser!);
     } else {
       offers = [];
@@ -53,7 +50,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
 
   Future<void> _handleRefresh(UserModel user) async {
     try {
-      offers = await FirebaseFunctions.fetchOffersbyUser(user);
+      offers = await FirebaseFunctions.fetchAllOffersbyUser(user);
       setState(() {
         offers = offers;
       });
@@ -173,8 +170,7 @@ class _RideOfferListState extends State<RideOfferList> {
                 return RideOfferCard(
                     userState: widget.userState,
                     rideOffer: widget.offers[index],
-                    refreshOffersIndicatorKey:
-                        widget.refreshOffersIndicatorKey);
+                    refreshOffersIndicatorKey: widget.refreshOffersIndicatorKey);
               } else {
                 return Container(
                   padding: const EdgeInsets.all(16.0),

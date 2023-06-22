@@ -1,4 +1,8 @@
+import 'package:corider/cloud_functions/firebase_function.dart';
+import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/screens/Ride/exploreRides/ride_offer_detail_screen.dart';
+import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 
@@ -6,24 +10,62 @@ class UpcomingRides extends StatefulWidget {
   final UserState userState;
   final Function(int) changePageIndex;
 
-  const UpcomingRides(
-      {Key? key, required this.userState, required this.changePageIndex})
-      : super(key: key);
+  const UpcomingRides({Key? key, required this.userState, required this.changePageIndex}) : super(key: key);
 
   @override
-  _UpcomingRidesState createState() => _UpcomingRidesState();
+  UpcomingRidesState createState() => UpcomingRidesState();
 }
 
-class _UpcomingRidesState extends State<UpcomingRides> {
-  List<RideOfferModel> rideOffers = [];
+class UpcomingRidesState extends State<UpcomingRides> {
+  GlobalKey<RefreshIndicatorState> refreshMyRequestedOfferIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  Map<RideOfferModel, RequestedOfferStatus> myRequestedOffers = {};
+  bool isMyRequestedOffersFetched = false;
+
+  void triggerRefresh() {
+    setState(() {
+      isMyRequestedOffersFetched = false;
+    });
+    fetchMyRequestedOffers();
+  }
+
+  Future<void> fetchMyRequestedOffers() async {
+    final allOffers = await widget.userState.fetchAllOffers();
+    final myRequestedOffersStatusMap =
+        await FirebaseFunctions.fetchReqeustedOffersStatusByUser(widget.userState.currentUser!);
+    setState(() {
+      myRequestedOffers = myRequestedOffersStatusMap
+          .map((key, value) => MapEntry(allOffers.firstWhere((offer) => offer.id == key), value));
+      isMyRequestedOffersFetched = true;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userState.currentUser!.requestedOfferIds.isEmpty) {
+      isMyRequestedOffersFetched = true;
+    } else {
+      fetchMyRequestedOffers();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (rideOffers.isEmpty) {
+    if (!isMyRequestedOffersFetched) {
+      fetchMyRequestedOffers();
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (myRequestedOffers.isEmpty) {
       // Show a message when there are no upcoming ride offers
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            IconButton(
+              onPressed: triggerRefresh,
+              icon: const Icon(Icons.refresh, color: Colors.blue),
+              iconSize: 32,
+            ),
             const Text(
               'No upcoming rides',
               style: TextStyle(
@@ -41,23 +83,38 @@ class _UpcomingRidesState extends State<UpcomingRides> {
         ),
       );
     }
-    return ListView.builder(
-      itemCount: rideOffers.length,
-      itemBuilder: (context, index) {
-        final rideOffer = rideOffers[index];
+    return RefreshIndicator(
+      key: refreshMyRequestedOfferIndicatorKey,
+      onRefresh: fetchMyRequestedOffers,
+      child: ListView.builder(
+        itemCount: myRequestedOffers.length,
+        itemBuilder: (context, index) {
+          final rideOffer = myRequestedOffers.keys.toList()[index];
+          final requestedOfferStatus = myRequestedOffers[rideOffer];
 
-        return ListTile(
-          title: Text(rideOffer.driverLocationName),
-          subtitle: Text(
-              rideOffer.proposedDepartureTime?.format(context) ?? 'Unknown'),
-          // Customize the tile as needed with other ride offer information
-          // For example, add buttons or icons to perform actions on the ride offer
-          onTap: () {
-            // Handle the tap on the ride offer tile
-            // You can navigate to a ride offer details screen or perform any other action
-          },
-        );
-      },
+          return ListTile(
+            title: Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
+            subtitle: Text(
+                '${rideOffer.proposedDepartureTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
+            trailing: requestedOfferStatus == RequestedOfferStatus.ACCEPTED
+                ? const Icon(Icons.check, color: Colors.green)
+                : requestedOfferStatus == RequestedOfferStatus.REJECTED
+                    ? const Icon(Icons.close, color: Colors.red)
+                    : requestedOfferStatus == RequestedOfferStatus.PENDING
+                        ? const Icon(Icons.pending, color: Colors.grey)
+                        : const Icon(Icons.error, color: Colors.orange),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => RideOfferDetailScreen(
+                          rideOffer: rideOffer,
+                          refreshOffersKey: refreshMyRequestedOfferIndicatorKey,
+                        )),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
