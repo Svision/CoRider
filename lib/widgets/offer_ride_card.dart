@@ -12,10 +12,7 @@ class RideOfferCard extends StatefulWidget {
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
   const RideOfferCard(
-      {Key? key,
-      required this.userState,
-      required this.rideOffer,
-      required this.refreshOffersIndicatorKey})
+      {Key? key, required this.userState, required this.rideOffer, required this.refreshOffersIndicatorKey})
       : super(key: key);
 
   @override
@@ -26,29 +23,31 @@ class _RideOfferCardState extends State<RideOfferCard> {
   String? driverProfileImageUrl;
 
   void getUserProfileImageUrl() {
-    widget.userState
-        .getDriverImageUrlByEmail(widget.rideOffer.driverId)
-        .then((profileImageUrl) => {
-              if (profileImageUrl != null)
-                {
-                  setState(() {
-                    driverProfileImageUrl = profileImageUrl;
-                  })
-                },
-              FirebaseFunctions.fetchUserProfileImageByEmail(
-                      widget.rideOffer.driverId)
-                  .then((profileImageUrl) {
-                setState(() {
-                  if (profileImageUrl != driverProfileImageUrl) {
-                    driverProfileImageUrl = profileImageUrl;
-                    if (driverProfileImageUrl != null) {
-                      widget.userState.setOfferDriverImageUrlWithEmail(
-                          widget.rideOffer.driverId, driverProfileImageUrl!);
-                    }
-                  }
-                });
+    if (widget.rideOffer.driverId == widget.userState.currentUser!.email) {
+      setState(() {
+        driverProfileImageUrl = widget.userState.currentUser!.profileImage;
+      });
+      return;
+    }
+
+    widget.userState.getDriverImageUrlByEmail(widget.rideOffer.driverId).then((profileImageUrl) => {
+          if (profileImageUrl != null)
+            {
+              setState(() {
+                driverProfileImageUrl = profileImageUrl;
               })
+            },
+          FirebaseFunctions.fetchUserProfileImageByEmail(widget.rideOffer.driverId).then((profileImageUrl) {
+            setState(() {
+              if (profileImageUrl != driverProfileImageUrl) {
+                driverProfileImageUrl = profileImageUrl;
+                if (driverProfileImageUrl != null) {
+                  widget.userState.setOfferDriverImageUrlWithEmail(widget.rideOffer.driverId, driverProfileImageUrl!);
+                }
+              }
             });
+          })
+        });
   }
 
   @override
@@ -71,16 +70,13 @@ class _RideOfferCardState extends State<RideOfferCard> {
                 child: CachedNetworkImage(
                   imageUrl: driverProfileImageUrl!,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      const CircularProgressIndicator(),
+                  placeholder: (context, url) => const CircularProgressIndicator(),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
       ),
       title: Text(
-        widget.rideOffer.driverId == widget.userState.currentUser!.email
-            ? 'Me'
-            : widget.rideOffer.driverId,
+        widget.rideOffer.driverId == widget.userState.currentUser!.email ? 'Me' : widget.rideOffer.driverId,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(
