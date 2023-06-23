@@ -1,7 +1,7 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/Ride/exploreRides/ride_offer_detail_screen.dart';
+import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';

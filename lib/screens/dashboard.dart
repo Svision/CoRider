@@ -1,5 +1,5 @@
 import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/Ride/exploreRides/explore_rides.dart';
+import 'package:corider/screens/ride/exploreRides/explore_rides.dart';
 import 'package:corider/screens/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
