@@ -34,6 +34,8 @@ dependencies:
   cached_network_image: ^3.2.3
   flutter_chat_ui: ^1.6.8
   flutter_chat_types: ^3.6.1
+  file_picker: ^5.3.2
+  open_filex: ^4.3.2
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +47,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/logo.png
+    - assets/messages.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
