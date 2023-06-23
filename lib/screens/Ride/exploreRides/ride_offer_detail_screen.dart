@@ -82,7 +82,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'PassengerIds: \n${widget.rideOffer.passengerIds.join(', ')}',
+              'PassengerIds: \n${widget.rideOffer.requestedUserIds.toString()}',
               style: const TextStyle(fontSize: 16.0),
             ),
             // Add more details as needed

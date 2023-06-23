@@ -1,3 +1,4 @@
+import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -8,8 +9,7 @@ class RideOfferModel {
   String vehicleId;
   TimeOfDay? proposedDepartureTime;
   TimeOfDay? proposedBackTime;
-  List<String> requestedUserIds;
-  List<String> passengerIds;
+  Map<String, RequestedOfferStatus> requestedUserIds;
   List<int> proposedWeekdays;
   String driverLocationName;
   LatLng driverLocation;
@@ -23,8 +23,7 @@ class RideOfferModel {
     required this.vehicleId,
     required this.proposedDepartureTime,
     required this.proposedBackTime,
-    this.requestedUserIds = const [],
-    this.passengerIds = const [],
+    this.requestedUserIds = const {},
     required this.proposedWeekdays,
     required this.driverLocationName,
     required this.driverLocation,
@@ -37,21 +36,36 @@ class RideOfferModel {
         'id': id,
         'driverId': driverId,
         'vehicleId': vehicleId,
-        'proposedStartTime':
-            '${proposedDepartureTime?.hour.toString()}:${proposedDepartureTime?.minute.toString()}',
-        'requestedUserIds': requestedUserIds,
-        'passengerIds': passengerIds,
-        'proposedBackTime':
-            '${proposedBackTime?.hour.toString()} : ${proposedBackTime?.minute.toString()}',
+        'proposedStartTime': '${proposedDepartureTime?.hour.toString()}:${proposedDepartureTime?.minute.toString()}',
+        'requestedUserIds': requestedUserIds.map((key, value) => MapEntry(key, value.index)),
+        'proposedBackTime': '${proposedBackTime?.hour.toString()} : ${proposedBackTime?.minute.toString()}',
         'proposedWeekdays': proposedWeekdays,
         'driverLocationName': driverLocationName,
-        'driverLocation': driverLocation.toJson(),
+        'driverLocation': {
+          'latitude': driverLocation.latitude,
+          'longitude': driverLocation.longitude,
+        },
         'price': price,
         'additionalDetails': additionalDetails,
+        'createdAt': createdAt.toIso8601String(),
       };
 
+  factory RideOfferModel.generateUnknown() {
+    return RideOfferModel(
+      driverId: '',
+      vehicleId: '',
+      proposedDepartureTime: null,
+      proposedBackTime: null,
+      requestedUserIds: {},
+      proposedWeekdays: [],
+      driverLocationName: '',
+      driverLocation: const LatLng(0, 0),
+      price: 0,
+      additionalDetails: '',
+    );
+  }
+
   factory RideOfferModel.fromJson(Map<String, dynamic> json) {
-    final driverLocationList = List<double>.from(json['driverLocation']);
     return RideOfferModel(
       id: json['id'],
       driverId: json['driverId'],
@@ -69,16 +83,14 @@ class RideOfferModel {
             )
           : null,
       requestedUserIds: json['requestedUserIds'] != null
-          ? List<String>.from(json['requestedUserIds'])
-          : [],
-      passengerIds: json['passengerIds'] != null
-          ? List<String>.from(json['passengerIds'])
-          : [],
+          ? (json['requestedUserIds'] as Map<String, dynamic>)
+              .map((key, value) => MapEntry(key, RequestedOfferStatus.values[value]))
+          : {},
       proposedWeekdays: List<int>.from(json['proposedWeekdays']),
       driverLocationName: json['driverLocationName'],
       driverLocation: LatLng(
-        driverLocationList[0],
-        driverLocationList[1],
+        json['driverLocation']['latitude'],
+        json['driverLocation']['longitude'],
       ),
       price: json['price'],
       additionalDetails: json['additionalDetails'],

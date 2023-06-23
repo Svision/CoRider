@@ -33,15 +33,9 @@ class UserModel {
         lastName: json['lastName'],
         profileImage: json['profileImage'],
         createdAt: DateTime.parse(json['createdAt']),
-        vehicle: json['vehicle'] != null
-            ? VehicleModel.fromJson(json['vehicle'])
-            : null,
-        myOfferIds: json['myOfferIds'] != null
-            ? List<String>.from(json['myOfferIds'])
-            : [],
-        requestedOfferIds: json['requestedOfferIds'] != null
-            ? List<String>.from(json['requestedOfferIds'])
-            : []);
+        vehicle: json['vehicle'] != null ? VehicleModel.fromJson(json['vehicle']) : null,
+        myOfferIds: json['myOfferIds'] != null ? List<String>.from(json['myOfferIds']) : [],
+        requestedOfferIds: json['requestedOfferIds'] != null ? List<String>.from(json['requestedOfferIds']) : []);
   }
 
   Map<String, dynamic> toJson() => {
@@ -58,8 +52,7 @@ class UserModel {
   String get fullName => '$firstName $lastName';
 
   //#region User Intents
-  Future<String?> createRideOffer(
-      UserState userState, RideOfferModel offer) async {
+  Future<String?> createRideOffer(UserState userState, RideOfferModel offer) async {
     final err = await FirebaseFunctions.saveRideOfferByUser(this, offer);
     if (err == null) {
       myOfferIds.add(offer.id);
@@ -104,8 +97,7 @@ class UserModel {
   }
 
   Future<String?> requestRide(UserState userState, String rideOfferId) async {
-    final err =
-        await FirebaseFunctions.requestRideByRideOfferId(this, rideOfferId);
+    final err = await FirebaseFunctions.requestRideByRideOfferId(this, rideOfferId);
     if (err == null) {
       requestedOfferIds.add(rideOfferId);
       userState.setUser(this);
@@ -115,10 +107,8 @@ class UserModel {
     }
   }
 
-  Future<String?> withdrawRequestRide(
-      UserState userState, String rideOfferId) async {
-    final err = await FirebaseFunctions.removeRideRequestByRideOfferId(
-        this, rideOfferId);
+  Future<String?> withdrawRequestRide(UserState userState, String rideOfferId) async {
+    final err = await FirebaseFunctions.removeRideRequestByRideOfferId(this, rideOfferId);
     if (err == null) {
       requestedOfferIds.remove(rideOfferId);
       userState.setUser(this);

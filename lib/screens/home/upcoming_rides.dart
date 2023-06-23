@@ -29,12 +29,16 @@ class UpcomingRidesState extends State<UpcomingRides> {
   }
 
   Future<void> fetchMyRequestedOffers() async {
-    final allOffers = await widget.userState.fetchAllOffers();
     final myRequestedOffersStatusMap =
         await FirebaseFunctions.fetchReqeustedOffersStatusByUser(widget.userState.currentUser!);
+    debugPrint('myRequestedOffersStatusMap: $myRequestedOffersStatusMap');
     setState(() {
-      myRequestedOffers = myRequestedOffersStatusMap
-          .map((key, value) => MapEntry(allOffers.firstWhere((offer) => offer.id == key), value));
+      myRequestedOffers = myRequestedOffersStatusMap.map((key, value) => MapEntry(
+          widget.userState.currentOffers!.firstWhere(
+            (offer) => offer.id == key,
+            orElse: () => RideOfferModel.generateUnknown(),
+          ),
+          value));
       isMyRequestedOffersFetched = true;
     });
   }
@@ -91,6 +95,17 @@ class UpcomingRidesState extends State<UpcomingRides> {
         itemBuilder: (context, index) {
           final rideOffer = myRequestedOffers.keys.toList()[index];
           final requestedOfferStatus = myRequestedOffers[rideOffer];
+
+          if (requestedOfferStatus == RequestedOfferStatus.INVALID) {
+            return ListTile(
+              title: const Text('Offer not available'),
+              subtitle: const Text('This offer is deleted by the user.'),
+              trailing: const Icon(Icons.error, color: Colors.orange),
+              onTap: () {
+                widget.userState.currentUser!.withdrawRequestRide(widget.userState, rideOffer.id);
+              },
+            );
+          }
 
           return ListTile(
             title: Text(Utils.getShortLocationName(rideOffer.driverLocationName)),

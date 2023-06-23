@@ -15,8 +15,8 @@ class FirebaseFunctions {
   static Future<Map<String, RequestedOfferStatus>> fetchReqeustedOffersStatusByUser(UserModel user) async {
     try {
       final offersCollection =
-          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection("requestedOffers");
-      final offersSnapshot = await offersCollection.where("offerId", whereIn: user.requestedOfferIds).get();
+          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection("rideOffers");
+      final offersSnapshot = await offersCollection.where('id', whereIn: user.requestedOfferIds).get();
       if (offersSnapshot.docs.isNotEmpty) {
         List<RideOfferModel> offers = offersSnapshot.docs
             .map(
@@ -27,10 +27,10 @@ class FirebaseFunctions {
         for (final requestedOfferId in user.requestedOfferIds) {
           try {
             final offer = offers.firstWhere((o) => o.id == requestedOfferId);
-            if (offer.passengerIds.contains(user.email)) {
-              offersStatusMap[requestedOfferId] = RequestedOfferStatus.ACCEPTED;
+            if (offer.requestedUserIds.containsKey(user.email)) {
+              offersStatusMap[requestedOfferId] = offer.requestedUserIds[user.email]!;
             } else {
-              offersStatusMap[requestedOfferId] = RequestedOfferStatus.PENDING;
+              offersStatusMap[requestedOfferId] = RequestedOfferStatus.INVALID;
             }
           } catch (e) {
             offersStatusMap[requestedOfferId] = RequestedOfferStatus.INVALID;
@@ -145,9 +145,9 @@ class FirebaseFunctions {
           .doc(user.companyName)
           .collection('rideOffers')
           .doc(rideOfferId)
-          .update({
-        'requestedUserIds': FieldValue.arrayUnion([user.email]),
-      });
+          .set({
+        'requestedUserIds': {user.email: RequestedOfferStatus.PENDING.index},
+      }, SetOptions(merge: true));
       await FirebaseFirestore.instance.collection('users').doc(user.email).update({
         'requestedOfferIds': FieldValue.arrayUnion([rideOfferId]),
       });
@@ -169,9 +169,9 @@ class FirebaseFunctions {
           .doc(user.companyName)
           .collection('rideOffers')
           .doc(rideOfferId)
-          .update({
-        'requestedUserIds': FieldValue.arrayRemove([user.email]),
-      });
+          .set({
+        'requestedUserIds': {user.email: FieldValue.delete()},
+      }, SetOptions(merge: true));
       return null;
     } catch (e) {
       return e.toString();
