@@ -42,6 +42,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _user = widget.userState.currentUser!.toChatUser();
     _messages = widget.room.lastMessages ?? [];
     if (_messages.isEmpty) {
       _loadMockMessages();
@@ -223,7 +224,7 @@ class _ChatScreenState extends State<ChatScreen> {
         onSendPressed: _handleSendPressed,
         showUserAvatars: true,
         showUserNames: true,
-        user: types.User(id: widget.userState.currentUser!.email),
+        user: _user,
       ),
     );
   }

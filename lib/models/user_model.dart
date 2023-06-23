@@ -2,6 +2,7 @@ import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 
 class UserModel {
   final String email;
@@ -50,6 +51,13 @@ class UserModel {
       };
 
   String get fullName => '$firstName $lastName';
+
+  User toChatUser() => User(
+        id: email,
+        firstName: firstName,
+        lastName: lastName,
+        imageUrl: profileImage,
+      );
 
   //#region User Intents
   Future<String?> createRideOffer(UserState userState, RideOfferModel offer) async {
