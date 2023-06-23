@@ -1,4 +1,5 @@
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/screens/chat/chat_list.dart';
 import 'package:corider/screens/home/upcoming_rides.dart';
 import 'package:corider/screens/home/my_offers.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +7,7 @@ import 'package:flutter/material.dart';
 class HomeScreen extends StatefulWidget {
   final Function(int) changePageIndex;
   final UserState userState;
-  const HomeScreen(
-      {Key? key, required this.userState, required this.changePageIndex})
-      : super(key: key);
+  const HomeScreen({Key? key, required this.userState, required this.changePageIndex}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -32,7 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.chat),
             onPressed: () {
-              // Perform action when chat button is pressed
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return ChatListScreen(userState: widget.userState);
+              }));
             },
           ),
         ],
@@ -51,9 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: UpcomingRides(
-                userState: widget.userState,
-                changePageIndex: widget.changePageIndex),
+            child: UpcomingRides(userState: widget.userState, changePageIndex: widget.changePageIndex),
           ),
           const Padding(
             padding: EdgeInsets.all(16.0),

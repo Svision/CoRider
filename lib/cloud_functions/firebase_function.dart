@@ -10,8 +10,24 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class FirebaseFunctions {
+  static Future<List<types.Room>> fetchChatRooms(UserModel user) async {
+    List<types.Room> chatRooms = [];
+    try {
+      final chatRoomsCollection =
+          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection("chatRooms");
+      final chatRoomsSnapshot = await chatRoomsCollection.where('userIds', arrayContains: user.email).get();
+      if (chatRoomsSnapshot.docs.isNotEmpty) {
+        chatRooms = chatRoomsSnapshot.docs.map((room) => types.Room.fromJson(room.data())).toList();
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return chatRooms;
+  }
+
   static Future<Map<String, RequestedOfferStatus>> fetchReqeustedOffersStatusByUser(UserModel user) async {
     try {
       final offersCollection =

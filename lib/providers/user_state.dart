@@ -5,6 +5,7 @@ import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class UserState extends ChangeNotifier {
   UserModel? _currentUser;
@@ -60,6 +61,16 @@ class UserState extends ChangeNotifier {
       debugPrint('OfferDriverImageUrl not set for: $email');
     }
     return driverImageUrl;
+  }
+
+  Future<List<types.Room>> fetchChatRooms() async {
+    List<types.Room> chatRooms = [];
+    try {
+      chatRooms = await FirebaseFunctions.fetchChatRooms(currentUser!);
+    } catch (e) {
+      debugPrint('fetchChatRooms: $e');
+    }
+    return chatRooms;
   }
 
   Future<void> signOff() async {
