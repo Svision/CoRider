@@ -17,8 +17,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     final currentUser = userState.currentUser;
-    ValueNotifier<String?> profileImageNotifier =
-        ValueNotifier<String?>(currentUser?.profileImage);
+    ValueNotifier<String?> profileImageNotifier = ValueNotifier<String?>(currentUser?.profileImage);
 
     void handleUploadPhoto() async {
       final imagePicker = ImagePicker();
@@ -41,15 +40,13 @@ class ProfileScreen extends StatelessWidget {
             ).then((err) => {
                   if (err == null)
                     {
-                      FirebaseFunctions.getProfileImageUrlByUser(currentUser)
-                          .then((imageUrl) => {
-                                if (imageUrl != null)
-                                  {
-                                    currentUser.saveProfileImage(
-                                        userState, imageUrl),
-                                    profileImageNotifier.value = imageUrl,
-                                  }
-                              })
+                      FirebaseFunctions.getProfileImageUrlByUser(currentUser).then((imageUrl) => {
+                            if (imageUrl != null)
+                              {
+                                currentUser.saveProfileImage(userState, imageUrl),
+                                profileImageNotifier.value = imageUrl,
+                              }
+                          })
                     }
                   else
                     {
@@ -75,8 +72,7 @@ class ProfileScreen extends StatelessWidget {
           builder: (BuildContext dialogContext) {
             return AlertDialog(
               title: const Text('Confirm Delete'),
-              content: const Text(
-                  'Are you sure you want to delete your account? This action cannot be undone.'),
+              content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
               actions: [
                 TextButton(
                   onPressed: () async {
@@ -103,8 +99,7 @@ class ProfileScreen extends StatelessWidget {
                       debugPrint('Error deleting account: $e');
                     }
                   },
-                  child:
-                      const Text('Delete', style: TextStyle(color: Colors.red)),
+                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
                 ),
                 const SizedBox(width: 8),
                 TextButton(
@@ -141,10 +136,8 @@ class ProfileScreen extends StatelessWidget {
                         child: CachedNetworkImage(
                         imageUrl: profileImage,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            const CircularProgressIndicator(),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
+                        placeholder: (context, url) => const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
                       )),
               ),
             );

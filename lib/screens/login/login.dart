@@ -1,11 +1,13 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/screens/login/custom_route.dart';
 import 'package:corider/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../dashboard.dart';
 
 class LoginScreen extends StatelessWidget {
+  static const routeName = '/login';
   final UserState userState;
   static bool isFirstTimeLoad = false;
 
@@ -53,17 +55,21 @@ class LoginScreen extends StatelessWidget {
       onSubmitAnimationCompleted: () {
         if (isFirstTimeLoad) {
           isFirstTimeLoad = false;
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => OnboardingScreen(
-              userState: userState,
-            ),
-          ));
+          Navigator.of(context).pushAndRemoveUntil(
+              FadePageRoute(
+                builder: (context) => OnboardingScreen(
+                  userState: userState,
+                ),
+              ),
+              (route) => false);
         } else {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => RootNavigationView(
-              userState: userState,
-            ),
-          ));
+          Navigator.of(context).pushAndRemoveUntil(
+              FadePageRoute(
+                builder: (context) => RootNavigationView(
+                  userState: userState,
+                ),
+              ),
+              (route) => false);
         }
       },
       userValidator: (value) => null,
@@ -108,13 +114,11 @@ class LoginScreen extends StatelessWidget {
         UserFormField(
             keyName: "firstName",
             displayName: "First Name",
-            fieldValidator: (value) =>
-                value!.isEmpty ? 'First Name is required' : null),
+            fieldValidator: (value) => value!.isEmpty ? 'First Name is required' : null),
         UserFormField(
             keyName: "lastName",
             displayName: "Last Name",
-            fieldValidator: (value) =>
-                value!.isEmpty ? 'Last Name is required' : null),
+            fieldValidator: (value) => value!.isEmpty ? 'Last Name is required' : null),
       ],
     );
   }
