@@ -1,4 +1,3 @@
-import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
@@ -8,9 +7,11 @@ import 'package:corider/models/ride_offer_model.dart';
 
 class UpcomingRides extends StatefulWidget {
   final UserState userState;
+  final Function() fetchAllOffers;
   final Function(int) changePageIndex;
 
-  const UpcomingRides({Key? key, required this.userState, required this.changePageIndex}) : super(key: key);
+  const UpcomingRides({Key? key, required this.userState, required this.fetchAllOffers, required this.changePageIndex})
+      : super(key: key);
 
   @override
   UpcomingRidesState createState() => UpcomingRidesState();
@@ -18,47 +19,29 @@ class UpcomingRides extends StatefulWidget {
 
 class UpcomingRidesState extends State<UpcomingRides> {
   GlobalKey<RefreshIndicatorState> refreshMyRequestedOfferIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  Map<RideOfferModel, RequestedOfferStatus> myRequestedOffers = {};
-  bool isMyRequestedOffersFetched = false;
-
-  void triggerRefresh() {
-    setState(() {
-      isMyRequestedOffersFetched = false;
-    });
-    fetchMyRequestedOffers();
-  }
+  List<RideOfferModel> myRequestedOffers = [];
 
   Future<void> fetchMyRequestedOffers() async {
-    final myRequestedOffersStatusMap =
-        await FirebaseFunctions.fetchReqeustedOffersStatusByUser(widget.userState.currentUser!);
-    debugPrint('myRequestedOffersStatusMap: $myRequestedOffersStatusMap');
+    await widget.fetchAllOffers();
+  }
+
+  void getMyRequestedOffers() {
+    final requestedOffers = widget.userState.currentOffers!
+        .where((offer) => offer.requestedUserIds.containsKey(widget.userState.currentUser!.email))
+        .toList();
     setState(() {
-      myRequestedOffers = myRequestedOffersStatusMap.map((key, value) => MapEntry(
-          widget.userState.currentOffers!.firstWhere(
-            (offer) => offer.id == key,
-            orElse: () => RideOfferModel.generateUnknown(),
-          ),
-          value));
-      isMyRequestedOffersFetched = true;
+      myRequestedOffers = requestedOffers;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    if (widget.userState.currentUser!.requestedOfferIds.isEmpty) {
-      isMyRequestedOffersFetched = true;
-    } else {
-      fetchMyRequestedOffers();
-    }
+    getMyRequestedOffers();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isMyRequestedOffersFetched) {
-      fetchMyRequestedOffers();
-      return const Center(child: CircularProgressIndicator());
-    }
     if (myRequestedOffers.isEmpty) {
       // Show a message when there are no upcoming ride offers
       return Center(
@@ -66,7 +49,7 @@ class UpcomingRidesState extends State<UpcomingRides> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              onPressed: triggerRefresh,
+              onPressed: fetchMyRequestedOffers,
               icon: const Icon(Icons.refresh, color: Colors.blue),
               iconSize: 32,
             ),
@@ -93,8 +76,8 @@ class UpcomingRidesState extends State<UpcomingRides> {
       child: ListView.builder(
         itemCount: myRequestedOffers.length,
         itemBuilder: (context, index) {
-          final rideOffer = myRequestedOffers.keys.toList()[index];
-          final requestedOfferStatus = myRequestedOffers[rideOffer];
+          final rideOffer = myRequestedOffers[index];
+          final requestedOfferStatus = rideOffer.requestedUserIds[widget.userState.currentUser!.email]!;
 
           if (requestedOfferStatus == RequestedOfferStatus.INVALID) {
             return ListTile(

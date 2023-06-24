@@ -28,38 +28,6 @@ class FirebaseFunctions {
     return chatRooms;
   }
 
-  static Future<Map<String, RequestedOfferStatus>> fetchReqeustedOffersStatusByUser(UserModel user) async {
-    try {
-      final offersCollection =
-          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection("rideOffers");
-      final offersSnapshot = await offersCollection.where('id', whereIn: user.requestedOfferIds).get();
-      if (offersSnapshot.docs.isNotEmpty) {
-        List<RideOfferModel> offers = offersSnapshot.docs
-            .map(
-              (offer) => RideOfferModel.fromJson(offer.data()),
-            )
-            .toList();
-        final Map<String, RequestedOfferStatus> offersStatusMap = {};
-        for (final requestedOfferId in user.requestedOfferIds) {
-          try {
-            final offer = offers.firstWhere((o) => o.id == requestedOfferId);
-            if (offer.requestedUserIds.containsKey(user.email)) {
-              offersStatusMap[requestedOfferId] = offer.requestedUserIds[user.email]!;
-            } else {
-              offersStatusMap[requestedOfferId] = RequestedOfferStatus.INVALID;
-            }
-          } catch (e) {
-            offersStatusMap[requestedOfferId] = RequestedOfferStatus.INVALID;
-          }
-        }
-        return offersStatusMap;
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-    return {};
-  }
-
   static Future<RideOfferModel?> fetchRideOfferById(UserModel user, String offerId) async {
     try {
       final offerDoc = await FirebaseFirestore.instance

@@ -7,7 +7,8 @@ import 'package:corider/models/ride_offer_model.dart';
 
 class MyOffers extends StatefulWidget {
   final UserState userState;
-  const MyOffers({Key? key, required this.userState}) : super(key: key);
+  final Function() fetchAllOffers;
+  const MyOffers({Key? key, required this.userState, required this.fetchAllOffers}) : super(key: key);
 
   @override
   MyOffersState createState() => MyOffersState();
@@ -16,52 +17,35 @@ class MyOffers extends StatefulWidget {
 class MyOffersState extends State<MyOffers> {
   GlobalKey<RefreshIndicatorState> refreshMyOffersIndicatorKey = GlobalKey<RefreshIndicatorState>();
   List<RideOfferModel> myOffers = [];
-  bool isMyOffersFetched = false;
-
-  void triggerRefresh() {
-    setState(() {
-      isMyOffersFetched = false;
-    });
-    fetchMyOffers();
-  }
 
   Future<void> fetchMyOffers() async {
-    final allOffers = await widget.userState.fetchAllOffers();
+    await widget.fetchAllOffers();
+  }
+
+  void getMyOffers() {
+    final myOffers = widget.userState.currentOffers!
+        .where((offer) => offer.driverId == widget.userState.currentUser!.email)
+        .toList();
     setState(() {
-      myOffers = allOffers.where((offer) => offer.driverId == widget.userState.currentUser!.email).toList();
-      isMyOffersFetched = true;
+      this.myOffers = myOffers;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    if (widget.userState.currentOffers == null) {
-      fetchMyOffers();
-    } else if (widget.userState.currentOffers!.isEmpty) {
-      isMyOffersFetched = true;
-    } else {
-      myOffers = widget.userState.currentOffers!
-          .where((offer) => offer.driverId == widget.userState.currentUser!.email)
-          .toList();
-      isMyOffersFetched = true;
-    }
+    getMyOffers();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isMyOffersFetched) {
-      fetchMyOffers();
-      return const Center(child: CircularProgressIndicator());
-    }
-
     if (myOffers.isEmpty) {
       // Show a message when there are no ride offers
       return Center(
         child: Column(
           children: [
             IconButton(
-              onPressed: triggerRefresh,
+              onPressed: fetchMyOffers,
               icon: const Icon(Icons.refresh, color: Colors.blue),
               iconSize: 32,
             ),
@@ -76,7 +60,7 @@ class MyOffersState extends State<MyOffers> {
               onPressed: () {
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (context) => const CreateRideOfferScreen()))
-                    .then((_) => triggerRefresh());
+                    .then((_) => fetchMyOffers());
               },
               child: const Text('Create Ride Offer'),
             ),
