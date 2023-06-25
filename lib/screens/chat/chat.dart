@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
@@ -22,10 +24,11 @@ class ChatScreen extends StatefulWidget {
   final types.Room room;
   const ChatScreen({Key? key, required this.userState, required this.room}) : super(key: key);
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  Stream<QuerySnapshot>? _messagesStream;
   late List<types.Message> _messages;
   late User _user;
 
@@ -42,17 +45,96 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _messagesStream = FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.userState.currentUser!.companyName)
+        .collection('chatRooms')
+        .doc(widget.room.id)
+        .collection('latestMessages')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
     _user = widget.userState.currentUser!.toChatUser();
     _messages = widget.room.lastMessages ?? [];
-    if (_messages.isEmpty) {
-      _loadMockMessages();
-    }
   }
 
-  void _addMessage(types.Message message) {
+  Future<void> _sendMessage(types.Message message) async {
     setState(() {
       _messages.insert(0, message);
     });
+    try {
+      final messagesRef = FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.userState.currentUser!.companyName)
+          .collection('chatRooms')
+          .doc(widget.room.id)
+          .collection('latestMessages');
+      final messageData = message.toJson();
+      await messagesRef.add(messageData);
+    } catch (e) {
+      debugPrint('Error sending message: $e');
+      // Revert optimistic update
+      setState(() {
+        _messages.remove(message);
+      });
+    }
+  }
+
+  void _handleSendPressed(types.PartialText message) {
+    final textMessage = types.TextMessage(
+      author: _user,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      id: const Uuid().v4(),
+      text: message.text,
+    );
+
+    _sendMessage(textMessage);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.room.name!),
+      ),
+      body: _messagesStream == null
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : StreamBuilder<QuerySnapshot>(
+              stream: _messagesStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
+
+                final data = snapshot.data;
+                final messages = data?.docs.map((doc) {
+                  final messageData = doc.data() as Map<String, dynamic>;
+                  return types.Message.fromJson(messageData);
+                }).toList();
+                _messages = messages ?? [];
+
+                return Chat(
+                  messages: _messages,
+                  onAttachmentPressed: _handleAttachmentPressed,
+                  onMessageTap: _handleMessageTap,
+                  onPreviewDataFetched: _handlePreviewDataFetched,
+                  onSendPressed: _handleSendPressed,
+                  showUserAvatars: true,
+                  showUserNames: true,
+                  user: _user,
+                );
+              },
+            ),
+    );
   }
 
   void _handleAttachmentPressed() {
@@ -98,13 +180,13 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _handleFileSelection() async {
+  Future<void> _handleFileSelection() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.any,
     );
 
     if (result != null && result.files.single.path != null) {
-      final message = types.FileMessage(
+      final placeholderMessage = types.FileMessage(
         author: _user,
         createdAt: DateTime.now().millisecondsSinceEpoch,
         id: const Uuid().v4(),
@@ -113,12 +195,63 @@ class _ChatScreenState extends State<ChatScreen> {
         size: result.files.single.size,
         uri: result.files.single.path!,
       );
+      setState(() {
+        _messages.insert(0, placeholderMessage);
+      });
 
-      _addMessage(message);
+      try {
+        // upload file to storage
+        Reference storageRef = FirebaseStorage.instance
+            .ref()
+            .child('chat_files')
+            .child(widget.userState.currentUser!.companyName)
+            .child(widget.room.id);
+
+        // handle same file names
+        bool hasDuplicate;
+        try {
+          await storageRef.child(result.files.single.name).getMetadata();
+          hasDuplicate = true;
+        } catch (e) {
+          hasDuplicate = false;
+        }
+        if (hasDuplicate) {
+          final String fileName = result.files.single.name;
+          final String extension = fileName.substring(fileName.lastIndexOf('.'));
+          final String fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
+          final String newFileName = '${fileNameWithoutExtension}_${DateTime.now().millisecondsSinceEpoch}$extension';
+          storageRef = storageRef.child(newFileName);
+        } else {
+          storageRef = storageRef.child(result.files.single.name);
+        }
+
+        final uploadTask = storageRef.putFile(
+          File(result.files.single.path!),
+          SettableMetadata(
+            contentType: lookupMimeType(result.files.single.path!),
+          ),
+        );
+        final snapshot = await uploadTask.whenComplete(() => null);
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
+        // update message with uploaded file url
+        types.FileMessage message = placeholderMessage.copyWith(uri: downloadUrl) as types.FileMessage;
+
+        // remove placeholder
+        _messages.remove(placeholderMessage);
+        _sendMessage(message);
+      } catch (e) {
+        debugPrint('Error sending message: $e');
+        // Revert optimistic update
+        setState(() {
+          _messages.remove(placeholderMessage);
+        });
+        return;
+      }
     }
   }
 
-  void _handleImageSelection() async {
+  Future<void> _handleImageSelection() async {
     final result = await ImagePicker().pickImage(
       imageQuality: 70,
       maxWidth: 1440,
@@ -128,8 +261,8 @@ class _ChatScreenState extends State<ChatScreen> {
     if (result != null) {
       final bytes = await result.readAsBytes();
       final image = await decodeImageFromList(bytes);
-
-      final message = types.ImageMessage(
+      // add placeholder to show image before uploading
+      final placeholderMessage = types.ImageMessage(
         author: _user,
         createdAt: DateTime.now().millisecondsSinceEpoch,
         height: image.height.toDouble(),
@@ -139,8 +272,36 @@ class _ChatScreenState extends State<ChatScreen> {
         uri: result.path,
         width: image.width.toDouble(),
       );
+      setState(() {
+        _messages.insert(0, placeholderMessage);
+      });
 
-      _addMessage(message);
+      try {
+        // upload image to storage
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('chat_images')
+            .child(widget.userState.currentUser!.companyName)
+            .child(widget.room.id)
+            .child(result.name);
+
+        final uploadTask = storageRef.putData(bytes);
+        final snapshot = await uploadTask.whenComplete(() => null);
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
+        // update message with uploaded image url
+        types.ImageMessage message = placeholderMessage.copyWith(uri: downloadUrl) as types.ImageMessage;
+
+        // remove placeholder
+        _messages.remove(placeholderMessage);
+        _sendMessage(message);
+      } catch (e) {
+        setState(() {
+          _messages.remove(placeholderMessage);
+        });
+        debugPrint('Error sending image: $e');
+        return;
+      }
     }
   }
 
@@ -197,35 +358,5 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _messages[index] = updatedMessage;
     });
-  }
-
-  void _handleSendPressed(types.PartialText message) {
-    final textMessage = types.TextMessage(
-      author: _user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: const Uuid().v4(),
-      text: message.text,
-    );
-
-    _addMessage(textMessage);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.room.name!),
-      ),
-      body: Chat(
-        messages: _messages,
-        onAttachmentPressed: _handleAttachmentPressed,
-        onMessageTap: _handleMessageTap,
-        onPreviewDataFetched: _handlePreviewDataFetched,
-        onSendPressed: _handleSendPressed,
-        showUserAvatars: true,
-        showUserNames: true,
-        user: _user,
-      ),
-    );
   }
 }

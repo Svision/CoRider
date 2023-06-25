@@ -151,7 +151,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 ? 'You: '
                                 : chatRoom.type == types.RoomType.group
                                     ? '${chatRoom.lastMessages![-1].author.firstName}: '
-                                    : '' '${chatRoom.lastMessages![-1].repliedMessage}',
+                                    : ''
+                                        '${chatRoom.lastMessages![-1].type == types.MessageType.text ? (chatRoom.lastMessages![-1] as types.TextMessage).text : '[Attachment]'}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
