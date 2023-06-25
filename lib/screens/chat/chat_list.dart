@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
 import 'package:flutter/material.dart';
@@ -68,41 +69,102 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   ),
                 )
               : ListView.builder(
+                  padding: const EdgeInsets.all(10),
                   itemCount: chatRooms.length,
                   itemBuilder: (context, index) {
                     final chatRoom = chatRooms[index];
-                    return Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 1.0,
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          chatRoom.name!,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChatScreen(
-                                userState: widget.userState,
-                                room: chatRoom,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                    return buildItem(context, chatRoom);
                   },
                 ),
+    );
+  }
+
+  Widget buildItem(BuildContext context, types.Room chatRoom) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
+      child: TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                userState: widget.userState,
+                room: chatRoom,
+              ),
+            ),
+          );
+        },
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[300]!),
+          shape: MaterialStateProperty.all<OutlinedBorder>(
+            const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+          ),
+        ),
+        child: Row(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: CircleAvatar(
+                maxRadius: 30,
+                backgroundColor: chatRoom.imageUrl == null ? Colors.grey : null,
+                child: chatRoom.imageUrl == null
+                    ? chatRoom.type == types.RoomType.group
+                        ? const Icon(
+                            Icons.group,
+                            color: Colors.white,
+                            size: 30,
+                          )
+                        : const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 30,
+                          )
+                    : ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: chatRoom.imageUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                        ),
+                      ),
+              ),
+            ),
+            Flexible(
+              child: Column(
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      chatRoom.name!,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                        chatRoom.lastMessages == null || chatRoom.lastMessages!.isEmpty
+                            ? 'No messages yet'
+                            : chatRoom.lastMessages![-1].author.id == widget.userState.currentUser!.email
+                                ? 'You: '
+                                : chatRoom.type == types.RoomType.group
+                                    ? '${chatRoom.lastMessages![-1].author.firstName}: '
+                                    : '' '${chatRoom.lastMessages![-1].repliedMessage}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        )),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
