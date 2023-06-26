@@ -19,9 +19,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   Future<void> triggerRefresh() async {
     List<types.Room> chatRooms = [];
+    List<String> chatRoomIds = chatRooms.map((e) => e.id).toList();
     for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
       final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId);
-      if (chatRoom != null && !chatRooms.contains(chatRoom)) {
+      if (chatRoom != null && !chatRoomIds.contains(chatRoom.id)) {
         setState(() {
           chatRooms.add(chatRoom);
         });
@@ -43,9 +44,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
             })
           });
     } else {
+      List<String> chatRoomIds = chatRooms.map((e) => e.id).toList();
       for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
         final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId);
-        if (chatRoom != null && !chatRooms.contains(chatRoom)) {
+        if (chatRoom != null && !chatRoomIds.contains(chatRoom.id)) {
           setState(() {
             chatRooms.add(chatRoom);
           });
