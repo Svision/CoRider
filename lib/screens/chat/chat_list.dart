@@ -18,9 +18,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
   bool isLoadingChats = false;
 
   Future<void> triggerRefresh() async {
-    setState(() {
-      isLoadingChats = true;
-    });
     List<types.Room> chatRooms = [];
     for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
       final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId);
@@ -32,13 +29,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
     }
     setState(() {
       this.chatRooms = chatRooms;
-      isLoadingChats = false;
     });
   }
 
   void loadChatRooms() async {
     if (chatRooms.isEmpty) {
-      triggerRefresh();
+      setState(() {
+        isLoadingChats = true;
+      });
+      triggerRefresh().then((value) => {
+            setState(() {
+              isLoadingChats = false;
+            })
+          });
     } else {
       for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
         final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId);
@@ -83,21 +86,48 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ? Container(
                   alignment: Alignment.center,
                   margin: const EdgeInsets.only(bottom: 200),
-                  child: const Text(
-                    'No chats yet :(',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () => {
+                            setState(() {
+                              isLoadingChats = true;
+                            }),
+                            triggerRefresh().then((value) => {
+                                  setState(() {
+                                    isLoadingChats = false;
+                                  })
+                                })
+                          },
+                          icon: const Icon(
+                            Icons.refresh,
+                            color: Colors.blue,
+                          ),
+                          iconSize: 48,
+                        ),
+                        const Text(
+                          'No chats yet :(',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(10),
-                  itemCount: chatRooms.length,
-                  itemBuilder: (context, index) {
-                    final chatRoom = chatRooms[index];
-                    return buildItem(context, chatRoom);
-                  },
+              : RefreshIndicator(
+                  onRefresh: triggerRefresh,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(10),
+                    itemCount: chatRooms.length,
+                    itemBuilder: (context, index) {
+                      final chatRoom = chatRooms[index];
+                      return buildItem(context, chatRoom);
+                    },
+                  ),
                 ),
     );
   }
