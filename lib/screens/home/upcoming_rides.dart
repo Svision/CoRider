@@ -26,7 +26,7 @@ class UpcomingRidesState extends State<UpcomingRides> {
   }
 
   void getMyRequestedOffers() {
-    final requestedOffers = widget.userState.currentOffers
+    final requestedOffers = widget.userState.storedOffers
         .where((offer) => offer.requestedUserIds.containsKey(widget.userState.currentUser!.email))
         .toList();
     setState(() {

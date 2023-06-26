@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.userState.currentOffers.isEmpty) fetchAllOffers();
+    if (widget.userState.storedOffers.isEmpty) fetchAllOffers();
   }
 
   @override

@@ -14,6 +14,7 @@ class UserModel {
   VehicleModel? vehicle;
   List<String> myOfferIds;
   List<String> requestedOfferIds;
+  List<String> chatRoomIds;
 
   UserModel({
     DateTime? createdAt,
@@ -24,6 +25,7 @@ class UserModel {
     this.vehicle,
     this.myOfferIds = const [],
     this.requestedOfferIds = const [],
+    this.chatRoomIds = const [],
   })  : companyName = email.split("@")[1],
         createdAt = DateTime.now();
 
@@ -36,7 +38,8 @@ class UserModel {
         createdAt: DateTime.parse(json['createdAt']),
         vehicle: json['vehicle'] != null ? VehicleModel.fromJson(json['vehicle']) : null,
         myOfferIds: json['myOfferIds'] != null ? List<String>.from(json['myOfferIds']) : [],
-        requestedOfferIds: json['requestedOfferIds'] != null ? List<String>.from(json['requestedOfferIds']) : []);
+        requestedOfferIds: json['requestedOfferIds'] != null ? List<String>.from(json['requestedOfferIds']) : [],
+        chatRoomIds: json['chatRoomIds'] != null ? List<String>.from(json['chatRoomIds']) : []);
   }
 
   Map<String, dynamic> toJson() => {
@@ -48,6 +51,7 @@ class UserModel {
         "vehicle": vehicle?.toJson(),
         "myOfferIds": myOfferIds,
         "requestedOfferIds": requestedOfferIds,
+        "chatRoomIds": chatRoomIds,
       };
 
   String get fullName => '$firstName $lastName';

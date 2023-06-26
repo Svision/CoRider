@@ -13,6 +13,42 @@ import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class FirebaseFunctions {
+  static Future<types.Room?> fetchChatRoom(UserModel user, String roomId) async {
+    types.Room? chatRoom;
+    try {
+      final chatRoomDoc = await FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("chatRooms")
+          .doc(roomId)
+          .get();
+      if (chatRoomDoc.exists) {
+        chatRoom = types.Room.fromJson(chatRoomDoc.data()!);
+        final messagesSnapshot = await FirebaseFirestore.instance
+            .collection("companies")
+            .doc(user.companyName)
+            .collection("chatRooms")
+            .doc(roomId)
+            .collection("messages")
+            .orderBy('createdAt', descending: true)
+            .limit(1)
+            .get();
+        if (messagesSnapshot.docs.isNotEmpty) {
+          final lastMessageDoc = messagesSnapshot.docs.first;
+          types.Message lastMessage = types.Message.fromJson(lastMessageDoc.data());
+          final user = await fetchUserByEmail(lastMessage.author.id);
+          lastMessage = lastMessage.copyWith(author: user!.toChatUser());
+          chatRoom = chatRoom.copyWith(
+            lastMessages: [lastMessage],
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return chatRoom;
+  }
+
   static Future<List<types.Room>> fetchChatRooms(UserModel user) async {
     List<types.Room> chatRooms = [];
     try {

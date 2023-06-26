@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -13,7 +10,6 @@ import 'package:uuid/uuid.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
@@ -30,18 +26,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   Stream<QuerySnapshot>? _messagesStream;
-  late List<types.Message> _messages;
+  List<types.Message> _messages = [];
   late User _user;
-
-  void _loadMockMessages() async {
-    final response = await rootBundle.loadString('assets/messages.json');
-    final messages =
-        (jsonDecode(response) as List).map((e) => types.Message.fromJson(e as Map<String, dynamic>)).toList();
-
-    setState(() {
-      _messages = messages;
-    });
-  }
 
   @override
   void initState() {
@@ -55,7 +41,6 @@ class _ChatScreenState extends State<ChatScreen> {
         .orderBy('createdAt', descending: true)
         .snapshots();
     _user = widget.userState.currentUser!.toChatUser();
-    _messages = widget.room.lastMessages ?? [];
   }
 
   Future<void> _sendMessage(types.Message message) async {
@@ -82,7 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
-      author: _user, // only store user id in database
+      author: types.User(id: _user.id), // only store user id in database
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: const Uuid().v4(),
       text: message.text,
@@ -140,6 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   types.Message _fetchUserByMessage(types.Message message) {
+    // debugPrint('storedUsers ${widget.userState.storedUsers}');
     if (widget.userState.storedUsers.containsKey(message.author.id)) {
       final user = widget.userState.storedUsers[message.author.id];
       message = message.copyWith(author: user!.toChatUser());
