@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -122,6 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   return types.Message.fromJson(messageData);
                 }).toList();
                 _messages = messages ?? [];
+                _messages = _fetchUsersByMessages(_messages);
 
                 return Chat(
                   messages: _messages,
@@ -139,23 +139,19 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future<types.Message> _fetchUserByMessage(types.Message message) async {
-    final user = await FirebaseFunctions.fetchUserByEmail(message.author.id);
-    if (user != null) {
-      message = message.copyWith(author: user.toChatUser());
+  types.Message _fetchUserByMessage(types.Message message) {
+    if (widget.userState.storedUsers.containsKey(message.author.id)) {
+      final user = widget.userState.storedUsers[message.author.id];
+      message = message.copyWith(author: user!.toChatUser());
+    } else {
+      // store user for future use
+      widget.userState.getStoredUserByEmail(message.author.id);
     }
     return message;
   }
 
-  Future<void> _fetchUsersByMessages(List<types.Message> messages) async {
-    final futures = messages.map((message) => _fetchUserByMessage(message)).toList();
-    final result = await Future.wait(futures);
-    debugPrint('result: ${result.first.toJson().toString()}');
-    if (mounted && result != _messages) {
-      setState(() {
-        _messages = result;
-      });
-    }
+  List<types.Message> _fetchUsersByMessages(List<types.Message> messages) {
+    return messages.map((message) => _fetchUserByMessage(message)).toList();
   }
 
   void _handleAttachmentPressed() {

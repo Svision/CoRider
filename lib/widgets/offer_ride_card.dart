@@ -1,4 +1,3 @@
-import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
@@ -27,14 +26,19 @@ class _RideOfferCardState extends State<RideOfferCard> {
   Future<void> getDriver() async {
     if (widget.rideOffer.driverId == widget.userState.currentUser!.email) {
       setState(() {
-        this.driver = widget.userState.currentUser!;
+        driver = widget.userState.currentUser!;
       });
       return;
     }
 
-    final driver = await FirebaseFunctions.fetchUserByEmail(widget.rideOffer.driverId);
+    UserModel? fetchedDriver;
+    if (widget.userState.storedUsers.containsKey(widget.rideOffer.driverId)) {
+      fetchedDriver = widget.userState.storedUsers[widget.rideOffer.driverId];
+    } else {
+      fetchedDriver = await widget.userState.getStoredUserByEmail(widget.rideOffer.driverId);
+    }
     setState(() {
-      this.driver = driver;
+      driver = fetchedDriver;
     });
   }
 
@@ -53,9 +57,9 @@ class _RideOfferCardState extends State<RideOfferCard> {
               backgroundColor:
                   driver!.profileImage == null ? Utils.getUserAvatarNameColor(widget.rideOffer.driverId) : null,
               child: driver!.profileImage == null
-                  ? const Icon(
-                      Icons.person,
-                      color: Colors.white,
+                  ? Text(
+                      '${driver!.firstName[0].toUpperCase()}${driver!.lastName[0].toUpperCase()}',
+                      style: const TextStyle(color: Colors.white),
                     )
                   : ClipOval(
                       child: CachedNetworkImage(

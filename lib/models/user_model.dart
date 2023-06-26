@@ -64,7 +64,7 @@ class UserModel {
     final err = await FirebaseFunctions.saveRideOfferByUser(this, offer);
     if (err == null) {
       myOfferIds.add(offer.id);
-      userState.setUser(this);
+      userState.setCurrentUser(this);
       return null;
     } else {
       return err;
@@ -75,7 +75,7 @@ class UserModel {
     final err = await FirebaseFunctions.saveProfileImageByUser(this, imageUrl);
     if (err == null) {
       profileImage = imageUrl;
-      userState.setUser(this);
+      userState.setCurrentUser(this);
       return null;
     } else {
       return err;
@@ -86,7 +86,7 @@ class UserModel {
     final err = await FirebaseFunctions.saveVehicleByUser(this, vehicle);
     if (err == null) {
       this.vehicle = vehicle;
-      userState.setUser(this);
+      userState.setCurrentUser(this);
       return null;
     } else {
       return err;
@@ -97,7 +97,7 @@ class UserModel {
     final err = await FirebaseFunctions.deleteVehicleByUser(this);
     if (err == null) {
       vehicle = null;
-      userState.setUser(this);
+      userState.setCurrentUser(this);
       return null;
     } else {
       return err;
@@ -108,7 +108,7 @@ class UserModel {
     final err = await FirebaseFunctions.requestRideByRideOfferId(this, rideOfferId);
     if (err == null) {
       requestedOfferIds.add(rideOfferId);
-      userState.setUser(this);
+      userState.setCurrentUser(this);
       return null;
     } else {
       return err;
@@ -119,7 +119,7 @@ class UserModel {
     final err = await FirebaseFunctions.removeRideRequestByRideOfferId(this, rideOfferId);
     if (err == null) {
       requestedOfferIds.remove(rideOfferId);
-      userState.setUser(this);
+      userState.setCurrentUser(this);
       return null;
     } else {
       return err;

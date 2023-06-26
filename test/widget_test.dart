@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 void main() {
   testWidgets('Test', (WidgetTester tester) async {
-    final userState = UserState(null, []);
+    final userState = UserState();
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       ChangeNotifierProvider<UserState>.value(

@@ -9,15 +9,12 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class UserState extends ChangeNotifier {
   UserModel? _currentUser;
-  List<RideOfferModel>? _currentOffers;
+  List<RideOfferModel> _currentOffers = [];
+  Map<String, UserModel> _storedUsers = {};
 
   UserModel? get currentUser => _currentUser;
-  List<RideOfferModel>? get currentOffers => _currentOffers;
-
-  UserState(UserModel? currentUser, List<RideOfferModel>? offers) {
-    _currentUser = currentUser;
-    _currentOffers = offers;
-  }
+  List<RideOfferModel> get currentOffers => _currentOffers;
+  Map<String, UserModel> get storedUsers => _storedUsers;
 
   Future<List<RideOfferModel>> fetchAllOffers() async {
     List<RideOfferModel> allOffers = [];
@@ -26,11 +23,11 @@ class UserState extends ChangeNotifier {
     } catch (e) {
       debugPrint('fetchAllOffers: $e');
     }
-    setOffers(allOffers);
+    setCurrentOffers(allOffers);
     return allOffers;
   }
 
-  Future<void> setUser(UserModel user) async {
+  Future<void> setCurrentUser(UserModel user) async {
     _currentUser = user;
     SharedPreferences sharedUser = await SharedPreferences.getInstance();
     sharedUser.setString('currentUser', jsonEncode(user.toJson()));
@@ -38,10 +35,17 @@ class UserState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setOffers(List<RideOfferModel> offers) async {
+  Future<void> setCurrentOffers(List<RideOfferModel> offers) async {
     _currentOffers = offers;
     SharedPreferences sharedOffers = await SharedPreferences.getInstance();
     sharedOffers.setString('currentOffers', jsonEncode(offers));
+    notifyListeners();
+  }
+
+  Future<void> setStoredUser(UserModel user) async {
+    _storedUsers[user.email] = user;
+    SharedPreferences sharedUsers = await SharedPreferences.getInstance();
+    sharedUsers.setString('storedUser-${user.email}', jsonEncode(_storedUsers));
     notifyListeners();
   }
 
@@ -49,6 +53,22 @@ class UserState extends ChangeNotifier {
     SharedPreferences sharedOffers = await SharedPreferences.getInstance();
     sharedOffers.setString('driverImageUrl-$email', driverImageUrl);
     notifyListeners();
+  }
+
+  Future<UserModel?> getStoredUserByEmail(String email) async {
+    SharedPreferences sharedUsers;
+    UserModel? storedUser;
+    sharedUsers = await SharedPreferences.getInstance();
+    if (sharedUsers.getString('storedUsers-$email') == null) {
+      final user = await FirebaseFunctions.fetchUserByEmail(email);
+      if (user != null) {
+        setStoredUser(user);
+        storedUser = user;
+      }
+    } else {
+      storedUser = UserModel.fromJson(jsonDecode(sharedUsers.getString('storedUser-$email')!));
+    }
+    return storedUser;
   }
 
   Future<String?> getDriverImageUrlByEmail(String email) async {
@@ -80,6 +100,7 @@ class UserState extends ChangeNotifier {
     debugPrint('signOffUser: ${sharedPreferences.getString('currentUser')}');
     sharedPreferences.remove('currentUser');
     sharedPreferences.remove('currentOffers');
+    sharedPreferences.remove('storedUsers');
     notifyListeners();
   }
 
@@ -89,7 +110,7 @@ class UserState extends ChangeNotifier {
     String? currentOffersString = sharedPref.getString('currentOffers');
     if (currentUserString != null) {
       try {
-        await setUser(UserModel.fromJson(jsonDecode(currentUserString)));
+        await setCurrentUser(UserModel.fromJson(jsonDecode(currentUserString)));
         // fetch user from firebase
         FirebaseFunctions.fetchUserByEmail(currentUser!.email).then((user) {
           // compare currentUser with user
@@ -97,17 +118,17 @@ class UserState extends ChangeNotifier {
             // print different
             debugPrint('difference: ${jsonEncode(currentUser!.toJson())} != ${jsonEncode(user.toJson())}');
             // if different, update currentUser
-            setUser(user);
+            setCurrentUser(user);
           }
           debugPrint('currentUser: ${currentUser!.toJson().toString()}');
         });
         if (currentOffersString != null) {
           try {
-            setOffers(
+            setCurrentOffers(
                 (jsonDecode(currentOffersString) as List<dynamic>).map((e) => RideOfferModel.fromJson(e)).toList());
-            if (currentOffers!.isEmpty) {
+            if (currentOffers.isEmpty) {
               FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
-                setOffers(offers);
+                setCurrentOffers(offers);
               });
             }
             debugPrint('currentOffer: ${currentOffers.toString()}');
@@ -117,7 +138,7 @@ class UserState extends ChangeNotifier {
         } else {
           // fetch offers from firebase
           FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
-            setOffers(offers);
+            setCurrentOffers(offers);
           });
         }
       } catch (e) {

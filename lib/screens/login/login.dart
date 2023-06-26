@@ -17,7 +17,7 @@ class LoginScreen extends StatelessWidget {
   Future<String?> _handleLogin(BuildContext context, String email) async {
     try {
       await FirebaseFunctions.fetchUserByEmail(email).then((user) async {
-        await userState.setUser(user!);
+        await userState.setCurrentUser(user!);
         await userState.loadData();
       });
       return null;

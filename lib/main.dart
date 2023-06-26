@@ -1,5 +1,3 @@
-import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/models/user_model.dart';
 import 'package:corider/screens/dashboard.dart';
 import 'package:corider/screens/login/login.dart';
 import 'package:corider/providers/user_state.dart';
@@ -14,9 +12,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  UserModel? currentUser;
-  List<RideOfferModel>? currentOffers;
-  UserState userState = UserState(currentUser, currentOffers);
+  UserState userState = UserState();
 
   await userState.loadData();
 
@@ -52,8 +48,7 @@ class _MyAppState extends State<MyApp> {
           : RootNavigationView(userState: widget.userState),
       routes: {
         "/login": (context) => LoginScreen(userState: widget.userState),
-        "/dashboard": (context) =>
-            RootNavigationView(userState: widget.userState),
+        "/dashboard": (context) => RootNavigationView(userState: widget.userState),
       },
     );
   }

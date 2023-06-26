@@ -13,7 +13,7 @@ class ExploreRidesScreen extends StatefulWidget {
   const ExploreRidesScreen({Key? key, required this.userState}) : super(key: key);
 
   @override
-  _ExploreRidesScreenState createState() => _ExploreRidesScreenState();
+  State<ExploreRidesScreen> createState() => _ExploreRidesScreenState();
 }
 
 class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
@@ -27,7 +27,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.userState.currentOffers == null || widget.userState.currentOffers!.isEmpty) {
+    if (widget.userState.currentOffers.isEmpty) {
       _handleRefresh(widget.userState.currentUser!);
     } else {
       offers = [];
@@ -54,7 +54,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
       setState(() {
         offers = offers;
       });
-      widget.userState.setOffers(offers);
+      widget.userState.setCurrentOffers(offers);
       _addMarkers();
     } catch (e) {
       debugPrint(e.toString());
@@ -65,7 +65,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     final UserModel currentUser = userState.currentUser!;
-    offers = userState.currentOffers!;
+    offers = userState.currentOffers;
     _addMarkers();
     return Scaffold(
       appBar: AppBar(
