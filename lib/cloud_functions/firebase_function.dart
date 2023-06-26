@@ -20,11 +20,39 @@ class FirebaseFunctions {
           FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection("chatRooms");
       final chatRoomsSnapshot = await chatRoomsCollection.where('userIds', arrayContains: user.email).get();
       if (chatRoomsSnapshot.docs.isNotEmpty) {
-        chatRooms = chatRoomsSnapshot.docs.map((room) => types.Room.fromJson(room.data())).toList();
+        await Future.forEach(chatRoomsSnapshot.docs, (roomSnapshot) async {
+          types.Room room = types.Room.fromJson(roomSnapshot.data());
+          final messagesSnapshot = await chatRoomsCollection
+              .doc(room.id)
+              .collection('messages')
+              .orderBy('createdAt', descending: true)
+              .limit(1)
+              .get();
+
+          if (messagesSnapshot.docs.isNotEmpty) {
+            final lastMessageDoc = messagesSnapshot.docs.first;
+            types.Message lastMessage = types.Message.fromJson(lastMessageDoc.data());
+            final user = await fetchUserByEmail(lastMessage.author.id);
+            lastMessage = lastMessage.copyWith(author: user!.toChatUser());
+            room = room.copyWith(
+              lastMessages: [lastMessage],
+            );
+          }
+          chatRooms.add(room);
+        });
       }
     } catch (e) {
       debugPrint(e.toString());
     }
+    // order chat rooms by last message timestamp
+    chatRooms.sort((a, b) {
+      // if no messages, set to min value
+      final minTimestamp = DateTime.fromMillisecondsSinceEpoch(0).microsecondsSinceEpoch;
+      final aTimestamp = a.lastMessages?.first.createdAt ?? minTimestamp;
+      final bTimestamp = b.lastMessages?.first.createdAt ?? minTimestamp;
+      return bTimestamp.compareTo(aTimestamp);
+    });
+
     return chatRooms;
   }
 

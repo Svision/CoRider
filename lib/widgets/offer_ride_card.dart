@@ -1,7 +1,9 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
+import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
+import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -16,67 +18,60 @@ class RideOfferCard extends StatefulWidget {
       : super(key: key);
 
   @override
-  _RideOfferCardState createState() => _RideOfferCardState();
+  State<RideOfferCard> createState() => _RideOfferCardState();
 }
 
 class _RideOfferCardState extends State<RideOfferCard> {
-  String? driverProfileImageUrl;
+  UserModel? driver;
 
-  void getUserProfileImageUrl() {
+  Future<void> getDriver() async {
     if (widget.rideOffer.driverId == widget.userState.currentUser!.email) {
       setState(() {
-        driverProfileImageUrl = widget.userState.currentUser!.profileImage;
+        this.driver = widget.userState.currentUser!;
       });
       return;
     }
 
-    widget.userState.getDriverImageUrlByEmail(widget.rideOffer.driverId).then((profileImageUrl) => {
-          if (profileImageUrl != null)
-            {
-              setState(() {
-                driverProfileImageUrl = profileImageUrl;
-              })
-            },
-          FirebaseFunctions.fetchUserProfileImageByEmail(widget.rideOffer.driverId).then((profileImageUrl) {
-            setState(() {
-              if (profileImageUrl != driverProfileImageUrl) {
-                driverProfileImageUrl = profileImageUrl;
-                if (driverProfileImageUrl != null) {
-                  widget.userState.setOfferDriverImageUrlWithEmail(widget.rideOffer.driverId, driverProfileImageUrl!);
-                }
-              }
-            });
-          })
-        });
+    final driver = await FirebaseFunctions.fetchUserByEmail(widget.rideOffer.driverId);
+    setState(() {
+      this.driver = driver;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    getUserProfileImageUrl();
+    getDriver();
   }
 
   Widget _buildListView() {
     return ListTile(
-      leading: CircleAvatar(
-        maxRadius: 25,
-        backgroundColor: driverProfileImageUrl == null ? Colors.grey : null,
-        child: driverProfileImageUrl == null
-            ? const Icon(
-                Icons.person,
-                color: Colors.white,
-              )
-            : ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: driverProfileImageUrl!,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => const CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                ),
-              ),
-      ),
+      leading: driver == null
+          ? const CircularProgressIndicator()
+          : CircleAvatar(
+              maxRadius: 25,
+              backgroundColor:
+                  driver!.profileImage == null ? Utils.getUserAvatarNameColor(widget.rideOffer.driverId) : null,
+              child: driver!.profileImage == null
+                  ? const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                    )
+                  : ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: driver!.profileImage!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                      ),
+                    ),
+            ),
       title: Text(
-        widget.rideOffer.driverId == widget.userState.currentUser!.email ? 'Me' : widget.rideOffer.driverId,
+        widget.rideOffer.driverId == widget.userState.currentUser!.email
+            ? 'You'
+            : driver == null
+                ? 'Loading...'
+                : driver!.fullName,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(

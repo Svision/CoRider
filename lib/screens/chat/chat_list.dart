@@ -79,6 +79,28 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
+  String buildLastMessagePreview(List<types.Message>? lastMessages) {
+    if (lastMessages != null && lastMessages.isNotEmpty) {
+      final lastMessage = lastMessages.last;
+      String authorFirstName;
+      if (lastMessage.author.id == widget.userState.currentUser!.email) {
+        authorFirstName = 'You';
+      } else {
+        authorFirstName = '${lastMessage.author.firstName!} ${lastMessage.author.lastName!.substring(0, 1)}';
+      }
+
+      String lastMessageText;
+      if (lastMessage.type == types.MessageType.text) {
+        lastMessageText = (lastMessage as types.TextMessage).text;
+      } else {
+        lastMessageText = '[Attachment]';
+      }
+      return '$authorFirstName: $lastMessageText';
+    } else {
+      return 'No messages yet';
+    }
+  }
+
   Widget buildItem(BuildContext context, types.Room chatRoom) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
@@ -144,15 +166,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   const SizedBox(height: 5),
                   Container(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                        chatRoom.lastMessages == null || chatRoom.lastMessages!.isEmpty
-                            ? 'No messages yet'
-                            : chatRoom.lastMessages![-1].author.id == widget.userState.currentUser!.email
-                                ? 'You: '
-                                : chatRoom.type == types.RoomType.group
-                                    ? '${chatRoom.lastMessages![-1].author.firstName}: '
-                                    : ''
-                                        '${chatRoom.lastMessages![-1].type == types.MessageType.text ? (chatRoom.lastMessages![-1] as types.TextMessage).text : '[Attachment]'}',
+                    child: Text(buildLastMessagePreview(chatRoom.lastMessages),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

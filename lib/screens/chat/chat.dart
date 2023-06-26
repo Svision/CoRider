@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
 
@@ -50,7 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .doc(widget.userState.currentUser!.companyName)
         .collection('chatRooms')
         .doc(widget.room.id)
-        .collection('latestMessages')
+        .collection('messages')
         .orderBy('createdAt', descending: true)
         .snapshots();
     _user = widget.userState.currentUser!.toChatUser();
@@ -67,7 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .doc(widget.userState.currentUser!.companyName)
           .collection('chatRooms')
           .doc(widget.room.id)
-          .collection('latestMessages');
+          .collection('messages');
       final messageData = message.toJson();
       await messagesRef.add(messageData);
     } catch (e) {
@@ -81,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
-      author: _user,
+      author: _user, // only store user id in database
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: const Uuid().v4(),
       text: message.text,
@@ -115,8 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
 
-                final data = snapshot.data;
-                final messages = data?.docs.map((doc) {
+                final messages = snapshot.data?.docs.map((doc) {
                   final messageData = doc.data() as Map<String, dynamic>;
                   return types.Message.fromJson(messageData);
                 }).toList();
@@ -130,11 +131,31 @@ class _ChatScreenState extends State<ChatScreen> {
                   onSendPressed: _handleSendPressed,
                   showUserAvatars: true,
                   showUserNames: true,
+                  timeFormat: DateFormat('h:mm a'),
                   user: _user,
                 );
               },
             ),
     );
+  }
+
+  Future<types.Message> _fetchUserByMessage(types.Message message) async {
+    final user = await FirebaseFunctions.fetchUserByEmail(message.author.id);
+    if (user != null) {
+      message = message.copyWith(author: user.toChatUser());
+    }
+    return message;
+  }
+
+  Future<void> _fetchUsersByMessages(List<types.Message> messages) async {
+    final futures = messages.map((message) => _fetchUserByMessage(message)).toList();
+    final result = await Future.wait(futures);
+    debugPrint('result: ${result.first.toJson().toString()}');
+    if (mounted && result != _messages) {
+      setState(() {
+        _messages = result;
+      });
+    }
   }
 
   void _handleAttachmentPressed() {
