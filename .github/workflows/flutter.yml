@@ -11,13 +11,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-    analyze-and-build-android:
+    default:
       # # Basic analysis & Build Android APK and app bundle
-      runs-on: ubuntu-latest
+      runs-on: self-hosted
 
       steps:
         - uses: actions/checkout@v3
         - uses: subosito/flutter-action@v2
+          with:
+            channel: 'stable'
+            architecture: arm64
         - uses: actions/setup-java@v2
           with:
             distribution: 'zulu'
@@ -27,18 +30,10 @@ jobs:
           run: flutter test
         - name: flutter analyze
           run: flutter analyze --no-fatal-infos --no-fatal-warnings
-        - run: flutter build apk
-        - run: flutter build appbundle
-
-    build-ios:
-      # Build for iOS
-      runs-on: macos-latest
-
-      steps:
-        - uses: actions/checkout@v3
-        - uses: subosito/flutter-action@v2
-          with:
-            channel: 'stable'
-            architecture: x64
-        - run: flutter pub get
-        - run: flutter build ios --release --no-codesign
+        - name: Build Android APK and app bundle
+          run: |
+            flutter build apk
+            flutter build appbundle
+        - name: Build iOS
+          run: |
+            flutter build ios --release --no-codesign
