@@ -74,13 +74,13 @@ class UserState extends ChangeNotifier {
     }
   }
 
-  Future<types.Room?> getStoredChatRoomByRoomId(String roomId) async {
+  Future<types.Room?> getStoredChatRoomByRoomId(String roomId, {bool forceUpdate = false}) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     types.Room? storedChatRoom;
     if (sharedPreferences.getString(_storedChatRoomsKey) != null) {
       Map<String, types.Room> storedChatRooms = (jsonDecode(sharedPreferences.getString(_storedChatRoomsKey)!) as Map)
           .map((key, value) => MapEntry(key, types.Room.fromJson(value)));
-      if (storedChatRooms.containsKey(roomId)) {
+      if (storedChatRooms.containsKey(roomId) && !forceUpdate) {
         storedChatRoom = storedChatRooms[roomId];
         FirebaseFunctions.fetchChatRoom(currentUser!, roomId).then((fetchedChatRoom) {
           if (fetchedChatRoom != null && fetchedChatRoom != storedChatRoom) {
@@ -99,13 +99,13 @@ class UserState extends ChangeNotifier {
     return fetchedChatRoom;
   }
 
-  Future<UserModel?> getStoredUserByEmail(String email) async {
+  Future<UserModel?> getStoredUserByEmail(String email, {bool forceUpdate = false}) async {
     SharedPreferences sharedUsers = await SharedPreferences.getInstance();
     UserModel? storedUser;
     if (sharedUsers.getString(_storedUsersKey) != null) {
       Map<String, UserModel> storedUsers = (jsonDecode(sharedUsers.getString(_storedUsersKey)!) as Map)
           .map((key, value) => MapEntry(key, UserModel.fromJson(value)));
-      if (storedUsers.containsKey(email)) {
+      if (storedUsers.containsKey(email) && !forceUpdate) {
         storedUser = storedUsers[email];
         FirebaseFunctions.fetchUserByEmail(email).then((fetchedUser) {
           if (fetchedUser != null && fetchedUser != storedUser) {
