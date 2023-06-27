@@ -93,7 +93,7 @@ class UpcomingRidesState extends State<UpcomingRides> {
           return ListTile(
             title: Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
             subtitle: Text(
-                '${rideOffer.proposedDepartureTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
+                '${rideOffer.proposedLeaveTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
             trailing: requestedOfferStatus == RequestedOfferStatus.ACCEPTED
                 ? const Icon(Icons.check, color: Colors.green)
                 : requestedOfferStatus == RequestedOfferStatus.REJECTED

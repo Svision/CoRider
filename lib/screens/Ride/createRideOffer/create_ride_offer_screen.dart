@@ -23,7 +23,7 @@ class CreateRideOfferScreen extends StatefulWidget {
 }
 
 class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
-  TimeOfDay proposedStartTime = const TimeOfDay(hour: 8, minute: 30);
+  TimeOfDay proposedLeaveTime = const TimeOfDay(hour: 8, minute: 30);
   TimeOfDay proposedBackTime = const TimeOfDay(hour: 17, minute: 00);
   List<int> proposedWeekdays = [1, 2, 3, 4, 5];
   String? driverLocationName;
@@ -36,13 +36,13 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
   void _showTimePicker(bool forStart) async {
     final selectedTime = await showTimePicker(
       context: context,
-      initialTime: forStart ? proposedStartTime : proposedBackTime,
+      initialTime: forStart ? proposedLeaveTime : proposedBackTime,
     );
 
     if (selectedTime != null) {
       setState(() {
         if (forStart) {
-          proposedStartTime = selectedTime;
+          proposedLeaveTime = selectedTime;
         } else {
           proposedBackTime = selectedTime;
         }
@@ -89,7 +89,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => _showTimePicker(true),
-                      child: Text(proposedStartTime.format(context)),
+                      child: Text(proposedLeaveTime.format(context)),
                     ),
                   ),
                   const SizedBox(width: 16.0),
@@ -264,7 +264,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                         final rideOffer = RideOfferModel(
                           createdAt: DateTime.now(),
                           driverId: currentUser.email,
-                          proposedDepartureTime: proposedStartTime,
+                          proposedLeaveTime: proposedLeaveTime,
                           proposedBackTime: proposedBackTime,
                           proposedWeekdays: proposedWeekdays,
                           driverLocationName: driverLocationName!,

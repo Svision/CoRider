@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
+import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
@@ -178,19 +179,17 @@ class _ChatListScreenState extends State<ChatListScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: CircleAvatar(
                 maxRadius: 30,
-                backgroundColor: chatRoom.imageUrl == null ? Colors.grey : null,
+                backgroundColor: Utils.getUserAvatarNameColor(chatRoom.id),
                 child: chatRoom.imageUrl == null
-                    ? chatRoom.type == types.RoomType.group
-                        ? const Icon(
-                            Icons.group,
-                            color: Colors.white,
-                            size: 30,
-                          )
-                        : const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 30,
-                          )
+                    ? Icon(
+                        chatRoom.type == types.RoomType.group
+                            ? Icons.group
+                            : chatRoom.type == types.RoomType.channel
+                                ? Icons.message
+                                : Icons.person,
+                        color: Colors.white,
+                        size: 30,
+                      )
                     : ClipOval(
                         child: CachedNetworkImage(
                           imageUrl: chatRoom.imageUrl!,

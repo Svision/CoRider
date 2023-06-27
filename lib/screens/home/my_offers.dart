@@ -79,7 +79,7 @@ class MyOffersState extends State<MyOffers> {
             return ListTile(
               title: Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
               subtitle: Text(
-                  '${rideOffer.proposedDepartureTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
+                  '${rideOffer.proposedLeaveTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
               // Customize the tile as needed with other ride offer information
               // For example, add buttons or icons to edit or delete the ride offer
               onTap: () {

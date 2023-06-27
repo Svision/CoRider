@@ -289,8 +289,6 @@ class FirebaseFunctions {
           FirebaseFirestore.instance.collection("companies").doc(user.companyName).collection("rideOffers");
 
       final offersSnapshot = await offersCollection.get();
-      debugPrint(offersSnapshot.docs.first.data().toString());
-
       final offers = offersSnapshot.docs.map((e) => RideOfferModel.fromJson(e.data())).toList();
 
       return offers;
@@ -370,17 +368,33 @@ class FirebaseFunctions {
       );
 
       final db = FirebaseFirestore.instance;
+
       final user = UserModel(
           email: data.name!,
+          createdAt: DateTime.now(),
           firstName: data.additionalSignupData!['firstName']!,
-          lastName: data.additionalSignupData!['lastName']!);
+          lastName: data.additionalSignupData!['lastName']!,
+          chatRoomIds: ['default', '${data.name!}-channel']);
       final userJson = user.toJson();
-
       await db
           .collection("users")
           .doc(user.email)
           .set(userJson)
           .then((_) => debugPrint('DocumentSnapshot added with ID: ${user.email}'));
+
+      final types.Room notificationChannel = types.Room(
+        id: '${user.email}-channel',
+        name: 'Notifications',
+        users: [types.User(id: user.email)],
+        type: types.RoomType.channel,
+      );
+      final notificationChannelJson = notificationChannel.toJson();
+      await db
+          .collection("companies")
+          .doc(user.companyName)
+          .collection('chatRooms')
+          .doc(notificationChannel.id)
+          .set(notificationChannelJson);
 
       // User added successfully
       String successMessage = 'User ${userCredential.user} signed up successfully!';

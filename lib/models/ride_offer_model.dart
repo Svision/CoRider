@@ -7,7 +7,7 @@ class RideOfferModel {
   String id;
   String driverId;
   String vehicleId;
-  TimeOfDay? proposedDepartureTime;
+  TimeOfDay? proposedLeaveTime;
   TimeOfDay? proposedBackTime;
   Map<String, RequestedOfferStatus> requestedUserIds;
   List<int> proposedWeekdays;
@@ -22,7 +22,7 @@ class RideOfferModel {
     required this.createdAt,
     required this.driverId,
     required this.vehicleId,
-    required this.proposedDepartureTime,
+    required this.proposedLeaveTime,
     required this.proposedBackTime,
     this.requestedUserIds = const {},
     required this.proposedWeekdays,
@@ -36,9 +36,9 @@ class RideOfferModel {
         'id': id,
         'driverId': driverId,
         'vehicleId': vehicleId,
-        'proposedStartTime': '${proposedDepartureTime?.hour.toString()}:${proposedDepartureTime?.minute.toString()}',
+        'proposedLeaveTime': '${proposedLeaveTime?.hour.toString()}:${proposedLeaveTime?.minute.toString()}',
         'requestedUserIds': requestedUserIds.map((key, value) => MapEntry(key, value.index)),
-        'proposedBackTime': '${proposedBackTime?.hour.toString()} : ${proposedBackTime?.minute.toString()}',
+        'proposedBackTime': '${proposedBackTime?.hour.toString()}:${proposedBackTime?.minute.toString()}',
         'proposedWeekdays': proposedWeekdays,
         'driverLocationName': driverLocationName,
         'driverLocation': {
@@ -55,7 +55,7 @@ class RideOfferModel {
       createdAt: null,
       driverId: '',
       vehicleId: '',
-      proposedDepartureTime: null,
+      proposedLeaveTime: null,
       proposedBackTime: null,
       requestedUserIds: {},
       proposedWeekdays: [],
@@ -72,10 +72,10 @@ class RideOfferModel {
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       driverId: json['driverId'],
       vehicleId: json['vehicleId'],
-      proposedDepartureTime: json['proposedStartTime'] != null
+      proposedLeaveTime: json['proposedLeaveTime'] != null
           ? TimeOfDay(
-              hour: int.parse(json['proposedStartTime'].split(':')[0]),
-              minute: int.parse(json['proposedStartTime'].split(':')[1]),
+              hour: int.parse(json['proposedLeaveTime'].split(':')[0]),
+              minute: int.parse(json['proposedLeaveTime'].split(':')[1]),
             )
           : null,
       proposedBackTime: json['proposedBackTime'] != null

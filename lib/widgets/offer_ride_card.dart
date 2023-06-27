@@ -83,13 +83,23 @@ class _RideOfferCardState extends State<RideOfferCard> {
         children: [
           Row(
             children: [
+              const Icon(
+                Icons.flight_takeoff,
+                size: 16.0,
+              ),
+              const SizedBox(width: 4.0),
               Text(
-                'Start: ${widget.rideOffer.proposedDepartureTime!.format(context)}',
+                '${widget.rideOffer.proposedLeaveTime!.format(context)}',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(width: 8.0),
+              const Icon(
+                Icons.flight_land,
+                size: 16.0,
+              ),
+              const SizedBox(width: 4.0),
               Text(
-                'Back: ${widget.rideOffer.proposedBackTime!.format(context)}',
+                '${widget.rideOffer.proposedBackTime!.format(context)}',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ],

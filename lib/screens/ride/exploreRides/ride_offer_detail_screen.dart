@@ -47,7 +47,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Proposed Departure Time: \n${widget.rideOffer.proposedDepartureTime!.format(context)}',
+              'Proposed Leave Time: \n${widget.rideOffer.proposedLeaveTime!.format(context)}',
               style: const TextStyle(fontSize: 16.0),
             ),
             const SizedBox(height: 8.0),
