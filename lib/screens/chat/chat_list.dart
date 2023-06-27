@@ -205,10 +205,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 children: [
                   Container(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      chatRoom.name!,
-                      maxLines: 1,
-                    ),
+                    child: Text(chatRoom.name!,
+                        maxLines: 1, style: TextStyle(color: Utils.getUserAvatarNameColor(chatRoom.id))),
                   ),
                   const SizedBox(height: 5),
                   Container(
