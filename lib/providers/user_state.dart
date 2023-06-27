@@ -9,9 +9,13 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class UserState extends ChangeNotifier {
   UserModel? _currentUser;
+  static const String _currentUserKey = 'currentUser';
   List<RideOfferModel> _storedOffers = [];
+  static const String _storedOffersKey = 'storedOffers';
   Map<String, UserModel> _storedUsers = {};
+  static const String _storedUsersKey = 'storedUsers';
   Map<String, types.Room> _storedChatRooms = {};
+  static const String _storedChatRoomsKey = 'storedChatRooms';
 
   UserModel? get currentUser => _currentUser;
   List<RideOfferModel> get storedOffers => _storedOffers;
@@ -25,32 +29,32 @@ class UserState extends ChangeNotifier {
     } catch (e) {
       debugPrint('fetchAllOffers: $e');
     }
-    setCurrentOffers(allOffers);
+    setStoredOffers(allOffers);
     return allOffers;
   }
 
   Future<void> setCurrentUser(UserModel user) async {
     _currentUser = user;
     SharedPreferences sharedUser = await SharedPreferences.getInstance();
-    sharedUser.setString('currentUser', jsonEncode(user.toJson()));
-    debugPrint('setUser: ${sharedUser.getString('currentUser')}');
+    sharedUser.setString(_currentUserKey, jsonEncode(user.toJson()));
+    debugPrint('currentUser: ${sharedUser.getString(_currentUserKey)}');
     notifyListeners();
   }
 
-  Future<void> setCurrentOffers(List<RideOfferModel> offers) async {
+  Future<void> setStoredOffers(List<RideOfferModel> offers) async {
     _storedOffers = offers;
     SharedPreferences sharedOffers = await SharedPreferences.getInstance();
-    sharedOffers.setString('currentOffers', jsonEncode(offers));
+    sharedOffers.setString(_storedOffersKey, jsonEncode(offers));
     notifyListeners();
   }
 
   Future<void> setStoredUser(UserModel user) async {
     SharedPreferences sharedUsers = await SharedPreferences.getInstance();
-    final storedData = sharedUsers.getString('storedUsers') ?? '{}';
+    final storedData = sharedUsers.getString(_storedUsersKey) ?? '{}';
     final storedUsersMap = jsonDecode(storedData) as Map<String, dynamic>;
     if (!storedUsersMap.containsKey(user.email) || storedUsersMap[user.email] != user.toJson()) {
       storedUsersMap[user.email] = user.toJson();
-      sharedUsers.setString('storedUsers', jsonEncode(_storedUsers));
+      sharedUsers.setString(_storedUsersKey, jsonEncode(_storedUsers));
 
       _storedUsers = storedUsersMap.map((key, value) => MapEntry(key, UserModel.fromJson(value)));
       notifyListeners();
@@ -59,89 +63,87 @@ class UserState extends ChangeNotifier {
 
   Future<void> setStoredChatRoom(types.Room chatRoom) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    final storedData = sharedPreferences.getString('storedChatRooms') ?? '{}';
+    final storedData = sharedPreferences.getString(_storedChatRoomsKey) ?? '{}';
     final storedChatRoomsMap = jsonDecode(storedData) as Map<String, dynamic>;
     if (!storedChatRoomsMap.containsKey(chatRoom.id) || storedChatRoomsMap[chatRoom.id] != chatRoom.toJson()) {
       storedChatRoomsMap[chatRoom.id] = chatRoom.toJson();
-      sharedPreferences.setString('storedChatRooms', jsonEncode(_storedChatRooms));
+      sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
 
       _storedChatRooms = storedChatRoomsMap.map((key, value) => MapEntry(key, types.Room.fromJson(value)));
       notifyListeners();
     }
   }
 
-  Future<void> setOfferDriverImageUrlWithEmail(String email, String driverImageUrl) async {
-    SharedPreferences sharedOffers = await SharedPreferences.getInstance();
-    sharedOffers.setString('driverImageUrl-$email', driverImageUrl);
-    notifyListeners();
-  }
-
   Future<types.Room?> getStoredChatRoomByRoomId(String roomId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     types.Room? storedChatRoom;
-    if (sharedPreferences.getString('storedChatRooms') != null) {
-      Map<String, types.Room> storedChatRooms = (jsonDecode(sharedPreferences.getString('storedChatRooms')!) as Map)
+    if (sharedPreferences.getString(_storedChatRoomsKey) != null) {
+      Map<String, types.Room> storedChatRooms = (jsonDecode(sharedPreferences.getString(_storedChatRoomsKey)!) as Map)
           .map((key, value) => MapEntry(key, types.Room.fromJson(value)));
       if (storedChatRooms.containsKey(roomId)) {
         storedChatRoom = storedChatRooms[roomId];
+        FirebaseFunctions.fetchChatRoom(currentUser!, roomId).then((fetchedChatRoom) {
+          if (fetchedChatRoom != null && fetchedChatRoom != storedChatRoom) {
+            // update storedChatRooms
+            setStoredChatRoom(fetchedChatRoom);
+          }
+        });
+        return storedChatRoom;
       }
     }
-    FirebaseFunctions.fetchChatRoom(currentUser!, roomId).then((chatRoom) {
-      if (chatRoom != null) {
-        // update storedChatRooms
-        setStoredChatRoom(chatRoom);
-      }
-    });
-    return storedChatRoom;
+    final fetchedChatRoom = await FirebaseFunctions.fetchChatRoom(currentUser!, roomId);
+    if (fetchedChatRoom != null) {
+      // update storedChatRooms
+      setStoredChatRoom(fetchedChatRoom);
+    }
+    return fetchedChatRoom;
   }
 
   Future<UserModel?> getStoredUserByEmail(String email) async {
     SharedPreferences sharedUsers = await SharedPreferences.getInstance();
     UserModel? storedUser;
-    if (sharedUsers.getString('storedUsers') != null) {
-      Map<String, UserModel> storedUsers = (jsonDecode(sharedUsers.getString('storedUsers')!) as Map)
+    if (sharedUsers.getString(_storedUsersKey) != null) {
+      Map<String, UserModel> storedUsers = (jsonDecode(sharedUsers.getString(_storedUsersKey)!) as Map)
           .map((key, value) => MapEntry(key, UserModel.fromJson(value)));
       if (storedUsers.containsKey(email)) {
         storedUser = storedUsers[email];
+        FirebaseFunctions.fetchUserByEmail(email).then((fetchedUser) {
+          if (fetchedUser != null && fetchedUser != storedUser) {
+            // update storedUser
+            setStoredUser(fetchedUser);
+          }
+        });
+        return storedUser;
       }
     }
-    FirebaseFunctions.fetchUserByEmail(email).then((fetchedUser) {
-      if (fetchedUser != null) {
-        // update storedUser
-        setStoredUser(fetchedUser);
-      }
-    });
-    return storedUser;
-  }
-
-  Future<String?> getDriverImageUrlByEmail(String email) async {
-    SharedPreferences sharedOffers;
-    String? driverImageUrl;
-    try {
-      sharedOffers = await SharedPreferences.getInstance();
-      driverImageUrl = sharedOffers.getString('driverImageUrl-$email');
-    } catch (e) {
-      debugPrint('OfferDriverImageUrl not set for: $email');
+    final fetchedUser = await FirebaseFunctions.fetchUserByEmail(email);
+    if (fetchedUser != null) {
+      // update storedUser
+      setStoredUser(fetchedUser);
     }
-    return driverImageUrl;
+    return fetchedUser;
   }
 
   Future<void> signOff() async {
     _currentUser = null;
     _storedOffers = [];
+    _storedUsers = {};
+    _storedChatRooms = {};
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    debugPrint('signOffUser: ${sharedPreferences.getString('currentUser')}');
-    sharedPreferences.remove('currentUser');
-    sharedPreferences.remove('currentOffers');
-    sharedPreferences.remove('storedUsers');
-    sharedPreferences.remove('storedChatRooms');
+    debugPrint('signOffUser: ${sharedPreferences.getString(_currentUserKey)}');
+    sharedPreferences.remove(_currentUserKey);
+    sharedPreferences.remove(_storedOffersKey);
+    sharedPreferences.remove(_storedUsersKey);
+    sharedPreferences.remove(_storedChatRoomsKey);
     notifyListeners();
   }
 
   Future<void> loadData() async {
     SharedPreferences sharedPref = await SharedPreferences.getInstance();
-    String? currentUserString = sharedPref.getString('currentUser');
-    String? currentOffersString = sharedPref.getString('currentOffers');
+    String? currentUserString = sharedPref.getString(_currentUserKey);
+    String? storedOffersString = sharedPref.getString(_storedOffersKey);
+    String? storedUsersString = sharedPref.getString(_storedUsersKey);
+    String? storedChatRoomsString = sharedPref.getString(_storedChatRoomsKey);
     if (currentUserString != null) {
       try {
         await setCurrentUser(UserModel.fromJson(jsonDecode(currentUserString)));
@@ -156,24 +158,53 @@ class UserState extends ChangeNotifier {
           }
           debugPrint('currentUser: ${currentUser!.toJson().toString()}');
         });
-        if (currentOffersString != null) {
+
+        // get stored offers
+        if (storedOffersString != null) {
           try {
-            setCurrentOffers(
-                (jsonDecode(currentOffersString) as List<dynamic>).map((e) => RideOfferModel.fromJson(e)).toList());
+            setStoredOffers(
+                (jsonDecode(storedOffersString) as List<dynamic>).map((e) => RideOfferModel.fromJson(e)).toList());
             if (storedOffers.isEmpty) {
               FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
-                setCurrentOffers(offers);
+                setStoredOffers(offers);
               });
             }
-            debugPrint('currentOffer: ${storedOffers.toString()}');
+            debugPrint('storedOffers: ${storedOffers.toString()}');
           } catch (e) {
             debugPrint('Error parsing currentOfferString: $e');
           }
         } else {
           // fetch offers from firebase
           FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
-            setCurrentOffers(offers);
+            setStoredOffers(offers);
           });
+        }
+
+        // get stored users
+        if (storedUsersString != null) {
+          try {
+            _storedUsers = (jsonDecode(storedUsersString) as Map<String, dynamic>)
+                .map((key, value) => MapEntry(key, UserModel.fromJson(value)));
+            debugPrint('storedUsers: ${_storedUsers.toString()}');
+          } catch (e) {
+            debugPrint('Error parsing storedUsersString: $e');
+          }
+        }
+
+        // get stored chatRooms
+        if (storedChatRoomsString != null) {
+          try {
+            _storedChatRooms = (jsonDecode(storedChatRoomsString) as Map<String, dynamic>)
+                .map((key, value) => MapEntry(key, types.Room.fromJson(value)));
+            debugPrint('storedChatRooms: ${_storedChatRooms.toString()}');
+          } catch (e) {
+            debugPrint('Error parsing storedChatRoomsString: $e');
+          }
+        } else {
+          // fetch chatRooms from firebase
+          for (final chatRoomId in currentUser!.chatRoomIds) {
+            getStoredChatRoomByRoomId(chatRoomId);
+          }
         }
       } catch (e) {
         debugPrint('Error parsing currentUserString: $e');

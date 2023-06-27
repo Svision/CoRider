@@ -54,7 +54,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
       setState(() {
         offers = offers;
       });
-      widget.userState.setCurrentOffers(offers);
+      widget.userState.setStoredOffers(offers);
       _addMarkers();
     } catch (e) {
       debugPrint(e.toString());

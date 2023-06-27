@@ -15,10 +15,11 @@ class RideOfferModel {
   LatLng driverLocation;
   double price;
   String additionalDetails;
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   RideOfferModel({
     String? id,
+    required this.createdAt,
     required this.driverId,
     required this.vehicleId,
     required this.proposedDepartureTime,
@@ -29,8 +30,7 @@ class RideOfferModel {
     required this.driverLocation,
     required this.price,
     required this.additionalDetails,
-  })  : id = id ?? const Uuid().v4(),
-        createdAt = DateTime.now();
+  }) : id = id ?? const Uuid().v4();
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -47,11 +47,12 @@ class RideOfferModel {
         },
         'price': price,
         'additionalDetails': additionalDetails,
-        'createdAt': createdAt.toIso8601String(),
+        'createdAt': createdAt!.toIso8601String(),
       };
 
   factory RideOfferModel.generateUnknown() {
     return RideOfferModel(
+      createdAt: null,
       driverId: '',
       vehicleId: '',
       proposedDepartureTime: null,
@@ -68,6 +69,7 @@ class RideOfferModel {
   factory RideOfferModel.fromJson(Map<String, dynamic> json) {
     return RideOfferModel(
       id: json['id'],
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       driverId: json['driverId'],
       vehicleId: json['vehicleId'],
       proposedDepartureTime: json['proposedStartTime'] != null

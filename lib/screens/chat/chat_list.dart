@@ -18,17 +18,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
   bool isLoadingChats = false;
 
   Future<void> triggerRefresh() async {
-    List<types.Room> chatRooms = [];
     List<String> chatRoomIds = chatRooms.map((e) => e.id).toList();
     for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
       final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId);
       if (chatRoom != null && !chatRoomIds.contains(chatRoom.id)) {
-        chatRooms.add(chatRoom);
+        setState(() {
+          chatRooms.add(chatRoom);
+        });
       }
     }
-    setState(() {
-      this.chatRooms = chatRooms;
-    });
   }
 
   void loadChatRooms() async {
@@ -36,21 +34,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
       setState(() {
         isLoadingChats = true;
       });
-      triggerRefresh().then((value) => {
-            setState(() {
-              isLoadingChats = false;
-            })
-          });
-    } else {
-      List<String> chatRoomIds = chatRooms.map((e) => e.id).toList();
-      for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
-        final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId);
-        if (chatRoom != null && !chatRoomIds.contains(chatRoom.id)) {
-          setState(() {
-            chatRooms.add(chatRoom);
-          });
-        }
-      }
+      await triggerRefresh();
+      // await Future.delayed(const Duration(seconds: 5));
+      setState(() {
+        isLoadingChats = false;
+      });
     }
   }
 
@@ -58,7 +46,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
   void initState() {
     super.initState();
     chatRooms = widget.userState.storedChatRooms.values.toList();
-    debugPrint(widget.userState.storedChatRooms.toString());
     loadChatRooms();
   }
 

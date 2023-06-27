@@ -262,6 +262,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                           return;
                         }
                         final rideOffer = RideOfferModel(
+                          createdAt: DateTime.now(),
                           driverId: currentUser.email,
                           proposedDepartureTime: proposedStartTime,
                           proposedBackTime: proposedBackTime,

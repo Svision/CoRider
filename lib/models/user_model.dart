@@ -17,7 +17,7 @@ class UserModel {
   List<String> chatRoomIds;
 
   UserModel({
-    DateTime? createdAt,
+    this.createdAt,
     required this.email,
     required this.firstName,
     required this.lastName,
@@ -26,8 +26,7 @@ class UserModel {
     this.myOfferIds = const [],
     this.requestedOfferIds = const [],
     this.chatRoomIds = const [],
-  })  : companyName = email.split("@")[1],
-        createdAt = DateTime.now();
+  }) : companyName = email.split("@")[1];
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
