@@ -48,24 +48,26 @@ class UserState extends ChangeNotifier {
     SharedPreferences sharedUsers = await SharedPreferences.getInstance();
     final storedData = sharedUsers.getString('storedUsers') ?? '{}';
     final storedUsersMap = jsonDecode(storedData) as Map<String, dynamic>;
-    storedUsersMap[user.email] = user.toJson();
+    if (!storedUsersMap.containsKey(user.email) || storedUsersMap[user.email] != user.toJson()) {
+      storedUsersMap[user.email] = user.toJson();
+      sharedUsers.setString('storedUsers', jsonEncode(_storedUsers));
 
-    sharedUsers.setString('storedUsers', jsonEncode(_storedUsers));
-
-    _storedUsers = storedUsersMap.map((key, value) => MapEntry(key, UserModel.fromJson(value)));
-    notifyListeners();
+      _storedUsers = storedUsersMap.map((key, value) => MapEntry(key, UserModel.fromJson(value)));
+      notifyListeners();
+    }
   }
 
   Future<void> setStoredChatRoom(types.Room chatRoom) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     final storedData = sharedPreferences.getString('storedChatRooms') ?? '{}';
     final storedChatRoomsMap = jsonDecode(storedData) as Map<String, dynamic>;
-    storedChatRoomsMap[chatRoom.id] = chatRoom.toJson();
+    if (!storedChatRoomsMap.containsKey(chatRoom.id) || storedChatRoomsMap[chatRoom.id] != chatRoom.toJson()) {
+      storedChatRoomsMap[chatRoom.id] = chatRoom.toJson();
+      sharedPreferences.setString('storedChatRooms', jsonEncode(_storedChatRooms));
 
-    sharedPreferences.setString('storedChatRooms', jsonEncode(_storedChatRooms));
-
-    _storedChatRooms = storedChatRoomsMap.map((key, value) => MapEntry(key, types.Room.fromJson(value)));
-    notifyListeners();
+      _storedChatRooms = storedChatRoomsMap.map((key, value) => MapEntry(key, types.Room.fromJson(value)));
+      notifyListeners();
+    }
   }
 
   Future<void> setOfferDriverImageUrlWithEmail(String email, String driverImageUrl) async {
@@ -84,12 +86,13 @@ class UserState extends ChangeNotifier {
         storedChatRoom = storedChatRooms[roomId];
       }
     }
-    final fetchedChatRoom = await FirebaseFunctions.fetchChatRoom(currentUser!, roomId);
-    if (fetchedChatRoom != null && fetchedChatRoom != storedChatRoom) {
-      // update storedChatRooms
-      setStoredChatRoom(fetchedChatRoom);
-    }
-    return fetchedChatRoom;
+    FirebaseFunctions.fetchChatRoom(currentUser!, roomId).then((chatRoom) {
+      if (chatRoom != null) {
+        // update storedChatRooms
+        setStoredChatRoom(chatRoom);
+      }
+    });
+    return storedChatRoom;
   }
 
   Future<UserModel?> getStoredUserByEmail(String email) async {
@@ -102,12 +105,13 @@ class UserState extends ChangeNotifier {
         storedUser = storedUsers[email];
       }
     }
-    final fetchedUser = await FirebaseFunctions.fetchUserByEmail(email);
-    if (fetchedUser != null && fetchedUser != storedUser) {
-      // update storedUser
-      setStoredUser(fetchedUser);
-    }
-    return fetchedUser;
+    FirebaseFunctions.fetchUserByEmail(email).then((fetchedUser) {
+      if (fetchedUser != null) {
+        // update storedUser
+        setStoredUser(fetchedUser);
+      }
+    });
+    return storedUser;
   }
 
   Future<String?> getDriverImageUrlByEmail(String email) async {

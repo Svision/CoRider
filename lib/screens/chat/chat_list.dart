@@ -23,9 +23,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
       final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId);
       if (chatRoom != null && !chatRoomIds.contains(chatRoom.id)) {
-        setState(() {
-          chatRooms.add(chatRoom);
-        });
+        chatRooms.add(chatRoom);
       }
     }
     setState(() {
