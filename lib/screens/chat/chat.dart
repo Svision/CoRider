@@ -27,6 +27,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  Timer? _timer;
   Stream<QuerySnapshot>? _messagesStream;
   late List<types.Message> _messages;
   late User _user;
@@ -44,6 +45,26 @@ class _ChatScreenState extends State<ChatScreen> {
         .snapshots();
     _user = widget.userState.currentUser!.toChatUser();
     _messages = widget.room.lastMessages ?? [];
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed
+    _cancelTimer();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    // Schedule the function to be called every 5 seconds
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      widget.userState.setStoredChatRoom(widget.room.copyWith(lastMessages: _messages));
+    });
+  }
+
+  void _cancelTimer() {
+    // Cancel the timer if it's active
+    _timer?.cancel();
   }
 
   Future<void> _sendMessage(types.Message message) async {
