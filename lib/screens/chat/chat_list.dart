@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
+import 'package:corider/screens/chat/extensions.dart';
 import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -26,7 +27,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     }
     if (chatRooms != fetchedChatRooms) {
       setState(() {
-        chatRooms = fetchedChatRooms;
+        chatRooms = fetchedChatRooms.sortedRooms();
       });
     }
   }
@@ -48,7 +49,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   void initState() {
     super.initState();
-    chatRooms = widget.userState.storedChatRooms.values.toList();
+    chatRooms = widget.userState.storedChatRooms.values.toList().sortedRooms();
     loadChatRooms();
   }
 
