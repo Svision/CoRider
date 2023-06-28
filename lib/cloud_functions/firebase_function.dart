@@ -5,6 +5,7 @@ import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/models/vehicle_model.dart';
+import 'package:corider/providers/user_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -13,7 +14,7 @@ import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class FirebaseFunctions {
-  static Future<types.Room?> fetchChatRoom(UserModel user, String roomId) async {
+  static Future<types.Room?> fetchChatRoom(UserState userState, UserModel user, String roomId) async {
     types.Room? chatRoom;
     try {
       final chatRoomDoc = await FirebaseFirestore.instance
@@ -31,15 +32,22 @@ class FirebaseFunctions {
             .doc(roomId)
             .collection("messages")
             .orderBy('createdAt', descending: true)
-            .limit(1)
             .get();
         if (messagesSnapshot.docs.isNotEmpty) {
-          final lastMessageDoc = messagesSnapshot.docs.first;
-          types.Message lastMessage = types.Message.fromJson(lastMessageDoc.data());
-          final user = await fetchUserByEmail(lastMessage.author.id);
-          lastMessage = lastMessage.copyWith(author: user!.toChatUser());
+          List<types.Message> lastMessages = List<types.Message>.from(
+              messagesSnapshot.docs.map((messageDoc) => types.Message.fromJson(messageDoc.data())));
+          await Future.forEach(lastMessages.asMap().entries, (entry) async {
+            final index = entry.key;
+            final message = entry.value;
+
+            final getUser = await userState.getStoredUserByEmail(message.author.id);
+            lastMessages[index] = message.copyWith(
+                author: getUser?.toChatUser(),
+                status: getUser?.email == user.email ? types.Status.sent : types.Status.seen);
+          });
+
           chatRoom = chatRoom.copyWith(
-            lastMessages: [lastMessage],
+            lastMessages: lastMessages,
           );
         }
       } else {
@@ -59,34 +67,16 @@ class FirebaseFunctions {
     return chatRoom;
   }
 
-  static Future<List<types.Room>> fetchChatRooms(UserModel user) async {
+  static Future<List<types.Room>> fetchChatRooms(UserState userState, UserModel user) async {
     List<types.Room> chatRooms = [];
     try {
-      final chatRoomsCollection =
-          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection("chatRooms");
-      final chatRoomsSnapshot = await chatRoomsCollection.where('userIds', arrayContains: user.email).get();
-      if (chatRoomsSnapshot.docs.isNotEmpty) {
-        await Future.forEach(chatRoomsSnapshot.docs, (roomSnapshot) async {
-          types.Room room = types.Room.fromJson(roomSnapshot.data());
-          final messagesSnapshot = await chatRoomsCollection
-              .doc(room.id)
-              .collection('messages')
-              .orderBy('createdAt', descending: true)
-              .limit(1)
-              .get();
-
-          if (messagesSnapshot.docs.isNotEmpty) {
-            final lastMessageDoc = messagesSnapshot.docs.first;
-            types.Message lastMessage = types.Message.fromJson(lastMessageDoc.data());
-            final user = await fetchUserByEmail(lastMessage.author.id);
-            lastMessage = lastMessage.copyWith(author: user!.toChatUser());
-            room = room.copyWith(
-              lastMessages: [lastMessage],
-            );
+      await Future.forEach(user.chatRoomIds, (chatRoomId) async {
+        fetchChatRoom(userState, user, chatRoomId).then((chatRoom) {
+          if (chatRoom != null) {
+            chatRooms.add(chatRoom);
           }
-          chatRooms.add(room);
         });
-      }
+      });
     } catch (e) {
       debugPrint(e.toString());
     }

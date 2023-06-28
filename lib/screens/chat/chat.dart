@@ -28,7 +28,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   Stream<QuerySnapshot>? _messagesStream;
-  List<types.Message> _messages = [];
+  late List<types.Message> _messages;
   late User _user;
 
   @override
@@ -43,6 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .orderBy('createdAt', descending: true)
         .snapshots();
     _user = widget.userState.currentUser!.toChatUser();
+    _messages = widget.room.lastMessages ?? [];
   }
 
   Future<void> _sendMessage(types.Message message) async {

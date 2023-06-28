@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
 import 'package:corider/utils/utils.dart';
@@ -19,22 +20,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
   bool isLoadingChats = false;
 
   Future<void> triggerRefresh() async {
-    List<String> chatRoomIds = chatRooms.map((e) => e.id).toList();
-    for (final chatRoomId in widget.userState.currentUser!.chatRoomIds) {
-      final chatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoomId, forceUpdate: true);
-      if (chatRoom == null) {
-        continue;
-      }
-      if (!chatRoomIds.contains(chatRoom.id)) {
-        setState(() {
-          chatRooms.add(chatRoom);
-        });
-      } else if (chatRooms.firstWhere((c) => c.id == chatRoom.id) != chatRoom) {
-        setState(() {
-          chatRooms.removeWhere((c) => c.id == chatRoom.id);
-          chatRooms.add(chatRoom);
-        });
-      }
+    final fetchedChatRooms = await FirebaseFunctions.fetchChatRooms(widget.userState, widget.userState.currentUser!);
+    for (final chatRoom in fetchedChatRooms) {
+      widget.userState.setStoredChatRoom(chatRoom);
+    }
+    if (chatRooms != fetchedChatRooms) {
+      setState(() {
+        chatRooms = fetchedChatRooms;
+      });
     }
   }
 
@@ -44,10 +37,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
         isLoadingChats = true;
       });
       await triggerRefresh();
-      // await Future.delayed(const Duration(seconds: 5));
       setState(() {
         isLoadingChats = false;
       });
+    } else {
+      await triggerRefresh();
     }
   }
 
@@ -78,53 +72,17 @@ class _ChatListScreenState extends State<ChatListScreen> {
       ),
       body: isLoadingChats
           ? const Center(child: CircularProgressIndicator())
-          : chatRooms.isEmpty
-              ? Container(
-                  alignment: Alignment.center,
-                  margin: const EdgeInsets.only(bottom: 200),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: () => {
-                            setState(() {
-                              isLoadingChats = true;
-                            }),
-                            triggerRefresh().then((value) => {
-                                  setState(() {
-                                    isLoadingChats = false;
-                                  })
-                                })
-                          },
-                          icon: const Icon(
-                            Icons.refresh,
-                            color: Colors.blue,
-                          ),
-                          iconSize: 48,
-                        ),
-                        const Text(
-                          'No chats yet :(',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: triggerRefresh,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: chatRooms.length,
-                    itemBuilder: (context, index) {
-                      final chatRoom = chatRooms[index];
-                      return buildItem(context, chatRoom);
-                    },
-                  ),
-                ),
+          : RefreshIndicator(
+              onRefresh: triggerRefresh,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: chatRooms.length,
+                itemBuilder: (context, index) {
+                  final chatRoom = chatRooms[index];
+                  return buildItem(context, chatRoom);
+                },
+              ),
+            ),
     );
   }
 

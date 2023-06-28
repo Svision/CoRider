@@ -72,7 +72,7 @@ class UserState extends ChangeNotifier {
     types.Room? storedChatRoom;
     if (_storedChatRooms.containsKey(roomId) && !forceUpdate) {
       storedChatRoom = _storedChatRooms[roomId];
-      FirebaseFunctions.fetchChatRoom(currentUser!, roomId).then((fetchedChatRoom) {
+      FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId).then((fetchedChatRoom) {
         if (fetchedChatRoom != null && fetchedChatRoom != storedChatRoom) {
           // update storedChatRooms
           setStoredChatRoom(fetchedChatRoom);
@@ -80,7 +80,7 @@ class UserState extends ChangeNotifier {
       });
       return storedChatRoom;
     }
-    final fetchedChatRoom = await FirebaseFunctions.fetchChatRoom(currentUser!, roomId);
+    final fetchedChatRoom = await FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId);
     if (fetchedChatRoom != null) {
       // update storedChatRooms
       setStoredChatRoom(fetchedChatRoom);
@@ -186,9 +186,11 @@ class UserState extends ChangeNotifier {
           }
         } else {
           // fetch chatRooms from firebase
-          for (final chatRoomId in currentUser!.chatRoomIds) {
-            getStoredChatRoomByRoomId(chatRoomId, forceUpdate: true);
-          }
+          FirebaseFunctions.fetchChatRooms(this, currentUser!).then((chatRooms) {
+            for (final chatRoom in chatRooms) {
+              setStoredChatRoom(chatRoom);
+            }
+          });
         }
       } catch (e) {
         debugPrint('Error parsing currentUserString: $e');
