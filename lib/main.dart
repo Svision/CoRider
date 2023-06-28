@@ -30,7 +30,7 @@ class MyApp extends StatefulWidget {
   const MyApp({Key? key, required this.userState}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -44,9 +46,13 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _sendMessage(types.Message message) async {
-    setState(() {
-      _messages.insert(0, message);
-    });
+    // handle image/file differently
+    if (message.type == types.MessageType.text) {
+      message = message.copyWith(status: types.Status.sending);
+      setState(() {
+        _messages.insert(0, message);
+      });
+    }
     try {
       final messagesRef = FirebaseFirestore.instance
           .collection('companies')
@@ -55,13 +61,33 @@ class _ChatScreenState extends State<ChatScreen> {
           .doc(widget.room.id)
           .collection('messages');
       final messageData = message.toJson();
-      await messagesRef.add(messageData);
-    } catch (e) {
-      debugPrint('Error sending message: $e');
-      // Revert optimistic update
+      await messagesRef.add(messageData).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Sending message timed out');
+        },
+      );
       setState(() {
-        _messages.remove(message);
+        final index = _messages.indexWhere((m) => m.id == message.id);
+        if (index != -1) {
+          _messages[index] = message.copyWith(status: types.Status.sent);
+        }
       });
+    } catch (e) {
+      if (e is TimeoutException) {
+        debugPrint('Sending message timed out');
+      } else {
+        debugPrint('Error sending message: $e');
+      }
+      // Revert optimistic update
+      if (message.type == types.MessageType.text) {
+        setState(() {
+          final index = _messages.indexWhere((m) => m.id == message.id);
+          if (index != -1) {
+            _messages[index] = message.copyWith(status: types.Status.error);
+          }
+        });
+      }
     }
   }
 
@@ -89,7 +115,7 @@ class _ChatScreenState extends State<ChatScreen> {
           : StreamBuilder<QuerySnapshot>(
               stream: _messagesStream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState != ConnectionState.active) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
@@ -101,11 +127,23 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
 
-                final messages = snapshot.data?.docs.map((doc) {
-                  final messageData = doc.data() as Map<String, dynamic>;
-                  return types.Message.fromJson(messageData);
-                }).toList();
-                _messages = messages ?? [];
+                int existingCreatedAt = _messages.isNotEmpty ? _messages.first.createdAt! : 0;
+
+                final newMessages = snapshot.data?.docs
+                    .map((doc) {
+                      final messageData = doc.data() as Map<String, dynamic>;
+                      types.Message message = types.Message.fromJson(messageData);
+                      if (message.author.id == _user.id) {
+                        message = message.copyWith(status: types.Status.sent);
+                      } else {
+                        message = message.copyWith(status: types.Status.seen);
+                      }
+                      return message;
+                    })
+                    .where((message) => message.createdAt! > existingCreatedAt)
+                    .toList();
+
+                _messages.insertAll(0, newMessages ?? []);
                 _messages = _fetchUsersByMessages(_messages);
 
                 return Chat(
@@ -154,9 +192,15 @@ class _ChatScreenState extends State<ChatScreen> {
                   Navigator.pop(context);
                   _handleImageSelection();
                 },
-                child: const Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Text('Photo'),
+                child: const Row(
+                  children: [
+                    Icon(Icons.photo),
+                    SizedBox(width: 8),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text('Photo'),
+                    ),
+                  ],
                 ),
               ),
               TextButton(
@@ -164,16 +208,28 @@ class _ChatScreenState extends State<ChatScreen> {
                   Navigator.pop(context);
                   _handleFileSelection();
                 },
-                child: const Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Text('File'),
+                child: const Row(
+                  children: [
+                    Icon(Icons.attach_file),
+                    SizedBox(width: 8),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text('File'),
+                    ),
+                  ],
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Text('Cancel'),
+                child: const Row(
+                  children: [
+                    Icon(Icons.cancel),
+                    SizedBox(width: 8),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text('Cancel'),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -197,6 +253,7 @@ class _ChatScreenState extends State<ChatScreen> {
         name: result.files.single.name,
         size: result.files.single.size,
         uri: result.files.single.path!,
+        status: types.Status.sending,
       );
       setState(() {
         _messages.insert(0, placeholderMessage);
@@ -234,20 +291,24 @@ class _ChatScreenState extends State<ChatScreen> {
             contentType: lookupMimeType(result.files.single.path!),
           ),
         );
-        final snapshot = await uploadTask.whenComplete(() => null);
+        final snapshot = await uploadTask.whenComplete(() => null).timeout(const Duration(seconds: 120), onTimeout: () {
+          uploadTask.cancel();
+          throw TimeoutException('File upload timed out');
+        });
         final downloadUrl = await snapshot.ref.getDownloadURL();
 
         // update message with uploaded file url
         types.FileMessage message = placeholderMessage.copyWith(uri: downloadUrl) as types.FileMessage;
 
-        // remove placeholder
-        _messages.remove(placeholderMessage);
         _sendMessage(message);
       } catch (e) {
-        debugPrint('Error sending message: $e');
+        debugPrint('Error sending file: $e');
         // Revert optimistic update
         setState(() {
-          _messages.remove(placeholderMessage);
+          final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
+          if (index != -1) {
+            _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
+          }
         });
         return;
       }
@@ -274,6 +335,7 @@ class _ChatScreenState extends State<ChatScreen> {
         size: bytes.length,
         uri: result.path,
         width: image.width.toDouble(),
+        status: types.Status.sending,
       );
       setState(() {
         _messages.insert(0, placeholderMessage);
@@ -289,20 +351,24 @@ class _ChatScreenState extends State<ChatScreen> {
             .child(result.name);
 
         final uploadTask = storageRef.putData(bytes);
-        final snapshot = await uploadTask.whenComplete(() => null);
+        final snapshot = await uploadTask.whenComplete(() => null).timeout(const Duration(seconds: 120), onTimeout: () {
+          uploadTask.cancel();
+          throw TimeoutException('Image upload timed out');
+        });
         final downloadUrl = await snapshot.ref.getDownloadURL();
 
         // update message with uploaded image url
         types.ImageMessage message = placeholderMessage.copyWith(uri: downloadUrl) as types.ImageMessage;
 
-        // remove placeholder
-        _messages.remove(placeholderMessage);
         _sendMessage(message);
       } catch (e) {
-        setState(() {
-          _messages.remove(placeholderMessage);
-        });
         debugPrint('Error sending image: $e');
+        setState(() {
+          final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
+          if (index != -1) {
+            _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
+          }
+        });
         return;
       }
     }

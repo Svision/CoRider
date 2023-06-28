@@ -42,6 +42,16 @@ class FirebaseFunctions {
             lastMessages: [lastMessage],
           );
         }
+      } else {
+        // remove chatRoomId from user's chatRoomIds
+        FirebaseFirestore.instance
+            .collection("companies")
+            .doc(user.companyName)
+            .collection("users")
+            .doc(user.email)
+            .update({
+          'chatRoomIds': FieldValue.arrayRemove([roomId])
+        });
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -434,6 +444,13 @@ class FirebaseFunctions {
         await storageRef.delete();
       } catch (e) {
         debugPrint(e.toString());
+      }
+
+      final chatRoomsCollection =
+          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection('chatRooms');
+      final userChannelRoomsQuerySnapshot = await chatRoomsCollection.doc('${user.email}-channel').get();
+      if (userChannelRoomsQuerySnapshot.exists) {
+        await userChannelRoomsQuerySnapshot.reference.delete();
       }
 
       debugPrint('Deleting offer created by user ${user.email} from ${user.companyName}');

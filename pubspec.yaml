@@ -36,6 +36,7 @@ dependencies:
   flutter_chat_types: ^3.6.1
   file_picker: ^5.3.2
   open_filex: ^4.3.2
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:
