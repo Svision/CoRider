@@ -429,13 +429,12 @@ class _ChatScreenState extends State<ChatScreen> {
             _messages[index] = updatedMessage;
           });
 
-          final client = http.Client();
-          final request = await client.get(Uri.parse(message.uri));
-          final bytes = request.bodyBytes;
           final documentsDir = (await getApplicationDocumentsDirectory()).path;
           localPath = '$documentsDir/${message.name}';
 
           if (!File(localPath).existsSync()) {
+            final request = await http.Client().get(Uri.parse(message.uri));
+            final bytes = request.bodyBytes;
             final file = File(localPath);
             await file.writeAsBytes(bytes);
           }

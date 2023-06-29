@@ -30,7 +30,7 @@ jobs:
 
     build-android:
       # Build Android APK and app bundle
-      needs: set-up
+      needs: basic-analysis
       runs-on: self-hosted
 
       steps:
@@ -43,7 +43,7 @@ jobs:
 
     build-ios:
       # Build for iOS
-      needs: set-up
+      needs: basic-analysis
       runs-on: self-hosted
       steps:
         - run: flutter build ios --release --no-codesign
