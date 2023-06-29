@@ -89,7 +89,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   String buildLastMessagePreview(List<types.Message>? lastMessages) {
     if (lastMessages != null && lastMessages.isNotEmpty) {
-      final lastMessage = lastMessages.last;
+      final lastMessage = lastMessages.first;
       String authorFirstName;
       if (lastMessage.author.id == widget.userState.currentUser!.email) {
         authorFirstName = 'You';

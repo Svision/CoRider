@@ -39,25 +39,30 @@ jobs:
       runs-on: self-hosted
 
       steps:
-        - uses: actions/setup-java@v2
+        - name: Set up JDK 11
+          uses: actions/setup-java@v2
           with:
             distribution: 'zulu'
             java-version: '11'
-        - run: flutter build apk
-        - run: flutter build appbundle
+        - name: Build release APK
+          run: flutter build apk --release
+        - name: Build release app bundle
+          run: flutter build appbundle
         - name: Upload APK
           uses: actions/upload-artifact@v3
           with:
-            name: apk
-            path: build/release/apk/app-release.apk
+            name: CoRider.apk
+            path: build/app/outputs/apk/release/app-release.apk
 
     build-ios:
       # Build for iOS
       needs: basic-analysis
       runs-on: self-hosted
       steps:
-        - run: flutter build ios --release --no-codesign
-        - uses: actions/upload-artifact@v3
+        - name: Build release iOS app
+          run: flutter build ios --release --no-codesign
+        - name: Upload iOS app
+          uses: actions/upload-artifact@v3
           with:
-            name: ios
-            path: build/release/ios/Runner.app
+            name: CoRider.app
+            path: build/ios/iphoneos/Runner.app
