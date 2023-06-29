@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_parsed_text/flutter_parsed_text.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
@@ -178,6 +180,22 @@ class _ChatScreenState extends State<ChatScreen> {
                   showUserNames: true,
                   timeFormat: DateFormat('h:mm a'),
                   user: _user,
+                  imageMessageBuilder: (imageMessage, {required messageWidth}) => CachedNetworkImage(
+                    imageUrl: imageMessage.uri,
+                    width: messageWidth * 0.8,
+                  ),
+                  textMessageOptions: TextMessageOptions(matchers: [
+                    MatchText(
+                      pattern: '```[^`]+```',
+                      style: PatternStyle.code.textStyle,
+                      renderText: ({required String str, required String pattern}) => {
+                        'display': str.replaceAll(
+                          '```',
+                          '',
+                        ),
+                      },
+                    ),
+                  ]),
                 );
               },
             ),
