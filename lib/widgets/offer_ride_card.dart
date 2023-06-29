@@ -173,6 +173,7 @@ class _RideOfferCardState extends State<RideOfferCard> {
             context,
             MaterialPageRoute(
                 builder: (context) => RideOfferDetailScreen(
+                      userState: widget.userState,
                       rideOffer: widget.rideOffer,
                       refreshOffersKey: widget.refreshOffersIndicatorKey,
                     )),

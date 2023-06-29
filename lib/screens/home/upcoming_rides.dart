@@ -105,6 +105,7 @@ class UpcomingRidesState extends State<UpcomingRides> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (context) => RideOfferDetailScreen(
+                          userState: widget.userState,
                           rideOffer: rideOffer,
                           refreshOffersKey: refreshMyRequestedOfferIndicatorKey,
                         )),

@@ -1,21 +1,39 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/screens/chat/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:provider/provider.dart';
 
 class RideOfferDetailScreen extends StatefulWidget {
+  final UserState userState;
   final RideOfferModel rideOffer;
   final GlobalKey? refreshOffersKey;
 
-  const RideOfferDetailScreen({Key? key, required this.rideOffer, this.refreshOffersKey}) : super(key: key);
+  const RideOfferDetailScreen({Key? key, required this.userState, required this.rideOffer, this.refreshOffersKey})
+      : super(key: key);
   @override
   RideOfferDetailScreenState createState() => RideOfferDetailScreenState();
 }
 
 class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   bool isRequesting = false;
+  UserModel? driverUser;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      isRequesting = true;
+    });
+    widget.userState.getStoredUserByEmail(widget.rideOffer.driverId).then((user) => {
+          setState(() {
+            driverUser = user;
+            isRequesting = false;
+          })
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +100,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'PassengerIds: \n${widget.rideOffer.requestedUserIds.toString()}',
+              'RequestedUserIds: \n${widget.rideOffer.requestedUserIds.toString()}',
               style: const TextStyle(fontSize: 16.0),
             ),
             // Add more details as needed
@@ -139,44 +157,84 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                     child: const Text('Withdraw Request')),
                               ],
                             )
-                          : ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  isRequesting = true;
-                                });
-                                currentUser.requestRide(userState, widget.rideOffer.id).then((err) => {
-                                      setState(() {
-                                        isRequesting = false;
-                                      }),
-                                      if (err == null)
-                                        {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Ride request sent!'),
-                                              duration: Duration(seconds: 1),
-                                            ),
-                                          ),
-                                          Navigator.of(context).pop(),
-                                        }
-                                      else
-                                        {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text("Ride request failed! $err"),
-                                              duration: const Duration(seconds: 2),
-                                            ),
-                                          )
-                                        }
+                          : Column(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isRequesting = true;
                                     });
-                                if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
-                                  GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
-                                      widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
-                                  refreshOffersIndicatorKey.currentState?.show();
-                                } else {
-                                  debugPrint('widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
-                                }
-                              },
-                              child: const Text('Request Ride'),
+                                    currentUser.requestChatWithUser(widget.userState, driverUser!).then((chatRoom) => {
+                                          setState(() {
+                                            isRequesting = false;
+                                          }),
+                                          if (chatRoom != null)
+                                            {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => ChatScreen(
+                                                    userState: widget.userState,
+                                                    room: chatRoom,
+                                                  ),
+                                                ),
+                                              )
+                                            }
+                                          else
+                                            {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text("Chat request failed!"),
+                                                  duration: Duration(seconds: 2),
+                                                ),
+                                              )
+                                            }
+                                        });
+                                  },
+                                  child: const Text('Chat'),
+                                ),
+                                const SizedBox(height: 16.0),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isRequesting = true;
+                                    });
+                                    currentUser.requestRide(userState, widget.rideOffer.id).then((err) => {
+                                          setState(() {
+                                            isRequesting = false;
+                                          }),
+                                          if (err == null)
+                                            {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('Ride request sent!'),
+                                                  duration: Duration(seconds: 1),
+                                                ),
+                                              ),
+                                              Navigator.of(context).pop(),
+                                            }
+                                          else
+                                            {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text("Ride request failed! $err"),
+                                                  duration: const Duration(seconds: 2),
+                                                ),
+                                              )
+                                            }
+                                        });
+                                    if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
+                                      GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
+                                          widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
+                                      refreshOffersIndicatorKey.currentState?.show();
+                                    } else {
+                                      debugPrint(
+                                          'widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
+                                    }
+                                  },
+                                  child: const Text('Request Ride'),
+                                ),
+                              ],
                             )
                       : ElevatedButton(
                           onPressed: () {

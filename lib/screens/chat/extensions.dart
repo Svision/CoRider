@@ -2,6 +2,9 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 extension ChatListExntension on List<types.Room> {
   void sortRooms() {
+    if (isEmpty) {
+      return;
+    }
     // order chat rooms by last message timestamp
     sort((a, b) {
       // notification room should be at the top

@@ -2,6 +2,9 @@ import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/utils/utils.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 
 class UserModel {
@@ -126,6 +129,26 @@ class UserModel {
       return null;
     } else {
       return err;
+    }
+  }
+
+  Future<types.Room?> requestChatWithUser(UserState userState, UserModel otherUser) async {
+    try {
+      String? roomId = Utils.getRoomIdByTwoUser(email, otherUser.email);
+      if (!chatRoomIds.contains(roomId)) {
+        roomId = await FirebaseFunctions.requestChatWithUser(userState, this, otherUser);
+      }
+      if (roomId != null) {
+        if (!chatRoomIds.contains(roomId)) {
+          chatRoomIds.add(roomId);
+        }
+        return await userState.getStoredChatRoomByRoomId(roomId, forceUpdate: true);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      debugPrint('requestChatWithUser: $e');
+      return null;
     }
   }
   //#endregion

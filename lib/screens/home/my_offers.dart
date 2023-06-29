@@ -86,6 +86,7 @@ class MyOffersState extends State<MyOffers> {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                       builder: (context) => RideOfferDetailScreen(
+                            userState: widget.userState,
                             rideOffer: rideOffer,
                             refreshOffersKey: refreshMyOffersIndicatorKey,
                           )),

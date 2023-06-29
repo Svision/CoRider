@@ -6,6 +6,7 @@ import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -14,12 +15,43 @@ import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class FirebaseFunctions {
-  static Future<types.Room?> fetchChatRoom(UserState userState, UserModel user, String roomId) async {
+  static Future<String?> requestChatWithUser(UserState userState, UserModel user, UserModel otherUser) async {
+    String? chatRoomId;
+    try {
+      final potentialChatRoom = types.Room(
+        id: Utils.getRoomIdByTwoUser(user.email, otherUser.email),
+        type: types.RoomType.direct,
+        users: [types.User(id: otherUser.email), types.User(id: user.email)],
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      await FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("chatRooms")
+          .doc(potentialChatRoom.id)
+          .set(potentialChatRoom.toJson());
+      await Future.wait([
+        FirebaseFirestore.instance.collection("users").doc(user.email).update({
+          'chatRoomIds': FieldValue.arrayUnion([potentialChatRoom.id])
+        }),
+        FirebaseFirestore.instance.collection("users").doc(otherUser.email).update({
+          'chatRoomIds': FieldValue.arrayUnion([potentialChatRoom.id])
+        })
+      ]);
+      chatRoomId = potentialChatRoom.id;
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return chatRoomId;
+  }
+
+  static Future<types.Room?> fetchChatRoom(UserState userState, UserModel currentUser, String roomId) async {
     types.Room? chatRoom;
     try {
       final chatRoomDoc = await FirebaseFirestore.instance
           .collection("companies")
-          .doc(user.companyName)
+          .doc(currentUser.companyName)
           .collection("chatRooms")
           .doc(roomId)
           .get();
@@ -27,7 +59,7 @@ class FirebaseFunctions {
         chatRoom = types.Room.fromJson(chatRoomDoc.data()!);
         final messagesSnapshot = await FirebaseFirestore.instance
             .collection("companies")
-            .doc(user.companyName)
+            .doc(currentUser.companyName)
             .collection("chatRooms")
             .doc(roomId)
             .collection("messages")
@@ -43,20 +75,29 @@ class FirebaseFunctions {
             final getUser = await userState.getStoredUserByEmail(message.author.id);
             lastMessages[index] = message.copyWith(
                 author: getUser?.toChatUser(),
-                status: getUser?.email == user.email ? types.Status.sent : types.Status.seen);
+                status: getUser?.email == currentUser.email ? types.Status.sent : types.Status.seen);
           });
 
           chatRoom = chatRoom.copyWith(
             lastMessages: lastMessages,
           );
         }
+
+        if (chatRoom.type == types.RoomType.direct) {
+          final otherUser = chatRoom.users.firstWhere((user) => user.id != currentUser.email);
+          final getOtherUser = await userState.getStoredUserByEmail(otherUser.id);
+          chatRoom = chatRoom.copyWith(
+            imageUrl: getOtherUser?.profileImage,
+            name: getOtherUser?.fullName ?? otherUser.id,
+          );
+        }
       } else {
         // remove chatRoomId from user's chatRoomIds
         FirebaseFirestore.instance
             .collection("companies")
-            .doc(user.companyName)
+            .doc(currentUser.companyName)
             .collection("users")
-            .doc(user.email)
+            .doc(currentUser.email)
             .update({
           'chatRoomIds': FieldValue.arrayRemove([roomId])
         });

@@ -1,4 +1,6 @@
+import 'package:corider/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class Utils {
   static Color getColorFromValue(String value) {
@@ -50,5 +52,22 @@ class Utils {
     ];
     final index = userId.hashCode % colors.length;
     return colors[index];
+  }
+
+  static String getRoomIdByTwoUser(String user1, String user2) {
+    final users = [user1, user2];
+    users.sort();
+    return users.join('_');
+  }
+
+  static types.Room displayedDirectRoomInfo(types.Room room, UserModel otherUser) {
+    if (room.type != types.RoomType.direct) {
+      return room;
+    }
+    return room.copyWith(
+      imageUrl: otherUser.profileImage,
+      name: otherUser.fullName,
+      users: room.users,
+    );
   }
 }
