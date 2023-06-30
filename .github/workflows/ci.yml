@@ -48,15 +48,15 @@ jobs:
           run: flutter build apk --release
         - name: Build release app bundle
           run: flutter build appbundle
-        - name: Delete previous APK artifact
-          uses: geekyeggo/delete-artifact@v2
-          with:
-            name: CoRider.apk
-        - name: Upload APK
-          uses: actions/upload-artifact@v3
-          with:
-            name: CoRider.apk
-            path: build/app/outputs/apk/release/app-release.apk
+        # - name: Delete previous APK artifact
+        #   uses: geekyeggo/delete-artifact@v2
+        #   with:
+        #     name: CoRider.apk
+        # - name: Upload APK
+        #   uses: actions/upload-artifact@v3
+        #   with:
+        #     name: CoRider.apk
+        #     path: build/app/outputs/apk/release/app-release.apk
 
     build-ios:
       # Build for iOS
@@ -65,12 +65,12 @@ jobs:
       steps:
         - name: Build release iOS app
           run: flutter build ios --release --no-codesign
-        - name: Delete previous iOS app artifact
-          uses: geekyeggo/delete-artifact@v2
-          with:
-            name: CoRider.app
-        - name: Upload iOS app
-          uses: actions/upload-artifact@v3
-          with:
-            name: CoRider.app
-            path: build/ios/iphoneos/Runner.app
+        # - name: Delete previous iOS app artifact
+        #   uses: geekyeggo/delete-artifact@v2
+        #   with:
+        #     name: CoRider.app
+        # - name: Upload iOS app
+        #   uses: actions/upload-artifact@v3
+        #   with:
+        #     name: CoRider.app
+        #     path: build/ios/iphoneos/Runner.app
