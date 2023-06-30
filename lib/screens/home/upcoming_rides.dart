@@ -2,6 +2,7 @@ import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
 import 'package:corider/utils/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 
@@ -91,16 +92,17 @@ class UpcomingRidesState extends State<UpcomingRides> {
           }
 
           return ListTile(
-            title: Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
+                Text(' - ${describeEnum(requestedOfferStatus)}',
+                    style: TextStyle(color: Utils.requestStatusToColor(requestedOfferStatus))),
+              ],
+            ),
             subtitle: Text(
                 '${rideOffer.proposedLeaveTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
-            trailing: requestedOfferStatus == RequestedOfferStatus.ACCEPTED
-                ? const Icon(Icons.check, color: Colors.green)
-                : requestedOfferStatus == RequestedOfferStatus.REJECTED
-                    ? const Icon(Icons.close, color: Colors.red)
-                    : requestedOfferStatus == RequestedOfferStatus.PENDING
-                        ? const Icon(Icons.pending, color: Colors.grey)
-                        : const Icon(Icons.error, color: Colors.orange),
+            trailing: Utils.requestStatusToIcon(requestedOfferStatus),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(

@@ -1,7 +1,10 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
+import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
+import 'package:corider/utils/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:provider/provider.dart';
@@ -98,11 +101,37 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
               'Additional Details: \n${widget.rideOffer.additionalDetails}',
               style: const TextStyle(fontSize: 16.0),
             ),
-            const SizedBox(height: 8.0),
-            Text(
-              'RequestedUserIds: \n${widget.rideOffer.requestedUserIds.toString()}',
-              style: const TextStyle(fontSize: 16.0),
-            ),
+            if (widget.rideOffer.driverId == currentUser.email)
+              Column(
+                children: [
+                  const SizedBox(height: 8.0),
+                  const Text(
+                    'Requested Users:',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Column(
+                    children: widget.rideOffer.requestedUserIds.entries.map((entry) {
+                      String userId = entry.key;
+                      RequestedOfferStatus status = entry.value;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(userId),
+                          Row(
+                            children: [Text('Status: ${describeEnum(status)}'), Utils.requestStatusToIcon(status)],
+                          ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            child: const Icon(Icons.check),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+
             // Add more details as needed
             const SizedBox(height: 32.0),
             Center(

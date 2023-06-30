@@ -1,3 +1,4 @@
+import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -69,5 +70,35 @@ class Utils {
       name: otherUser.fullName,
       users: room.users,
     );
+  }
+
+  static Icon requestStatusToIcon(RequestedOfferStatus status) {
+    switch (status) {
+      case RequestedOfferStatus.INVALID:
+        return Icon(Icons.error, color: requestStatusToColor(status));
+      case RequestedOfferStatus.PENDING:
+        return Icon(Icons.pending, color: requestStatusToColor(status));
+      case RequestedOfferStatus.ACCEPTED:
+        return Icon(Icons.check, color: requestStatusToColor(status));
+      case RequestedOfferStatus.REJECTED:
+        return Icon(Icons.close, color: requestStatusToColor(status));
+      default:
+        return Icon(Icons.pending, color: requestStatusToColor(status));
+    }
+  }
+
+  static Color requestStatusToColor(RequestedOfferStatus status) {
+    switch (status) {
+      case RequestedOfferStatus.INVALID:
+        return Colors.red;
+      case RequestedOfferStatus.PENDING:
+        return Colors.orange;
+      case RequestedOfferStatus.ACCEPTED:
+        return Colors.green;
+      case RequestedOfferStatus.REJECTED:
+        return Colors.red;
+      default:
+        return Colors.orange;
+    }
   }
 }
