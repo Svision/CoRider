@@ -13,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:uuid/uuid.dart';
 
 class FirebaseFunctions {
   static Future<String?> requestChatWithUser(UserState userState, UserModel user, UserModel otherUser) async {
@@ -217,19 +218,35 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> requestRideByRideOfferId(UserModel user, String rideOfferId) async {
+  static Future<String?> requestRideByRideOffer(UserModel user, RideOfferModel rideOffer) async {
     try {
       await FirebaseFirestore.instance
           .collection('companies')
           .doc(user.companyName)
           .collection('rideOffers')
-          .doc(rideOfferId)
+          .doc(rideOffer.id)
           .set({
         'requestedUserIds': {user.email: RequestedOfferStatus.PENDING.index},
       }, SetOptions(merge: true));
       await FirebaseFirestore.instance.collection('users').doc(user.email).update({
-        'requestedOfferIds': FieldValue.arrayUnion([rideOfferId]),
+        'requestedOfferIds': FieldValue.arrayUnion([rideOffer.id]),
       });
+      // notify driver
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(user.companyName)
+          .collection('chatRooms')
+          .doc('${rideOffer.driverId}-channel')
+          .collection('messages')
+          .add(
+            types.TextMessage(
+              id: const Uuid().v4(),
+              author: const types.User(id: 'notifications'),
+              createdAt: DateTime.now().millisecondsSinceEpoch,
+              text: 'You have a new ride request from ${user.fullName}',
+            ).toJson(),
+          );
+
       return null;
     } catch (e) {
       return e.toString();

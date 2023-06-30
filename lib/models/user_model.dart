@@ -110,10 +110,10 @@ class UserModel {
     }
   }
 
-  Future<String?> requestRide(UserState userState, String rideOfferId) async {
-    final err = await FirebaseFunctions.requestRideByRideOfferId(this, rideOfferId);
+  Future<String?> requestRide(UserState userState, RideOfferModel rideOffer) async {
+    final err = await FirebaseFunctions.requestRideByRideOffer(this, rideOffer);
     if (err == null) {
-      requestedOfferIds.add(rideOfferId);
+      requestedOfferIds.add(rideOffer.id);
       userState.setCurrentUser(this);
       return null;
     } else {

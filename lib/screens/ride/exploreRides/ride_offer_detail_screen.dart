@@ -199,7 +199,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                     setState(() {
                                       isRequesting = true;
                                     });
-                                    currentUser.requestRide(userState, widget.rideOffer.id).then((err) => {
+                                    currentUser.requestRide(userState, widget.rideOffer).then((err) => {
                                           setState(() {
                                             isRequesting = false;
                                           }),

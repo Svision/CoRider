@@ -94,7 +94,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       if (lastMessage.author.id == widget.userState.currentUser!.email) {
         authorFirstName = 'You';
       } else {
-        authorFirstName = '${lastMessage.author.firstName!} ${lastMessage.author.lastName!.substring(0, 1)}';
+        authorFirstName =
+            '${lastMessage.author.firstName ?? 'Unknown'} ${lastMessage.author.lastName?.substring(0, 1)}';
       }
 
       String lastMessageText;
@@ -103,7 +104,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       } else {
         lastMessageText = '[Attachment]';
       }
-      return '$authorFirstName: $lastMessageText';
+      return lastMessage.author.id == 'notifications' ? lastMessageText : '$authorFirstName: $lastMessageText';
     } else {
       return 'No messages yet';
     }

@@ -176,7 +176,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   onMessageTap: _handleMessageTap,
                   onPreviewDataFetched: _handlePreviewDataFetched,
                   onSendPressed: _handleSendPressed,
-                  showUserAvatars: true,
+                  showUserAvatars: widget.room.type == types.RoomType.channel ? false : true,
                   showUserNames: true,
                   timeFormat: DateFormat('h:mm a'),
                   user: _user,
@@ -184,6 +184,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     imageUrl: imageMessage.uri,
                     width: messageWidth * 0.8,
                   ),
+                  customBottomWidget: widget.room.type == types.RoomType.channel ? const SizedBox(height: 16) : null,
                   textMessageOptions: TextMessageOptions(matchers: [
                     MatchText(
                       pattern: '```[^`]+```',
@@ -208,6 +209,9 @@ class _ChatScreenState extends State<ChatScreen> {
       final user = widget.userState.storedUsers[message.author.id];
       message = message.copyWith(author: user!.toChatUser());
     } else {
+      if (message.author.id == 'notifications') {
+        return message.copyWith(author: const types.User(id: 'notifications'));
+      }
       // store user for future use
       widget.userState.getStoredUserByEmail(message.author.id);
     }
