@@ -117,13 +117,23 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(userId),
+                          Text(userId.split('@')[0]),
                           Row(
-                            children: [Text('Status: ${describeEnum(status)}'), Utils.requestStatusToIcon(status)],
+                            children: [Text('${describeEnum(status)}'), Utils.requestStatusToIcon(status)],
                           ),
                           ElevatedButton(
                             onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
                             child: const Icon(Icons.check),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: const Icon(Icons.close),
                           ),
                         ],
                       );
