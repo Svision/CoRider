@@ -1,5 +1,6 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
+import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/models/vehicle_model.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/utils/utils.dart';
@@ -149,6 +150,26 @@ class UserModel {
     } catch (e) {
       debugPrint('requestChatWithUser: $e');
       return null;
+    }
+  }
+
+  Future<String?> acceptRideRequest(String rideOfferId, String userId) async {
+    final err = await FirebaseFunctions.changeRideRequestStatusWithUserId(
+        this, rideOfferId, userId, RequestedOfferStatus.ACCEPTED);
+    if (err == null) {
+      return null;
+    } else {
+      return err;
+    }
+  }
+
+  Future<String?> rejectRideRequest(String rideOfferId, String userId) async {
+    final err = await FirebaseFunctions.changeRideRequestStatusWithUserId(
+        this, rideOfferId, userId, RequestedOfferStatus.REJECTED);
+    if (err == null) {
+      return null;
+    } else {
+      return err;
     }
   }
   //#endregion

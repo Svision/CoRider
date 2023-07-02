@@ -24,6 +24,16 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   bool isRequesting = false;
   UserModel? driverUser;
 
+  void refreshOffers() {
+    if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
+      GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
+          widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
+      refreshOffersIndicatorKey.currentState?.show();
+    } else {
+      debugPrint('widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -122,14 +132,98 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                             children: [Text('${describeEnum(status)}'), Utils.requestStatusToIcon(status)],
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              if (status != RequestedOfferStatus.ACCEPTED) {
+                                setState(() {
+                                  isRequesting = true;
+                                });
+                                widget.userState.currentUser!
+                                    .acceptRideRequest(widget.rideOffer.id, userId)
+                                    .then((err) => {
+                                          setState(() {
+                                            isRequesting = false;
+                                          }),
+                                          if (err == null)
+                                            {
+                                              setState(() {
+                                                widget.rideOffer.requestedUserIds[userId] =
+                                                    RequestedOfferStatus.ACCEPTED;
+                                              }),
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('Ride request accepted!'),
+                                                  duration: Duration(seconds: 1),
+                                                ),
+                                              ),
+                                            }
+                                          else
+                                            {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text('Error: $err'),
+                                                  duration: const Duration(seconds: 2),
+                                                ),
+                                              ),
+                                            }
+                                        });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Ride request already accepted!'),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                             ),
                             child: const Icon(Icons.check),
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              if (status != RequestedOfferStatus.REJECTED) {
+                                setState(() {
+                                  isRequesting = true;
+                                });
+                                widget.userState.currentUser!
+                                    .rejectRideRequest(widget.rideOffer.id, userId)
+                                    .then((err) => {
+                                          setState(() {
+                                            isRequesting = false;
+                                          }),
+                                          if (err == null)
+                                            {
+                                              setState(() {
+                                                widget.rideOffer.requestedUserIds[userId] =
+                                                    RequestedOfferStatus.REJECTED;
+                                              }),
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('Ride request rejected!'),
+                                                  duration: Duration(seconds: 1),
+                                                ),
+                                              ),
+                                            }
+                                          else
+                                            {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text('Error: $err'),
+                                                  duration: const Duration(seconds: 2),
+                                                ),
+                                              ),
+                                            }
+                                        });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Ride request already rejected!'),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                             ),
@@ -184,14 +278,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                                 )
                                               },
                                           });
-                                      if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
-                                        GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
-                                            widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
-                                        refreshOffersIndicatorKey.currentState?.show();
-                                      } else {
-                                        debugPrint(
-                                            'widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
-                                      }
+                                      refreshOffers();
                                     },
                                     child: const Text('Withdraw Request')),
                               ],
@@ -262,14 +349,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                               )
                                             }
                                         });
-                                    if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
-                                      GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
-                                          widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
-                                      refreshOffersIndicatorKey.currentState?.show();
-                                    } else {
-                                      debugPrint(
-                                          'widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
-                                    }
+                                    refreshOffers();
                                   },
                                   child: const Text('Request Ride'),
                                 ),
@@ -293,13 +373,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                       )
                                     });
                             Navigator.of(context).pop();
-                            if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
-                              GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey =
-                                  widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
-                              refreshOffersIndicatorKey.currentState?.show();
-                            } else {
-                              debugPrint('widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
-                            }
+                            refreshOffers();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,

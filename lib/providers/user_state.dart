@@ -10,7 +10,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 class UserState extends ChangeNotifier {
   UserModel? _currentUser;
   static const String _currentUserKey = 'currentUser';
-  List<RideOfferModel> _storedOffers = [];
+  Map<String, RideOfferModel> _storedOffers = {};
   static const String _storedOffersKey = 'storedOffers';
   Map<String, UserModel> _storedUsers = {};
   static const String _storedUsersKey = 'storedUsers';
@@ -18,7 +18,7 @@ class UserState extends ChangeNotifier {
   static const String _storedChatRoomsKey = 'storedChatRooms';
 
   UserModel? get currentUser => _currentUser;
-  List<RideOfferModel> get storedOffers => _storedOffers;
+  Map<String, RideOfferModel> get storedOffers => _storedOffers;
   Map<String, UserModel> get storedUsers => _storedUsers;
   Map<String, types.Room> get storedChatRooms => _storedChatRooms;
 
@@ -29,7 +29,9 @@ class UserState extends ChangeNotifier {
     } catch (e) {
       debugPrint('fetchAllOffers: $e');
     }
-    setStoredOffers(allOffers);
+    for (final offer in allOffers) {
+      setStoredOffer(offer);
+    }
     return allOffers;
   }
 
@@ -41,11 +43,11 @@ class UserState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setStoredOffers(List<RideOfferModel> offers) async {
-    if (offers != _storedOffers) {
-      _storedOffers = offers;
-      SharedPreferences sharedOffers = await SharedPreferences.getInstance();
-      sharedOffers.setString(_storedOffersKey, jsonEncode(offers));
+  Future<void> setStoredOffer(RideOfferModel offer) async {
+    if (!_storedOffers.containsKey(offer.id) || _storedOffers[offer.id] != offer) {
+      _storedOffers[offer.id] = offer;
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString(_storedOffersKey, jsonEncode(_storedOffers));
       notifyListeners();
     }
   }
@@ -66,6 +68,26 @@ class UserState extends ChangeNotifier {
       sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
       notifyListeners();
     }
+  }
+
+  Future<RideOfferModel?> getStoredOfferById(String id, {bool forceUpdate = false}) async {
+    RideOfferModel? storedOffer;
+    if (_storedOffers.containsKey(id) && !forceUpdate) {
+      storedOffer = _storedOffers[id];
+      FirebaseFunctions.fetchRideOfferById(currentUser!, id).then((fetchedOffer) {
+        if (fetchedOffer != null && fetchedOffer != storedOffer) {
+          // update storedOffers
+          setStoredOffer(fetchedOffer);
+        }
+      });
+      return storedOffer;
+    }
+    final fetchedOffer = await FirebaseFunctions.fetchRideOfferById(currentUser!, id);
+    if (fetchedOffer != null) {
+      // update storedOffers
+      setStoredOffer(fetchedOffer);
+    }
+    return fetchedOffer;
   }
 
   Future<types.Room?> getStoredChatRoomByRoomId(String roomId, {bool forceUpdate = false}) async {
@@ -110,7 +132,7 @@ class UserState extends ChangeNotifier {
 
   Future<void> signOff() async {
     _currentUser = null;
-    _storedOffers = [];
+    _storedOffers = {};
     _storedUsers = {};
     _storedChatRooms = {};
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -146,21 +168,18 @@ class UserState extends ChangeNotifier {
         // get stored offers
         if (storedOffersString != null) {
           try {
-            setStoredOffers(
-                (jsonDecode(storedOffersString) as List<dynamic>).map((e) => RideOfferModel.fromJson(e)).toList());
-            if (storedOffers.isEmpty) {
-              FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
-                setStoredOffers(offers);
-              });
-            }
-            debugPrint('storedOffers: ${storedOffers.toString()}');
+            _storedOffers = (jsonDecode(storedOffersString) as Map<String, dynamic>)
+                .map((key, value) => MapEntry(key, RideOfferModel.fromJson(value)));
+            debugPrint('storedOffers: ${_storedOffers.toString()}');
           } catch (e) {
             debugPrint('Error parsing currentOfferString: $e');
           }
         } else {
           // fetch offers from firebase
           FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
-            setStoredOffers(offers);
+            for (final offer in offers) {
+              setStoredOffer(offer);
+            }
           });
         }
 

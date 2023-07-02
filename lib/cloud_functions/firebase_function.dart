@@ -16,6 +16,28 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:uuid/uuid.dart';
 
 class FirebaseFunctions {
+  static Future<String?> changeRideRequestStatusWithUserId(
+      UserModel user, String rideOfferId, String userId, RequestedOfferStatus status) async {
+    try {
+      final rideOfferRef = FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("rideOffers")
+          .doc(rideOfferId);
+      final rideOfferDoc = await rideOfferRef.get();
+      if (rideOfferDoc.exists) {
+        await rideOfferRef.set({
+          'requestedUserIds': {userId: status.index},
+        }, SetOptions(merge: true));
+      } else {
+        return "Ride offer no longer exists";
+      }
+    } catch (e) {
+      return e.toString();
+    }
+    return null;
+  }
+
   static Future<String?> requestChatWithUser(UserState userState, UserModel user, UserModel otherUser) async {
     String? chatRoomId;
     try {
@@ -210,7 +232,7 @@ class FirebaseFunctions {
           .doc(offer.id)
           .set(offer.toJson());
       await FirebaseFirestore.instance.collection('users').doc(user.email).update({
-        'rideOffers': FieldValue.arrayUnion([offer.id]),
+        'myOfferIds': FieldValue.arrayUnion([offer.id]),
       });
       return null;
     } on FirebaseException catch (e) {
@@ -263,7 +285,7 @@ class FirebaseFunctions {
       await FirebaseFirestore.instance
           .collection('companies')
           .doc(user.companyName)
-          .collection('rideOffers')
+          .collection('myOfferIds')
           .doc(rideOfferId)
           .set({
         'requestedUserIds': {user.email: FieldValue.delete()},
@@ -322,7 +344,7 @@ class FirebaseFunctions {
       offersCollection.doc(offerId).delete();
 
       await FirebaseFirestore.instance.collection('users').doc(user.email).update({
-        'rideOffers': FieldValue.arrayRemove([offerId]),
+        'myOfferIds': FieldValue.arrayRemove([offerId]),
       });
       return null;
     } catch (e) {

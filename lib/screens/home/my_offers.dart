@@ -23,8 +23,10 @@ class MyOffersState extends State<MyOffers> {
   }
 
   void getMyOffers() {
-    final myOffers =
-        widget.userState.storedOffers.where((offer) => offer.driverId == widget.userState.currentUser!.email).toList();
+    final myOffers = widget.userState.storedOffers.entries
+        .where((offer) => widget.userState.currentUser!.myOfferIds.contains(offer.key))
+        .map((offer) => offer.value)
+        .toList();
     setState(() {
       this.myOffers = myOffers;
     });

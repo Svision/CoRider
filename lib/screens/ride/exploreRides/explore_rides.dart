@@ -54,7 +54,9 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
       setState(() {
         offers = offers;
       });
-      widget.userState.setStoredOffers(offers);
+      for (final offer in offers) {
+        widget.userState.setStoredOffer(offer);
+      }
       _addMarkers();
     } catch (e) {
       debugPrint(e.toString());
@@ -65,7 +67,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     final UserModel currentUser = userState.currentUser!;
-    offers = userState.storedOffers;
+    offers = userState.storedOffers.values.toList();
     _addMarkers();
     return Scaffold(
       appBar: AppBar(
