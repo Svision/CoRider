@@ -145,7 +145,7 @@ class FirebaseFunctions {
     return chatRoom;
   }
 
-  static Future<List<types.Room>> fetchChatRooms(UserState userState, UserModel user) async {
+  static Future<List<types.Room>> fetchAllChatRooms(UserState userState, UserModel user) async {
     List<types.Room> chatRooms = [];
     try {
       await Future.wait(user.chatRoomIds.map((chatRoomId) async {

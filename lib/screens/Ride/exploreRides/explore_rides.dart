@@ -1,4 +1,3 @@
-import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
@@ -50,13 +49,10 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
 
   Future<void> _handleRefresh(UserModel user) async {
     try {
-      offers = await FirebaseFunctions.fetchAllOffersbyUser(user);
+      await widget.userState.fetchAllOffers();
       setState(() {
-        offers = offers;
+        offers = widget.userState.storedOffers.values.toList();
       });
-      for (final offer in offers) {
-        widget.userState.setStoredOffer(offer);
-      }
       _addMarkers();
     } catch (e) {
       debugPrint(e.toString());

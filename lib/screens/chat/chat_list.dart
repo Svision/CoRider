@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
 import 'package:corider/screens/chat/extensions.dart';
@@ -21,15 +20,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
   bool isLoadingChats = false;
 
   Future<void> triggerRefresh() async {
-    final fetchedChatRooms = await FirebaseFunctions.fetchChatRooms(widget.userState, widget.userState.currentUser!);
-    for (final chatRoom in fetchedChatRooms) {
-      widget.userState.setStoredChatRoom(chatRoom);
-    }
-    if (chatRooms != fetchedChatRooms) {
-      setState(() {
-        chatRooms = fetchedChatRooms.sortedRooms();
-      });
-    }
+    await widget.userState.fetchAllChatRooms();
+    setState(() {
+      chatRooms = widget.userState.storedChatRooms.values.toList().sortedRooms();
+    });
   }
 
   void loadChatRooms() async {

@@ -22,6 +22,17 @@ class UserState extends ChangeNotifier {
   Map<String, UserModel> get storedUsers => _storedUsers;
   Map<String, types.Room> get storedChatRooms => _storedChatRooms;
 
+  Future<List<types.Room>> fetchAllChatRooms() async {
+    List<types.Room> allChatRooms = [];
+    try {
+      allChatRooms = await FirebaseFunctions.fetchAllChatRooms(this, currentUser!);
+    } catch (e) {
+      debugPrint('fetchAllChatRooms: $e');
+    }
+    await setAllStoredChatRooms(allChatRooms);
+    return allChatRooms;
+  }
+
   Future<List<RideOfferModel>> fetchAllOffers() async {
     List<RideOfferModel> allOffers = [];
     try {
@@ -29,9 +40,7 @@ class UserState extends ChangeNotifier {
     } catch (e) {
       debugPrint('fetchAllOffers: $e');
     }
-    for (final offer in allOffers) {
-      setStoredOffer(offer);
-    }
+    await setAllStoredOffers(allOffers);
     return allOffers;
   }
 
@@ -43,27 +52,56 @@ class UserState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setStoredOffer(RideOfferModel offer) async {
-    if (!_storedOffers.containsKey(offer.id) || _storedOffers[offer.id] != offer) {
-      _storedOffers[offer.id] = offer;
+  Future<void> setAllStoredOffers(List<RideOfferModel> offers) async {
+    _storedOffers = {for (final offer in offers) offer.id: offer};
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString(_storedOffersKey, jsonEncode(offers));
+    notifyListeners();
+  }
+
+  Future<void> setStoredOffer(String offerId, RideOfferModel? offer) async {
+    if (offer != null && (!_storedOffers.containsKey(offer.id) || _storedOffers[offer.id] != offer)) {
+      _storedOffers[offerId] = offer;
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString(_storedOffersKey, jsonEncode(_storedOffers));
+      notifyListeners();
+    } else if (offer == null && _storedOffers.containsKey(offerId)) {
+      _storedOffers.remove(offerId);
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString(_storedOffersKey, jsonEncode(_storedOffers));
       notifyListeners();
     }
   }
 
-  Future<void> setStoredUser(UserModel user) async {
-    if (!_storedUsers.containsKey(user.email) || _storedUsers[user.email] != user) {
+  Future<void> setStoredUser(String userId, UserModel? user) async {
+    if (user != null && (!_storedUsers.containsKey(user.email) || _storedUsers[user.email] != user)) {
       _storedUsers[user.email] = user;
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString(_storedUsersKey, jsonEncode(_storedUsers));
+      notifyListeners();
+    } else if (user == null && _storedUsers.containsKey(userId)) {
+      _storedUsers.remove(userId);
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString(_storedUsersKey, jsonEncode(_storedUsers));
       notifyListeners();
     }
   }
 
-  Future<void> setStoredChatRoom(types.Room chatRoom) async {
-    if (!_storedChatRooms.containsKey(chatRoom.id) || _storedChatRooms[chatRoom.id] != chatRoom) {
+  Future<void> setAllStoredChatRooms(List<types.Room> chatRooms) async {
+    _storedChatRooms = {for (final chatRoom in chatRooms) chatRoom.id: chatRoom};
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(chatRooms));
+    notifyListeners();
+  }
+
+  Future<void> setStoredChatRoom(String chatRoomId, types.Room? chatRoom) async {
+    if (chatRoom != null && (!_storedChatRooms.containsKey(chatRoom.id) || _storedChatRooms[chatRoom.id] != chatRoom)) {
       _storedChatRooms[chatRoom.id] = chatRoom;
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
+      notifyListeners();
+    } else if (chatRoom == null && _storedChatRooms.containsKey(chatRoomId)) {
+      _storedChatRooms.remove(chatRoomId);
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
       notifyListeners();
@@ -75,18 +113,12 @@ class UserState extends ChangeNotifier {
     if (_storedOffers.containsKey(id) && !forceUpdate) {
       storedOffer = _storedOffers[id];
       FirebaseFunctions.fetchRideOfferById(currentUser!, id).then((fetchedOffer) {
-        if (fetchedOffer != null && fetchedOffer != storedOffer) {
-          // update storedOffers
-          setStoredOffer(fetchedOffer);
-        }
+        setStoredOffer(id, fetchedOffer);
       });
       return storedOffer;
     }
     final fetchedOffer = await FirebaseFunctions.fetchRideOfferById(currentUser!, id);
-    if (fetchedOffer != null) {
-      // update storedOffers
-      setStoredOffer(fetchedOffer);
-    }
+    setStoredOffer(id, fetchedOffer);
     return fetchedOffer;
   }
 
@@ -95,18 +127,12 @@ class UserState extends ChangeNotifier {
     if (_storedChatRooms.containsKey(roomId) && !forceUpdate) {
       storedChatRoom = _storedChatRooms[roomId];
       FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId).then((fetchedChatRoom) {
-        if (fetchedChatRoom != null && fetchedChatRoom != storedChatRoom) {
-          // update storedChatRooms
-          setStoredChatRoom(fetchedChatRoom);
-        }
+        setStoredChatRoom(roomId, fetchedChatRoom);
       });
       return storedChatRoom;
     }
     final fetchedChatRoom = await FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId);
-    if (fetchedChatRoom != null) {
-      // update storedChatRooms
-      setStoredChatRoom(fetchedChatRoom);
-    }
+    setStoredChatRoom(roomId, fetchedChatRoom);
     return fetchedChatRoom;
   }
 
@@ -115,18 +141,12 @@ class UserState extends ChangeNotifier {
     if (_storedUsers.containsKey(email) && !forceUpdate) {
       storedUser = storedUsers[email];
       FirebaseFunctions.fetchUserByEmail(email).then((fetchedUser) {
-        if (fetchedUser != null && fetchedUser != storedUser) {
-          // update storedUser
-          setStoredUser(fetchedUser);
-        }
+        setStoredUser(email, fetchedUser);
       });
       return storedUser;
     }
     final fetchedUser = await FirebaseFunctions.fetchUserByEmail(email);
-    if (fetchedUser != null) {
-      // update storedUser
-      setStoredUser(fetchedUser);
-    }
+    setStoredUser(email, fetchedUser);
     return fetchedUser;
   }
 
@@ -177,9 +197,7 @@ class UserState extends ChangeNotifier {
         } else {
           // fetch offers from firebase
           FirebaseFunctions.fetchAllOffersbyUser(currentUser!).then((offers) {
-            for (final offer in offers) {
-              setStoredOffer(offer);
-            }
+            setAllStoredOffers(offers);
           });
         }
 
@@ -205,10 +223,8 @@ class UserState extends ChangeNotifier {
           }
         } else {
           // fetch chatRooms from firebase
-          FirebaseFunctions.fetchChatRooms(this, currentUser!).then((chatRooms) {
-            for (final chatRoom in chatRooms) {
-              setStoredChatRoom(chatRoom);
-            }
+          FirebaseFunctions.fetchAllChatRooms(this, currentUser!).then((chatRooms) {
+            setAllStoredChatRooms(chatRooms);
           });
         }
       } catch (e) {
