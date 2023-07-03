@@ -1,10 +1,31 @@
 import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/login/custom_route.dart';
-import 'package:corider/screens/onboarding_screen.dart';
+import 'package:corider/screens/login/onboarding_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../root.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
+AndroidNotificationChannel? channel;
+
+FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
+late FirebaseMessaging messaging;
+
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  debugPrint('notification(${notificationResponse.id}) action tapped: '
+      '${notificationResponse.actionId} with'
+      ' payload: ${notificationResponse.payload}');
+  if (notificationResponse.input?.isNotEmpty ?? false) {
+    debugPrint('notification action tapped with input: ${notificationResponse.input}');
+  }
+}
 
 class LoginScreen extends StatelessWidget {
   static const routeName = '/login';
@@ -14,12 +35,44 @@ class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key, required this.userState});
   Duration get loginTime => const Duration(milliseconds: 1000);
 
+  Future<void> registerNotification() async {
+    await Firebase.initializeApp();
+    messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+    final fcmToken = await messaging.getToken();
+    debugPrint('fcmToken: $fcmToken');
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const initSettings = InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings());
+
+    await flutterLocalNotificationsPlugin!.initialize(initSettings,
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+        onDidReceiveNotificationResponse: notificationTapBackground);
+    await messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
   Future<String?> _handleLogin(BuildContext context, String email) async {
     try {
       await FirebaseFunctions.fetchUserByEmail(email).then((user) async {
         await userState.setCurrentUser(user!);
         await userState.loadData();
       });
+      await registerNotification();
       return null;
     } catch (e) {
       return e.toString();
@@ -28,6 +81,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsFlutterBinding.ensureInitialized();
     return FlutterLogin(
       title: "CoRider",
       userType: LoginUserType.email,
