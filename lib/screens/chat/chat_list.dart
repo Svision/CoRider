@@ -159,8 +159,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 children: [
                   Container(
                     alignment: Alignment.centerLeft,
-                    child: Text(chatRoom.name ?? 'Loading...',
-                        maxLines: 1, style: TextStyle(color: Utils.getUserAvatarNameColor(chatRoom.id))),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(chatRoom.name ?? 'Loading...',
+                            maxLines: 1, style: TextStyle(color: Utils.getUserAvatarNameColor(chatRoom.id))),
+                        if (chatRoom.lastMessages?.first != null)
+                          Text(
+                              DateTime.fromMillisecondsSinceEpoch(chatRoom.lastMessages!.first.createdAt!)
+                                  .getFormattedString(),
+                              maxLines: 1,
+                              style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Container(

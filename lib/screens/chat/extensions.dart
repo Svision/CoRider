@@ -1,4 +1,5 @@
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:intl/intl.dart';
 
 extension ChatListExntension on List<types.Room> {
   void sortRooms() {
@@ -26,5 +27,37 @@ extension ChatListExntension on List<types.Room> {
     final sortedRooms = this;
     sortedRooms.sortRooms();
     return sortedRooms;
+  }
+}
+
+extension DateTimeExtension on DateTime {
+  String getFormattedString() {
+    final currentDate = DateTime.now();
+    final timeFormatter = DateFormat('hh:mm a');
+    final yearFormatter = DateFormat('yyyy-MM-dd');
+
+    if (isSameDay(currentDate)) {
+      return timeFormatter.format(this);
+    } else if (isYesterday()) {
+      return 'Yesterday ${timeFormatter.format(this)}';
+    } else if (isSameYear(currentDate)) {
+      return yearFormatter.format(this).substring(5);
+    } else {
+      return yearFormatter.format(this);
+    }
+  }
+
+  bool isSameDay(DateTime date2) {
+    return year == date2.year && month == date2.month && day == date2.day;
+  }
+
+  bool isYesterday() {
+    final currentDate = DateTime.now();
+    final yesterday = currentDate.subtract(const Duration(days: 1));
+    return isSameDay(yesterday);
+  }
+
+  bool isSameYear(DateTime date2) {
+    return year == date2.year;
   }
 }
