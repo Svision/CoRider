@@ -55,7 +55,7 @@ class UserState extends ChangeNotifier {
   Future<void> setAllStoredOffers(List<RideOfferModel> offers) async {
     _storedOffers = {for (final offer in offers) offer.id: offer};
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(_storedOffersKey, jsonEncode(offers));
+    sharedPreferences.setString(_storedOffersKey, jsonEncode(_storedOffers));
     notifyListeners();
   }
 
@@ -90,7 +90,7 @@ class UserState extends ChangeNotifier {
   Future<void> setAllStoredChatRooms(List<types.Room> chatRooms) async {
     _storedChatRooms = {for (final chatRoom in chatRooms) chatRoom.id: chatRoom};
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(chatRooms));
+    sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
     notifyListeners();
   }
 

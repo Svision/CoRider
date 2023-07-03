@@ -3,6 +3,7 @@ import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
 import 'package:corider/screens/chat/extensions.dart';
 import 'package:corider/utils/utils.dart';
+import 'package:corider/widgets/notification_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
@@ -18,6 +19,7 @@ class ChatListScreen extends StatefulWidget {
 class _ChatListScreenState extends State<ChatListScreen> {
   List<types.Room> chatRooms = [];
   bool isLoadingChats = false;
+  int _totalNotifications = 0;
 
   Future<void> triggerRefresh() async {
     await widget.userState.fetchAllChatRooms();
@@ -130,28 +132,42 @@ class _ChatListScreenState extends State<ChatListScreen> {
         child: Row(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: CircleAvatar(
-                maxRadius: 30,
-                backgroundColor: Utils.getUserAvatarNameColor(chatRoom.id),
-                child: chatRoom.imageUrl == null
-                    ? Icon(
-                        chatRoom.type == types.RoomType.group
-                            ? Icons.group
-                            : chatRoom.type == types.RoomType.channel
-                                ? Icons.message
-                                : Icons.person,
-                        color: Colors.white,
-                        size: 30,
-                      )
-                    : ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: chatRoom.imageUrl!,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => const Icon(Icons.error),
-                        ),
-                      ),
+              padding: const EdgeInsets.only(left: 15),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: CircleAvatar(
+                      radius: 30,
+                      backgroundColor: Utils.getUserAvatarNameColor(chatRoom.id),
+                      child: chatRoom.imageUrl == null
+                          ? Icon(
+                              chatRoom.type == types.RoomType.group
+                                  ? Icons.group
+                                  : chatRoom.type == types.RoomType.channel
+                                      ? Icons.message
+                                      : Icons.person,
+                              color: Colors.white,
+                              size: 30,
+                            )
+                          : ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl: chatRoom.imageUrl!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const CircularProgressIndicator(),
+                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                              ),
+                            ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: _totalNotifications > 9 ? 0 : 5,
+                    child: NotificationBadge(
+                      totalNotifications: _totalNotifications,
+                    ),
+                  ),
+                ],
               ),
             ),
             Flexible(

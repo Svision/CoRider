@@ -4,7 +4,7 @@ import 'package:corider/screens/login/custom_route.dart';
 import 'package:corider/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
-import '../dashboard.dart';
+import '../root.dart';
 
 class LoginScreen extends StatelessWidget {
   static const routeName = '/login';

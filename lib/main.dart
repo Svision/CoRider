@@ -1,4 +1,4 @@
-import 'package:corider/screens/dashboard.dart';
+import 'package:corider/screens/root.dart';
 import 'package:corider/screens/login/login.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:flutter/material.dart';

@@ -1,6 +1,6 @@
 import 'package:corider/providers/user_state.dart';
 import 'package:flutter/material.dart';
-import 'dashboard.dart';
+import 'root.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final UserState userState;
@@ -79,8 +79,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       )
                     : ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context)
-                              .pushReplacement(MaterialPageRoute(
+                          Navigator.of(context).pushReplacement(MaterialPageRoute(
                             builder: (context) => RootNavigationView(
                               userState: widget.userState,
                             ),
@@ -91,8 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 12.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
                         ),
                         child: const Text(
                           'Get Started',
