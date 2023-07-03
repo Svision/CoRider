@@ -66,6 +66,8 @@ class UserModel {
         imageUrl: profileImage,
       );
 
+  String messageChannelId() => '$email-channel';
+
   //#region User Intents
   Future<String?> createRideOffer(UserState userState, RideOfferModel offer) async {
     final err = await FirebaseFunctions.saveRideOfferByUser(this, offer);

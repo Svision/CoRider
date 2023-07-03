@@ -2,6 +2,7 @@ import 'package:corider/models/types/requested_offer_status.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:uuid/uuid.dart';
 
 class Utils {
   static Color getColorFromValue(String value) {
@@ -100,5 +101,18 @@ class Utils {
       default:
         return Colors.orange;
     }
+  }
+
+  static String getUserChannelId(String userId) {
+    return '$userId-channel';
+  }
+
+  static types.TextMessage createNotificationTextMessage(String text) {
+    return types.TextMessage(
+      id: const Uuid().v4(),
+      author: const types.User(id: 'notifications'),
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      text: text,
+    );
   }
 }

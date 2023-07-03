@@ -13,7 +13,6 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:uuid/uuid.dart';
 
 class FirebaseFunctions {
   static Future<String?> changeRideRequestStatusWithUserId(
@@ -29,6 +28,21 @@ class FirebaseFunctions {
         await rideOfferRef.set({
           'requestedUserIds': {userId: status.index},
         }, SetOptions(merge: true));
+        try {
+          FirebaseFirestore.instance
+              .collection("companies")
+              .doc(user.companyName)
+              .collection("chatRooms")
+              .doc(Utils.getUserChannelId(userId))
+              .collection('messages')
+              .add(
+                Utils.createNotificationTextMessage(
+                        'Your request from ${user.fullName} has been ${describeEnum(status).toLowerCase()}.')
+                    .toJson(),
+              );
+        } catch (e) {
+          debugPrint(e.toString());
+        }
       } else {
         return "Ride offer no longer exists";
       }
@@ -258,15 +272,12 @@ class FirebaseFunctions {
           .collection('companies')
           .doc(user.companyName)
           .collection('chatRooms')
-          .doc('${rideOffer.driverId}-channel')
+          .doc(Utils.getUserChannelId(rideOffer.driverId))
           .collection('messages')
           .add(
-            types.TextMessage(
-              id: const Uuid().v4(),
-              author: const types.User(id: 'notifications'),
-              createdAt: DateTime.now().millisecondsSinceEpoch,
-              text: 'You have a new ride request from ${user.fullName}',
-            ).toJson(),
+            Utils.createNotificationTextMessage(
+                    'You have a new ride request from ${user.fullName}! Go to your ride page to respond.')
+                .toJson(),
           );
 
       return null;
@@ -318,6 +329,9 @@ class FirebaseFunctions {
   }
 
   static Future<String?> fetchUserProfileImageByEmail(String email) async {
+    if (email == 'notifications') {
+      return null;
+    }
     try {
       final usersCollection = FirebaseFirestore.instance.collection("users");
 
@@ -328,7 +342,7 @@ class FirebaseFunctions {
         final profileImage = userData!['profileImage'];
         return profileImage;
       } else {
-        debugPrint("User not found");
+        debugPrint("User $email not found");
         return null;
       }
     } catch (e) {
@@ -369,6 +383,9 @@ class FirebaseFunctions {
   }
 
   static Future<VehicleModel?> fetchUserVehicleByEmail(String email) async {
+    if (email == 'notifications') {
+      return null;
+    }
     VehicleModel? vehicleModel;
     try {
       final usersCollection = FirebaseFirestore.instance.collection("users");
@@ -384,7 +401,7 @@ class FirebaseFunctions {
           vehicleModel = VehicleModel.fromJson(vehicleData);
         }
       } else {
-        debugPrint("User not found");
+        debugPrint("User $email not found");
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -393,6 +410,9 @@ class FirebaseFunctions {
   }
 
   static Future<UserModel?> fetchUserByEmail(String email) async {
+    if (email == 'notifications') {
+      return null;
+    }
     UserModel? userModel;
     try {
       final usersCollection = FirebaseFirestore.instance.collection("users");
@@ -403,7 +423,7 @@ class FirebaseFunctions {
         final userData = userSnapshot.data();
         userModel = UserModel.fromJson(userData!);
       } else {
-        debugPrint("User not found");
+        debugPrint("User $email not found");
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -444,7 +464,7 @@ class FirebaseFunctions {
           createdAt: DateTime.now(),
           firstName: data.additionalSignupData!['firstName']!,
           lastName: data.additionalSignupData!['lastName']!,
-          chatRoomIds: ['default', '${data.name!}-channel']);
+          chatRoomIds: ['default', Utils.getUserChannelId(data.name!)]);
       final userJson = user.toJson();
       await db
           .collection("users")
@@ -453,7 +473,7 @@ class FirebaseFunctions {
           .then((_) => debugPrint('DocumentSnapshot added with ID: ${user.email}'));
 
       final types.Room notificationChannel = types.Room(
-        id: '${user.email}-channel',
+        id: user.messageChannelId(),
         name: 'Notifications',
         users: [types.User(id: user.email)],
         type: types.RoomType.channel,
