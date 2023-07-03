@@ -235,156 +235,170 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                   ),
                 ],
               ),
-
             // Add more details as needed
             const SizedBox(height: 32.0),
             Center(
               child: !isRequesting
-                  ? currentUser.email != widget.rideOffer.driverId
-                      ? currentUser.requestedOfferIds.contains(widget.rideOffer.id)
-                          ? Column(
-                              children: [
-                                const Text(
-                                  'Ride requested!',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-                                ),
-                                const SizedBox(height: 8.0),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        isRequesting = true;
-                                      });
-                                      currentUser.withdrawRequestRide(userState, widget.rideOffer.id).then((err) => {
-                                            setState(() {
-                                              isRequesting = false;
-                                            }),
-                                            if (err == null)
-                                              {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text('Ride request withdrawn!'),
-                                                    duration: Duration(seconds: 1),
-                                                  ),
-                                                ),
-                                                Navigator.of(context).pop(),
-                                              }
-                                            else
-                                              {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text("Ride request withdraw failed! $err"),
-                                                    duration: const Duration(seconds: 2),
-                                                  ),
-                                                )
-                                              },
-                                          });
-                                      refreshOffers();
-                                    },
-                                    child: const Text('Withdraw Request')),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      isRequesting = true;
-                                    });
-                                    currentUser.requestChatWithUser(widget.userState, driverUser!).then((chatRoom) => {
-                                          setState(() {
-                                            isRequesting = false;
-                                          }),
-                                          if (chatRoom != null)
-                                            {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => ChatScreen(
-                                                    userState: widget.userState,
-                                                    room: chatRoom,
-                                                  ),
-                                                ),
-                                              )
-                                            }
-                                          else
-                                            {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text("Chat request failed!"),
-                                                  duration: Duration(seconds: 2),
-                                                ),
-                                              )
-                                            }
-                                        });
-                                  },
-                                  child: const Text('Chat'),
-                                ),
-                                const SizedBox(height: 16.0),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      isRequesting = true;
-                                    });
-                                    currentUser.requestRide(userState, widget.rideOffer).then((err) => {
-                                          setState(() {
-                                            isRequesting = false;
-                                          }),
-                                          if (err == null)
-                                            {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('Ride request sent!'),
-                                                  duration: Duration(seconds: 1),
-                                                ),
-                                              ),
-                                              Navigator.of(context).pop(),
-                                            }
-                                          else
-                                            {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text("Ride request failed! $err"),
-                                                  duration: const Duration(seconds: 2),
-                                                ),
-                                              )
-                                            }
-                                        });
-                                    refreshOffers();
-                                  },
-                                  child: const Text('Request Ride'),
-                                ),
-                              ],
-                            )
-                      : ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isRequesting = true;
-                            });
-                            FirebaseFunctions.deleteUserRideOfferByOfferId(currentUser, widget.rideOffer.id)
-                                .then((value) => {
-                                      setState(() {
-                                        isRequesting = false;
-                                      }),
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Ride offer deleted!'),
-                                          duration: Duration(seconds: 1),
-                                        ),
-                                      )
-                                    });
-                            Navigator.of(context).pop();
-                            refreshOffers();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          child: const Text('Delete Ride'),
-                        )
+                  ? buildRideOfferActions(context, widget.userState, currentUser)
                   : const CircularProgressIndicator(),
             )
           ],
         ),
       ),
     );
+  }
+
+  Widget buildMyRideOfferActions(BuildContext context, UserState userState, UserModel currentUser) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          isRequesting = true;
+        });
+        FirebaseFunctions.deleteUserRideOfferByOfferId(currentUser, widget.rideOffer.id).then((value) => {
+              setState(() {
+                isRequesting = false;
+              }),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Ride offer deleted!'),
+                  duration: Duration(seconds: 1),
+                ),
+              )
+            });
+        Navigator.of(context).pop();
+        refreshOffers();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+      ),
+      child: const Text('Delete Ride'),
+    );
+  }
+
+  Widget chatButton(UserModel currentUser) {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          isRequesting = true;
+        });
+        currentUser.requestChatWithUser(widget.userState, driverUser!).then((chatRoom) => {
+              setState(() {
+                isRequesting = false;
+              }),
+              if (chatRoom != null)
+                {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(
+                        userState: widget.userState,
+                        room: chatRoom,
+                      ),
+                    ),
+                  )
+                }
+              else
+                {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Chat request failed!"),
+                      duration: Duration(seconds: 2),
+                    ),
+                  )
+                }
+            });
+      },
+      child: const Text('Chat'),
+    );
+  }
+
+  Widget buildOtherRideOfferActions(BuildContext context, UserState userState, UserModel currentUser) {
+    return currentUser.requestedOfferIds.contains(widget.rideOffer.id)
+        ? Column(
+            children: [
+              chatButton(currentUser),
+              const SizedBox(height: 8.0),
+              const Text(
+                'Ride requested!',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+              ),
+              const SizedBox(height: 8.0),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      isRequesting = true;
+                    });
+                    currentUser.withdrawRequestRide(userState, widget.rideOffer.id).then((err) => {
+                          setState(() {
+                            isRequesting = false;
+                          }),
+                          if (err == null)
+                            {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Ride request withdrawn!'),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              ),
+                            }
+                          else
+                            {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Ride request withdraw failed! $err"),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              )
+                            },
+                        });
+                    refreshOffers();
+                  },
+                  child: const Text('Withdraw Request')),
+            ],
+          )
+        : Column(
+            children: [
+              chatButton(currentUser),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    isRequesting = true;
+                  });
+                  currentUser.requestRide(userState, widget.rideOffer).then((err) => {
+                        setState(() {
+                          isRequesting = false;
+                        }),
+                        if (err == null)
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Ride request sent!'),
+                                duration: Duration(seconds: 1),
+                              ),
+                            ),
+                          }
+                        else
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Ride request failed! $err"),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            )
+                          }
+                      });
+                  refreshOffers();
+                },
+                child: const Text('Request Ride'),
+              ),
+            ],
+          );
+  }
+
+  Widget buildRideOfferActions(BuildContext context, UserState userState, UserModel currentUser) {
+    return currentUser.email != widget.rideOffer.driverId
+        ? buildOtherRideOfferActions(context, userState, currentUser)
+        : buildMyRideOfferActions(context, userState, currentUser);
   }
 }
