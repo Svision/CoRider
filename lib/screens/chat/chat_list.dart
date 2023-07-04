@@ -157,12 +157,17 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 room: chatRoom,
               ),
             ),
-          ).then((value) {
+          ).then((value) async {
+            final newChatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoom.id);
             // reload chatRoom
-            setState(() async {
+            setState(() {
               isBackgroundFethching = true;
-              chatRooms[chatRooms.indexWhere((element) => element.id == chatRoom.id)] =
-                  (await widget.userState.getStoredChatRoomByRoomId(chatRoom.id))!;
+              final index = chatRooms.indexWhere((element) => element.id == chatRoom.id);
+              if (newChatRoom != null) {
+                chatRooms[index] = newChatRoom;
+              } else {
+                chatRooms.removeAt(index);
+              }
               isBackgroundFethching = false;
             });
           });

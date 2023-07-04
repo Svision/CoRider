@@ -2,6 +2,7 @@ import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat_list.dart';
 import 'package:corider/screens/home/upcoming_rides.dart';
 import 'package:corider/screens/home/my_offers.dart';
+import 'package:corider/widgets/notification_badge.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -49,15 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             if (widget.userState.totalNotificationsCount != 0)
               Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
+                top: 7,
+                right: widget.userState.totalNotificationsCount > 9 ? 0 : 5,
+                child: NotificationBadge(
+                  totalNotifications: widget.userState.totalNotificationsCount,
+                  forTotal: true,
                 ),
               ),
           ]),
