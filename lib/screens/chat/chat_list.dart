@@ -157,7 +157,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 room: chatRoom,
               ),
             ),
-          );
+          ).then((value) {
+            // reload chatRoom
+            setState(() async {
+              isBackgroundFethching = true;
+              chatRooms[chatRooms.indexWhere((element) => element.id == chatRoom.id)] =
+                  (await widget.userState.getStoredChatRoomByRoomId(chatRoom.id))!;
+              isBackgroundFethching = false;
+            });
+          });
         },
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[300]!),

@@ -58,8 +58,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _startTimer() {
-    // Schedule the function to be called every 3 seconds
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    // Schedule the function to be called every second
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       widget.userState.setStoredChatRoom(widget.room.id, widget.room.copyWith(lastMessages: _messages));
     });
   }
