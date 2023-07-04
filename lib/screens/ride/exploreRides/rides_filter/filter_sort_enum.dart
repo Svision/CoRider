@@ -1,4 +1,4 @@
-enum RideOfferFilter { all, byMe }
+enum RideOfferFilter { all, byMe, others }
 
 enum RideOfferSortBy {
   distance,

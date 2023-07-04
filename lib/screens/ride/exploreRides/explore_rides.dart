@@ -2,6 +2,7 @@ import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/ride/createRideOffer/create_ride_offer_screen.dart';
+import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
 import 'package:corider/screens/ride/exploreRides/rides_filter/filter_sort_enum.dart';
 import 'package:corider/screens/ride/exploreRides/rides_filter/rides_filter.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,17 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
         markerId: MarkerId(i.toString()),
         position: location,
         infoWindow: InfoWindow(title: offers[i].driverId),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RideOfferDetailScreen(
+                userState: widget.userState,
+                rideOffer: offers[i],
+              ),
+            ),
+          );
+        },
       );
       _markers.add(marker);
     }
@@ -69,7 +81,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
     _addMarkers();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ride Offers'),
+        title: const Text('Rides'),
         leading: IconButton(
           onPressed: () {
             setState(() {
@@ -204,7 +216,9 @@ class _RideOfferListState extends State<RideOfferList> {
               index -= 1;
               if (index < widget.offers.length) {
                 if (_selectedFilter == RideOfferFilter.byMe &&
-                    widget.offers[index].driverId != widget.userState.currentUser!.email) {
+                        widget.offers[index].driverId != widget.userState.currentUser!.email ||
+                    _selectedFilter == RideOfferFilter.others &&
+                        widget.offers[index].driverId == widget.userState.currentUser!.email) {
                   return Container();
                 }
                 return RideOfferCard(
