@@ -99,7 +99,7 @@ class _RootNavigationViewState extends State<RootNavigationView> {
           NavigationDestination(
             selectedIcon: Icon(Icons.commute),
             icon: Icon(Icons.commute_outlined),
-            label: 'Ride',
+            label: 'Rides',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.person),

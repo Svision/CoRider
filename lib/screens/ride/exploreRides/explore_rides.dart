@@ -2,6 +2,8 @@ import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/ride/createRideOffer/create_ride_offer_screen.dart';
+import 'package:corider/screens/ride/exploreRides/rides_filter/filter_sort_enum.dart';
+import 'package:corider/screens/ride/exploreRides/rides_filter/rides_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/widgets/offer_ride_card.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -127,10 +129,37 @@ class RideOfferList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _RideOfferListState createState() => _RideOfferListState();
+  State<RideOfferList> createState() => _RideOfferListState();
 }
 
 class _RideOfferListState extends State<RideOfferList> {
+  RideOfferFilter? _selectedFilter;
+  RideOfferSortBy? _selectedSort;
+
+  void _handleFilterChanged(RideOfferFilter value) {
+    if (_selectedFilter == value) {
+      return;
+    }
+    setState(() {
+      _selectedFilter = value;
+      debugPrint(_selectedFilter.toString());
+      // Apply the filter logic based on the selected value
+      // Update the filtered offers accordingly
+    });
+  }
+
+  void _handleSortChanged(RideOfferSortBy value) {
+    if (_selectedSort == value) {
+      return;
+    }
+    setState(() {
+      _selectedSort = value;
+      debugPrint(_selectedSort.toString());
+      // Apply the sort logic based on the selected value
+      // Update the sorted offers accordingly
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -162,28 +191,41 @@ class _RideOfferListState extends State<RideOfferList> {
             ),
           )
         : ListView.builder(
-            itemCount: widget.offers.length + 1,
+            itemCount: widget.offers.length + 2,
             itemBuilder: (context, index) {
+              // header
+              if (index == 0) {
+                return RidesFilter(
+                  onFilterChanged: _handleFilterChanged,
+                  onSortChanged: _handleSortChanged,
+                );
+              }
+              // body
+              index -= 1;
               if (index < widget.offers.length) {
+                if (_selectedFilter == RideOfferFilter.myOffers &&
+                    widget.offers[index].driverId != widget.userState.currentUser!.email) {
+                  return Container();
+                }
                 return RideOfferCard(
                     userState: widget.userState,
                     rideOffer: widget.offers[index],
                     refreshOffersIndicatorKey: widget.refreshOffersIndicatorKey);
-              } else {
-                return Container(
-                  padding: const EdgeInsets.all(16.0),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'END\nPull down to refresh',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                    ),
-                  ),
-                );
               }
+              // footer
+              return Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.center,
+                child: const Text(
+                  'END\nPull down to refresh',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
+                ),
+              );
             },
           );
   }
@@ -202,7 +244,7 @@ class CustomCustomMapWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _CustomCustomMapWidgetState createState() => _CustomCustomMapWidgetState();
+  State<CustomCustomMapWidget> createState() => _CustomCustomMapWidgetState();
 }
 
 class _CustomCustomMapWidgetState extends State<CustomCustomMapWidget> {
