@@ -16,16 +16,35 @@ class UserState extends ChangeNotifier {
   static const String _storedUsersKey = 'storedUsers';
   Map<String, types.Room> _storedChatRooms = {};
   static const String _storedChatRoomsKey = 'storedChatRooms';
+  Map<String, int> _totalNotifications = {};
+  static const String _totalNotificationsKey = 'totalNotifications';
 
   UserModel? get currentUser => _currentUser;
   Map<String, RideOfferModel> get storedOffers => _storedOffers;
   Map<String, UserModel> get storedUsers => _storedUsers;
   Map<String, types.Room> get storedChatRooms => _storedChatRooms;
+  Map<String, int> get totalNotifications => _totalNotifications;
+  int get totalNotificationsCount =>
+      _totalNotifications.values.fold(0, (previousValue, element) => previousValue + element);
+
+  Future<void> setTotalNotifications(Map<String, int> newTotalNotifications) async {
+    _totalNotifications = newTotalNotifications;
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString(_totalNotificationsKey, jsonEncode(_totalNotifications));
+    notifyListeners();
+  }
 
   Future<List<types.Room>> fetchAllChatRooms() async {
     List<types.Room> allChatRooms = [];
     try {
       allChatRooms = await FirebaseFunctions.fetchAllChatRooms(this, currentUser!);
+      Map<String, int> newTotalNotifications = {};
+      for (final chatRoom in allChatRooms) {
+        final previousNotifications = _totalNotifications[chatRoom.id] ?? 0;
+        newTotalNotifications[chatRoom.id] = previousNotifications +
+            (chatRoom.lastMessages!.length - (_storedChatRooms[chatRoom.id]?.lastMessages?.length ?? 0));
+      }
+      await setTotalNotifications(newTotalNotifications);
     } catch (e) {
       debugPrint('fetchAllChatRooms: $e');
     }

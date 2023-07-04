@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
@@ -17,14 +19,21 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
+  Timer? _timer;
   List<types.Room> chatRooms = [];
   bool isLoadingChats = false;
-  int _totalNotifications = 0;
+  bool isBackgroundFethching = false;
+  Map<String, int> totalNotifications = {};
 
   Future<void> triggerRefresh() async {
+    setState(() {
+      isBackgroundFethching = true;
+    });
     await widget.userState.fetchAllChatRooms();
     setState(() {
+      totalNotifications = widget.userState.totalNotifications;
       chatRooms = widget.userState.storedChatRooms.values.toList().sortedRooms();
+      isBackgroundFethching = false;
     });
   }
 
@@ -46,16 +55,40 @@ class _ChatListScreenState extends State<ChatListScreen> {
   void initState() {
     super.initState();
     chatRooms = widget.userState.storedChatRooms.values.toList().sortedRooms();
+    totalNotifications = widget.userState.totalNotifications;
     loadChatRooms();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed
+    _cancelTimer();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    // Schedule the function to be called every second
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isBackgroundFethching) {
+        triggerRefresh();
+      }
+    });
+  }
+
+  void _cancelTimer() {
+    // Cancel the timer if it's active
+    _timer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
+    final totalNotificaiotns = totalNotifications.values.fold(0, (a, b) => a + b);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Chats',
-          style: TextStyle(
+        title: Text(
+          totalNotificaiotns == 0 ? 'Chats' : 'Chats ($totalNotificaiotns)',
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -107,10 +140,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   Widget buildItem(BuildContext context, types.Room chatRoom) {
+    final notificationsNum = totalNotifications[chatRoom.id] ?? 0;
     return Container(
       margin: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
       child: TextButton(
         onPressed: () {
+          setState(() {
+            totalNotifications[chatRoom.id] = 0;
+          });
+          widget.userState.setTotalNotifications(totalNotifications);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -162,9 +200,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   ),
                   Positioned(
                     top: 0,
-                    right: _totalNotifications > 9 ? 0 : 5,
+                    right: notificationsNum > 9 ? 0 : 5,
                     child: NotificationBadge(
-                      totalNotifications: _totalNotifications,
+                      totalNotifications: notificationsNum,
                     ),
                   ),
                 ],
