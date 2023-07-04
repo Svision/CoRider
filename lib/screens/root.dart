@@ -1,12 +1,7 @@
-import 'dart:convert';
-
 import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/login/login.dart';
 import 'package:corider/screens/ride/exploreRides/explore_rides.dart';
 import 'package:corider/screens/home/home.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'profile/profile_screen.dart';
 
@@ -20,45 +15,6 @@ class RootNavigationView extends StatefulWidget {
 
 class _RootNavigationViewState extends State<RootNavigationView> {
   int currentPageIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) async {
-      RemoteNotification? notification = message?.notification!;
-
-      debugPrint(notification != null ? notification.title : '');
-    });
-
-    FirebaseMessaging.onMessage.listen((message) async {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-
-      if (notification != null && (android != null)) {
-        String action = jsonEncode(message.data);
-
-        flutterLocalNotificationsPlugin!.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel!.id,
-                channel!.name,
-                priority: Priority.high,
-                importance: Importance.max,
-                channelShowBadge: true,
-                autoCancel: true,
-              ),
-            ),
-            payload: action);
-      }
-    });
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      debugPrint('onMessageOpenedApp: $message');
-    });
-  }
 
   void changePageIndex(int index) {
     setState(() {

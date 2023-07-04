@@ -1,6 +1,6 @@
 import 'package:corider/providers/user_state.dart';
 import 'package:flutter/material.dart';
-import '../root.dart';
+import 'root.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final UserState userState;
