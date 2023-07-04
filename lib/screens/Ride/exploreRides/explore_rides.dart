@@ -203,7 +203,7 @@ class _RideOfferListState extends State<RideOfferList> {
               // body
               index -= 1;
               if (index < widget.offers.length) {
-                if (_selectedFilter == RideOfferFilter.myOffers &&
+                if (_selectedFilter == RideOfferFilter.byMe &&
                     widget.offers[index].driverId != widget.userState.currentUser!.email) {
                   return Container();
                 }

@@ -184,6 +184,7 @@ class UserState extends ChangeNotifier {
     sharedPreferences.remove(_storedOffersKey);
     sharedPreferences.remove(_storedUsersKey);
     sharedPreferences.remove(_storedChatRoomsKey);
+    sharedPreferences.remove(_totalNotificationsKey);
     notifyListeners();
   }
 

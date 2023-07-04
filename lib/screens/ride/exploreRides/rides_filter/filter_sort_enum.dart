@@ -1,10 +1,8 @@
-// ignore_for_file: constant_identifier_names
-
-enum RideOfferFilter { all, myOffers }
+enum RideOfferFilter { all, byMe }
 
 enum RideOfferSortBy {
   distance,
-  proposedLeaveTime,
-  proposedBackTime,
+  leaveTime,
+  backTime,
   price,
 }
