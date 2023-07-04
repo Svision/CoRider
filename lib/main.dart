@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'cloud_functions/firebase_options.dart';
 import 'package:provider/provider.dart';
+import 'package:corider/providers/push_notificaions/local_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ Future<void> main() async {
   UserState userState = UserState();
 
   await userState.loadData();
+  await LocalNotificationService.setup();
 
   runApp(
     ChangeNotifierProvider(

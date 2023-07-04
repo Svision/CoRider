@@ -41,8 +41,12 @@ class UserState extends ChangeNotifier {
       Map<String, int> newTotalNotifications = {};
       for (final chatRoom in allChatRooms) {
         final previousNotifications = _totalNotifications[chatRoom.id] ?? 0;
-        newTotalNotifications[chatRoom.id] = previousNotifications +
-            (chatRoom.lastMessages!.length - (_storedChatRooms[chatRoom.id]?.lastMessages?.length ?? 0));
+        int newNotifications =
+            chatRoom.lastMessages!.length - (_storedChatRooms[chatRoom.id]?.lastMessages?.length ?? 0);
+        if (newNotifications < 0) {
+          newNotifications = 0;
+        }
+        newTotalNotifications[chatRoom.id] = previousNotifications + newNotifications;
       }
       await setTotalNotifications(newTotalNotifications);
     } catch (e) {

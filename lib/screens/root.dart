@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:corider/providers/push_notificaions/local_notification_service.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/ride/exploreRides/explore_rides.dart';
 import 'package:corider/screens/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'profile/profile_screen.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class RootNavigationView extends StatefulWidget {
   final UserState userState;
@@ -15,6 +19,58 @@ class RootNavigationView extends StatefulWidget {
 
 class _RootNavigationViewState extends State<RootNavigationView> {
   int currentPageIndex = 0;
+  bool isBackgroundFethching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startBackgroundFethching();
+  }
+
+  void _startBackgroundFethching() {
+    // Fetch new messages every 3 seconds
+    Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!isBackgroundFethching) {
+        setState(() {
+          isBackgroundFethching = true;
+        });
+        final storedChatRooms = Map<String, types.Room>.from(widget.userState.storedChatRooms);
+        widget.userState.fetchAllChatRooms().then((allChatRooms) async {
+          // compare storedChatRooms and allChatRooms
+
+          for (final chatRoom in allChatRooms) {
+            // if there is a new chat room, then show notification
+            if (!storedChatRooms.containsKey(chatRoom.id)) {
+              final otherUser = chatRoom.users.where((user) => user.id != widget.userState.currentUser!.email).first;
+              // show notification
+              LocalNotificationService.showNewMessageLocalNotification(
+                'New Chat',
+                '${otherUser.firstName} ${otherUser.lastName} requested to chat with you',
+              );
+            } else {
+              // if there is a new message, then show notification
+              final storedChatRoom = storedChatRooms[chatRoom.id]!;
+              if (storedChatRoom.lastMessages!.length < chatRoom.lastMessages!.length) {
+                final latestMessage = chatRoom.lastMessages!.first;
+                final otherUserId =
+                    chatRoom.users.where((user) => user.id != widget.userState.currentUser!.email).first.id;
+                final otherUser = await widget.userState.getStoredUserByEmail(otherUserId);
+                // show notification
+                LocalNotificationService.showNewMessageLocalNotification(
+                  otherUser?.fullName ?? 'New Message',
+                  latestMessage is types.TextMessage ? latestMessage.text : '[Attachment]]',
+                );
+              }
+            }
+          }
+
+          setState(() {
+            isBackgroundFethching = false;
+          });
+        });
+      }
+    });
+  }
 
   void changePageIndex(int index) {
     setState(() {

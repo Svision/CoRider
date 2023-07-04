@@ -10,6 +10,7 @@ import GoogleMaps
   ) -> Bool {
     GMSServices.provideAPIKey("AIzaSyByejbYzjTBQNgfrMKi5XIj3IDotnh3rNI")
     GeneratedPluginRegistrant.register(with: self)
+    UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

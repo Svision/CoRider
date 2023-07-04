@@ -112,6 +112,8 @@ PODS:
     - FirebaseCoreExtension (~> 10.0)
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
   - Flutter (1.0.0)
+  - flutter_local_notifications (0.0.1):
+    - Flutter
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -188,6 +190,7 @@ DEPENDENCIES:
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - FirebaseFirestore (from `https://github.com/invertase/firestore-ios-sdk-frameworks.git`, tag `10.10.0`)
   - Flutter (from `Flutter`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
@@ -242,6 +245,8 @@ EXTERNAL SOURCES:
     :tag: 10.10.0
   Flutter:
     :path: Flutter
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   geocoding_ios:
     :path: ".symlinks/plugins/geocoding_ios/ios"
   google_maps_flutter_ios:
@@ -289,6 +294,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 8a3b9a8b98ce72a42d22e69865cf662e38d2d6f5
   FirebaseStorage: a12297f786e81e653864d87723ec30381eb90220
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   geocoding_ios: a389ea40f6f548de6e63006a2e31bf66ff80769a
   google_maps_flutter_ios: abdac20d6ce8931f6ebc5f46616df241bfaa2cfd
