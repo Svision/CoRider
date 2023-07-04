@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'profile/profile_screen.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:collection/collection.dart';
 
 class RootNavigationView extends StatefulWidget {
   final UserState userState;
@@ -53,11 +54,11 @@ class _RootNavigationViewState extends State<RootNavigationView> {
               if (storedChatRoom.lastMessages!.length < chatRoom.lastMessages!.length) {
                 final latestMessage = chatRoom.lastMessages!.first;
                 final otherUserId =
-                    chatRoom.users.where((user) => user.id != widget.userState.currentUser!.email).first.id;
-                final otherUser = await widget.userState.getStoredUserByEmail(otherUserId);
+                    chatRoom.users.firstWhereOrNull((user) => user.id != widget.userState.currentUser!.email)?.id;
+                final otherUser = otherUserId != null ? await widget.userState.getStoredUserByEmail(otherUserId) : null;
                 // show notification
                 LocalNotificationService.showNewMessageLocalNotification(
-                  otherUser?.fullName ?? 'New Message',
+                  otherUser?.fullName ?? 'New Notification',
                   latestMessage is types.TextMessage ? latestMessage.text : '[Attachment]]',
                 );
               }
