@@ -96,25 +96,34 @@ class _RideOfferCardState extends State<RideOfferCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(
-                Icons.flight_takeoff,
-                size: 16.0,
+              Row(
+                children: [
+                  const Icon(
+                    Icons.flight_takeoff,
+                    size: 16.0,
+                  ),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    widget.rideOffer.proposedLeaveTime!.format(context),
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Icon(
+                    Icons.flight_land,
+                    size: 16.0,
+                  ),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    widget.rideOffer.proposedBackTime!.format(context),
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4.0),
               Text(
-                '${widget.rideOffer.proposedLeaveTime!.format(context)}',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(width: 8.0),
-              const Icon(
-                Icons.flight_land,
-                size: 16.0,
-              ),
-              const SizedBox(width: 4.0),
-              Text(
-                '${widget.rideOffer.proposedBackTime!.format(context)}',
-                style: const TextStyle(fontWeight: FontWeight.w500),
+                widget.rideOffer.price == 0.0 ? 'Free' : '\$${widget.rideOffer.price}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),

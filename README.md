@@ -1,4 +1,4 @@
-# CoRider [![Continuous Integration](https://github.com/Svision/CoRider/actions/workflows/ci.yml/badge.svg)](https://github.com/Svision/CoRider/actions/workflows/ci.yml)
+# CoRider [![CI](https://github.com/Svision/CoRider/actions/workflows/ci.yml/badge.svg)](https://github.com/Svision/CoRider/actions/workflows/ci.yml)
 
 CoRider is a company-wide carpooling app built using Flutter. The app aims to promote sustainable transportation, reduce traffic congestion, and foster employee connectivity within the organization.
 
@@ -46,4 +46,4 @@ This project is licensed under the [GPL-3.0 License](LICENSE).
 
 ## Contact
 
-For any questions or inquiries, please contact me at changhao.song@mail.utoronto.ca
+For any questions or inquiries, please contact me at <changhao.song@mail.utoronto.ca>

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:intl/intl.dart';
 
@@ -59,5 +60,15 @@ extension DateTimeExtension on DateTime {
 
   bool isSameYear(DateTime date2) {
     return year == date2.year;
+  }
+}
+
+extension TimeOfDayExtension on TimeOfDay {
+  int compareTo(TimeOfDay other) {
+    if (hour < other.hour) return -1;
+    if (hour > other.hour) return 1;
+    if (minute < other.minute) return -1;
+    if (minute > other.minute) return 1;
+    return 0;
   }
 }

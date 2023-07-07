@@ -1,4 +1,8 @@
-enum RideOfferFilter { all, byMe, others }
+enum RideOfferFilter {
+  all,
+  others,
+  byMe,
+}
 
 enum RideOfferSortBy {
   createdAt,

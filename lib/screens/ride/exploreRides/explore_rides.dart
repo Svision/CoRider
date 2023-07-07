@@ -1,6 +1,7 @@
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/extensions.dart';
 import 'package:corider/screens/ride/createRideOffer/create_ride_offer_screen.dart';
 import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
 import 'package:corider/screens/ride/exploreRides/rides_filter/filter_sort_enum.dart';
@@ -198,6 +199,15 @@ class _RideOfferListState extends State<RideOfferList> {
       case RideOfferSortBy.distance:
         _sortOffersByDistance();
         break;
+      case RideOfferSortBy.leaveTime:
+        _sortOffersByLeaveTime();
+        break;
+      case RideOfferSortBy.backTime:
+        _sortOffersByBackTime();
+        break;
+      case RideOfferSortBy.price:
+        _sortOffersByPrice();
+        break;
       default:
         _rebuildOffers(List.from(widget.rideOfferCards));
         break;
@@ -215,6 +225,30 @@ class _RideOfferListState extends State<RideOfferList> {
       double distanceB = Geolocator.distanceBetween(widget.currentLocation!.latitude, widget.currentLocation!.longitude,
           b.rideOffer.driverLocation.latitude, b.rideOffer.driverLocation.longitude);
       return distanceA.compareTo(distanceB);
+    });
+    _rebuildOffers(sortedOffers);
+  }
+
+  void _sortOffersByLeaveTime() {
+    List<RideOfferCard> sortedOffers = List.from(widget.rideOfferCards);
+    sortedOffers.sort((a, b) {
+      return a.rideOffer.proposedLeaveTime!.compareTo(b.rideOffer.proposedLeaveTime!);
+    });
+    _rebuildOffers(sortedOffers);
+  }
+
+  void _sortOffersByBackTime() {
+    List<RideOfferCard> sortedOffers = List.from(widget.rideOfferCards);
+    sortedOffers.sort((a, b) {
+      return a.rideOffer.proposedBackTime!.compareTo(b.rideOffer.proposedBackTime!);
+    });
+    _rebuildOffers(sortedOffers);
+  }
+
+  void _sortOffersByPrice() {
+    List<RideOfferCard> sortedOffers = List.from(widget.rideOfferCards);
+    sortedOffers.sort((a, b) {
+      return a.rideOffer.price.compareTo(b.rideOffer.price);
     });
     _rebuildOffers(sortedOffers);
   }

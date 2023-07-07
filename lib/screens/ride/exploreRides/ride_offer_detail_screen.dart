@@ -103,7 +103,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Price: \n${widget.rideOffer.price}',
+              'Price: \n${widget.rideOffer.price == 0.0 ? 'Free' : widget.rideOffer.price}',
               style: const TextStyle(fontSize: 16.0),
             ),
             const SizedBox(height: 8.0),

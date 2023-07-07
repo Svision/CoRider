@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/chat/chat.dart';
-import 'package:corider/screens/chat/extensions.dart';
+import 'package:corider/extensions.dart';
 import 'package:corider/utils/utils.dart';
 import 'package:corider/widgets/notification_badge.dart';
 import 'package:flutter/material.dart';
