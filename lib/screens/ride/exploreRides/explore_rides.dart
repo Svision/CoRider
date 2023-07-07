@@ -199,24 +199,34 @@ class _RideOfferListState extends State<RideOfferList> {
         _sortOffersByDistance();
         break;
       default:
-        displayOffers = List.from(widget.rideOfferCards);
+        _rebuildOffers(List.from(widget.rideOfferCards));
         break;
     }
-    setState(() {
-      displayOffers = displayOffers;
-    });
   }
 
   void _sortOffersByDistance() {
     if (widget.currentLocation == null) {
       return;
     }
-    displayOffers.sort((a, b) {
+    List<RideOfferCard> sortedOffers = List.from(widget.rideOfferCards);
+    sortedOffers.sort((a, b) {
       double distanceA = Geolocator.distanceBetween(widget.currentLocation!.latitude, widget.currentLocation!.longitude,
           a.rideOffer.driverLocation.latitude, a.rideOffer.driverLocation.longitude);
       double distanceB = Geolocator.distanceBetween(widget.currentLocation!.latitude, widget.currentLocation!.longitude,
           b.rideOffer.driverLocation.latitude, b.rideOffer.driverLocation.longitude);
       return distanceA.compareTo(distanceB);
+    });
+    _rebuildOffers(sortedOffers);
+  }
+
+  void _rebuildOffers(List<RideOfferCard> offers) {
+    setState(() {
+      displayOffers = [];
+      Future.delayed(const Duration(milliseconds: 50), () {
+        setState(() {
+          displayOffers = offers;
+        });
+      });
     });
   }
 
