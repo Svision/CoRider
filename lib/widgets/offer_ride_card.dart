@@ -148,11 +148,12 @@ class _RideOfferCardState extends State<RideOfferCard> {
           Marker(
             markerId: const MarkerId('driverLocationMarker'),
             position: driverLocation,
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
           ),
         },
+        myLocationEnabled: true,
         myLocationButtonEnabled: false, // Disable the "Locate Me" button
         mapToolbarEnabled: false, // Disable the map toolbar
-        zoomControlsEnabled: false, // Disable the zoom controls
       ),
     );
   }
@@ -219,9 +220,7 @@ class _RideOfferCardState extends State<RideOfferCard> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8.0),
-                    Text(
-                      '${widget.rideOffer.driverLocationName}\n(${widget.rideOffer.driverLocation.latitude}, ${widget.rideOffer.driverLocation.longitude})',
-                    ),
+                    Text(widget.rideOffer.driverLocationName),
                   ],
                 ),
               ),
