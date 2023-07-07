@@ -41,6 +41,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   overlay_support: ^2.1.0
   flutter_local_notifications: ^15.0.0
+  geolocator: ^9.0.2
 
 dev_dependencies:
   flutter_test:
