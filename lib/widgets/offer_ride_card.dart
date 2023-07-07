@@ -10,10 +10,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 class RideOfferCard extends StatefulWidget {
   final UserState userState;
   final RideOfferModel rideOffer;
+  final LatLng? currentLocation;
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
   const RideOfferCard(
-      {Key? key, required this.userState, required this.rideOffer, required this.refreshOffersIndicatorKey})
+      {Key? key,
+      required this.userState,
+      required this.rideOffer,
+      required this.currentLocation,
+      required this.refreshOffersIndicatorKey})
       : super(key: key);
 
   @override
@@ -45,6 +50,7 @@ class _RideOfferCardState extends State<RideOfferCard> {
   @override
   void initState() {
     super.initState();
+    // print(widget.currentLocation);
     getDriver();
   }
 
@@ -70,13 +76,21 @@ class _RideOfferCardState extends State<RideOfferCard> {
                       ),
                     ),
             ),
-      title: Text(
-        widget.rideOffer.driverId == widget.userState.currentUser!.email
-            ? 'You'
-            : driver == null
-                ? 'Loading...'
-                : driver!.fullName,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            widget.rideOffer.driverId == widget.userState.currentUser!.email
+                ? 'You'
+                : driver == null
+                    ? 'Loading...'
+                    : driver!.fullName,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          if (widget.currentLocation != null)
+            Text(Utils.getDistanceByTwoLocation(widget.currentLocation!, widget.rideOffer.driverLocation),
+                style: const TextStyle(color: Colors.grey))
+        ],
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

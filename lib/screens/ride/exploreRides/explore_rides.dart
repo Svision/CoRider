@@ -31,7 +31,7 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    currentLocation = widget.userState.currentLocation;
     if (widget.userState.storedOffers.isEmpty) {
       _handleRefresh(widget.userState.currentUser!);
     } else {
@@ -40,20 +40,10 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
           .map((offer) => RideOfferCard(
                 userState: widget.userState,
                 rideOffer: offer,
+                currentLocation: currentLocation,
                 refreshOffersIndicatorKey: refreshOffersIndicatorKey,
               ))
           .toList();
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      setState(() {
-        currentLocation = LatLng(position.latitude, position.longitude);
-      });
-    } catch (e) {
-      debugPrint('Error: $e');
     }
   }
 
@@ -85,16 +75,17 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> {
   Future<void> _handleRefresh(UserModel user) async {
     try {
       await widget.userState.fetchAllOffers();
+      currentLocation = await widget.userState.getCurrentLocation();
       setState(() {
         offers = widget.userState.storedOffers.values.toList();
         rideOfferCards = offers
             .map((offer) => RideOfferCard(
                   userState: widget.userState,
                   rideOffer: offer,
+                  currentLocation: currentLocation,
                   refreshOffersIndicatorKey: refreshOffersIndicatorKey,
                 ))
             .toList();
-        debugPrint('rideOfferCards: $rideOfferCards');
       });
       _addMarkers();
     } catch (e) {

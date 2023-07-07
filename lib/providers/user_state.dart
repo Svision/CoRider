@@ -4,12 +4,15 @@ import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class UserState extends ChangeNotifier {
   UserModel? _currentUser;
   static const String _currentUserKey = 'currentUser';
+  LatLng? _currentLocation;
   Map<String, RideOfferModel> _storedOffers = {};
   static const String _storedOffersKey = 'storedOffers';
   Map<String, UserModel> _storedUsers = {};
@@ -20,12 +23,33 @@ class UserState extends ChangeNotifier {
   static const String _totalNotificationsKey = 'totalNotifications';
 
   UserModel? get currentUser => _currentUser;
+  LatLng? get currentLocation => _currentLocation;
   Map<String, RideOfferModel> get storedOffers => _storedOffers;
   Map<String, UserModel> get storedUsers => _storedUsers;
   Map<String, types.Room> get storedChatRooms => _storedChatRooms;
   Map<String, int> get totalNotifications => _totalNotifications;
   int get totalNotificationsCount =>
       _totalNotifications.values.fold(0, (previousValue, element) => previousValue + element);
+
+  Future<void> setCurrentLocation(LatLng newLocation) async {
+    _currentLocation = newLocation;
+    notifyListeners();
+  }
+
+  Future<LatLng?> getCurrentLocation() async {
+    if (_currentLocation == null) {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      _currentLocation = LatLng(position.latitude, position.longitude);
+      return _currentLocation;
+    }
+    try {
+      Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+          .then((position) => _currentLocation = LatLng(position.latitude, position.longitude));
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+    return _currentLocation;
+  }
 
   Future<void> setTotalNotifications(Map<String, int> newTotalNotifications) async {
     _totalNotifications = newTotalNotifications;
@@ -208,6 +232,8 @@ class UserState extends ChangeNotifier {
           }
           debugPrint('currentUser: ${currentUser!.toJson().toString()}');
         });
+
+        getCurrentLocation();
 
         // get stored offers
         if (storedOffersString != null) {
