@@ -7,7 +7,7 @@ import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart'
 import 'package:corider/screens/ride/exploreRides/rides_filter/filter_sort_enum.dart';
 import 'package:corider/screens/ride/exploreRides/rides_filter/rides_filter.dart';
 import 'package:flutter/material.dart';
-import 'package:corider/widgets/offer_ride_card.dart';
+import 'package:corider/widgets/ride_offer_card.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';

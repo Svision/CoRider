@@ -1,6 +1,7 @@
 import 'package:corider/models/ride_offer_model.dart';
 import 'package:corider/models/user_model.dart';
 import 'package:corider/providers/user_state.dart';
+import 'package:corider/screens/profile/user_profile_screen.dart';
 import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
 import 'package:corider/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -58,24 +59,34 @@ class _RideOfferCardState extends State<RideOfferCard> {
     return ListTile(
       leading: driver == null
           ? const CircularProgressIndicator()
-          : CircleAvatar(
-              maxRadius: 25,
-              backgroundColor:
-                  driver!.profileImage == null ? Utils.getUserAvatarNameColor(widget.rideOffer.driverId) : null,
-              child: driver!.profileImage == null
-                  ? Text(
-                      '${driver!.firstName[0].toUpperCase()}${driver!.lastName[0].toUpperCase()}',
-                      style: const TextStyle(color: Colors.white),
-                    )
-                  : ClipOval(
-                      child: CachedNetworkImage(
-                        imageUrl: driver!.profileImage!,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const CircularProgressIndicator(),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
+          : GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UserProfileScreen(
+                            user: driver!,
+                          )),
+                );
+              },
+              child: CircleAvatar(
+                maxRadius: 25,
+                backgroundColor:
+                    driver!.profileImage == null ? Utils.getUserAvatarNameColor(widget.rideOffer.driverId) : null,
+                child: driver!.profileImage == null
+                    ? Text(
+                        '${driver!.firstName[0].toUpperCase()}${driver!.lastName[0].toUpperCase()}',
+                        style: const TextStyle(color: Colors.white),
+                      )
+                    : ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: driver!.profileImage!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                        ),
                       ),
-                    ),
-            ),
+              )),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

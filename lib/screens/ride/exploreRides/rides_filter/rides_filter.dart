@@ -17,8 +17,8 @@ class RidesFilter extends StatefulWidget {
 }
 
 class _RidesFilterState extends State<RidesFilter> {
-  String selectedFilter = describeEnum(RideOfferFilter.all);
-  String selectedSort = describeEnum(RideOfferSortBy.createdAt);
+  String selectedFilter = describeEnum(RideOfferFilter.ALL);
+  String selectedSort = describeEnum(RideOfferSortBy.DEFAULT);
 
   @override
   Widget build(BuildContext context) {

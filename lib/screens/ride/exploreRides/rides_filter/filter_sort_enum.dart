@@ -1,11 +1,13 @@
 enum RideOfferFilter {
-  all,
+  // ignore: constant_identifier_names
+  ALL,
   others,
   byMe,
 }
 
 enum RideOfferSortBy {
-  createdAt,
+  // ignore: constant_identifier_names
+  DEFAULT,
   distance,
   leaveTime,
   backTime,

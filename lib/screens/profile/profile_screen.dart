@@ -3,6 +3,7 @@ import 'package:corider/cloud_functions/firebase_function.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/login/login.dart';
 import 'package:corider/screens/profile/add_vehicle_screen.dart';
+import 'package:corider/screens/profile/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -144,21 +145,37 @@ class ProfileScreen extends StatelessWidget {
           },
         ),
         const SizedBox(height: 16),
-        Text(
-          currentUser?.email ?? 'Unknown',
-          style: const TextStyle(fontSize: 16),
-        ),
-        Text(
-          currentUser?.fullName ?? 'Unknown Name',
-          style: const TextStyle(fontSize: 16),
-        ),
-        Text(
-          currentUser?.companyName ?? 'Unknown Company',
-          style: const TextStyle(fontSize: 16),
-        ),
-        Text(
-          currentUser?.createdAt.toString() ?? 'Unknown Created At',
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => UserProfileScreen(
+                        user: currentUser!,
+                        isCurrentUser: true,
+                      )),
+            );
+          },
+          child: Column(
+            children: [
+              Text(
+                currentUser?.email ?? 'Unknown',
+                style: const TextStyle(fontSize: 16),
+              ),
+              Text(
+                currentUser?.fullName ?? 'Unknown Name',
+                style: const TextStyle(fontSize: 16),
+              ),
+              Text(
+                currentUser?.companyName ?? 'Unknown Company',
+                style: const TextStyle(fontSize: 16),
+              ),
+              Text(
+                currentUser?.createdAt.toString() ?? 'Unknown Created At',
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            ],
+          ),
         ),
         ElevatedButton(
           onPressed: () {
@@ -172,7 +189,11 @@ class ProfileScreen extends StatelessWidget {
           },
           child: const Text('My Vehicle'),
         ),
-        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () {},
+          child: const Text('My Company'),
+        ),
+        const SizedBox(height: 32),
         ElevatedButton(
           onPressed: () => {
             userState.signOff(),
