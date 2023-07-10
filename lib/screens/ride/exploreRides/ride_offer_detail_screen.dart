@@ -313,15 +313,17 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   }
 
   Widget buildOtherRideOfferActions(BuildContext context, UserState userState, UserModel currentUser) {
+    final requestedOfferStatus = widget.rideOffer.requestedUserIds[currentUser.email]!;
     return currentUser.requestedOfferIds.contains(widget.rideOffer.id)
         ? Column(
             children: [
               chatButton(currentUser),
               const SizedBox(height: 8.0),
-              const Text(
-                'Ride requested!',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-              ),
+              Text('Ride ${describeEnum(requestedOfferStatus)}!',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: Utils.requestStatusToColor(requestedOfferStatus))),
               const SizedBox(height: 8.0),
               ElevatedButton(
                   onPressed: () {
