@@ -17,7 +17,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: widget.isCurrentUser ? const Text('Profile') : Text(widget.user.fullName),
       ),
       body: SingleChildScrollView(
         child: Column(
